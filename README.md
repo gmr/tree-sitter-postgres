@@ -33,20 +33,20 @@ cd postgres && npx tree-sitter generate
 
 ### Input files
 
-| File | Source |
-|------|--------|
-| `src/backend/parser/gram.y` | Bison grammar (733 rules, 3236 alternatives) |
-| `src/include/parser/kwlist.h` | Keyword definitions (494 keywords) |
+| File                          | Source                                       |
+| ----------------------------- | -------------------------------------------- |
+| `src/backend/parser/gram.y`   | Bison grammar (733 rules, 3236 alternatives) |
+| `src/include/parser/kwlist.h` | Keyword definitions (494 keywords)           |
 
 ### Generator scripts
 
-| Script | Purpose |
-|--------|---------|
-| `script/generate-grammar.js` | Orchestrator — reads PG source, writes `postgres/grammar.js` |
-| `script/parse-gram-y.js` | Parses Bison grammar: rules, terminals, precedence, `%prec` annotations |
-| `script/parse-kwlist.js` | Parses keyword list into categories |
-| `script/codegen.js` | Generates tree-sitter grammar with precedence and optional-rule handling |
-| `postgres/harvest-conflicts.sh` | Iteratively discovers GLR conflicts needed by tree-sitter |
+| Script                          | Purpose                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `script/generate-grammar.js`    | Orchestrator — reads PG source, writes `postgres/grammar.js`             |
+| `script/parse-gram-y.js`        | Parses Bison grammar: rules, terminals, precedence, `%prec` annotations  |
+| `script/parse-kwlist.js`        | Parses keyword list into categories                                      |
+| `script/codegen.js`             | Generates tree-sitter grammar with precedence and optional-rule handling |
+| `postgres/harvest-conflicts.sh` | Iteratively discovers GLR conflicts needed by tree-sitter                |
 
 ## Repository structure
 
@@ -83,4 +83,4 @@ PL/pgSQL uses a separate Bison grammar (`src/pl/plpgsql/src/pl_gram.y`) in Postg
 
 ## License
 
-MIT
+BSD 3-Clause

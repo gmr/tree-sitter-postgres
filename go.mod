@@ -1,4 +1,4 @@
-module github.com/gmr/tree-sitter-postgres/postgres
+module github.com/gmr/tree-sitter-postgres
 
 go 1.23
 

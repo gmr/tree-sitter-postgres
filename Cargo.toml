@@ -2,7 +2,7 @@
 name = "tree-sitter-postgres"
 description = "Postgres grammar for tree-sitter"
 version = "0.0.1"
-license = "MIT"
+license = "BSD-3-Clause"
 readme = "README.md"
 keywords = ["incremental", "parsing", "tree-sitter", "postgres"]
 categories = ["parsing", "text-editors"]
@@ -11,7 +11,7 @@ edition = "2024"
 autoexamples = false
 
 build = "bindings/rust/build.rs"
-include = ["bindings/rust/*", "grammar.js", "queries/*", "src/*"]
+include = ["bindings/rust/*", "postgres/grammar.js", "postgres/queries/*", "postgres/src/*"]
 
 [lib]
 path = "bindings/rust/lib.rs"

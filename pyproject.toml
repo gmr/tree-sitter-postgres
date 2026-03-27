@@ -9,13 +9,13 @@ version = "0.0.1"
 keywords = ["incremental", "parsing", "tree-sitter", "postgres"]
 classifiers = [
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: BSD License",
   "Topic :: Software Development :: Compilers",
   "Topic :: Text Processing :: Linguistic",
   "Typing :: Typed"
 ]
 requires-python = ">=3.9"
-license.text = "MIT"
+license.text = "BSD-3-Clause"
 readme = "README.md"
 
 [project.urls]

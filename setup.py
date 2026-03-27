@@ -8,9 +8,9 @@ from wheel.bdist_wheel import bdist_wheel
 
 class Build(build):
     def run(self):
-        if isdir("queries"):
+        if isdir("postgres/queries"):
             dest = join(self.build_lib, "tree_sitter_postgres", "queries")
-            self.copy_tree("queries", dest)
+            self.copy_tree("postgres/queries", dest)
         super().run()
 
 
@@ -35,7 +35,7 @@ setup(
             name="_binding",
             sources=[
                 "bindings/python/tree_sitter_postgres/binding.c",
-                "src/parser.c",
+                "postgres/src/parser.c",
                 # NOTE: if your language uses an external scanner, add it here.
             ],
             extra_compile_args=[
@@ -50,7 +50,7 @@ setup(
                 ("PY_SSIZE_T_CLEAN", None),
                 ("TREE_SITTER_HIDE_SYMBOLS", None),
             ],
-            include_dirs=["src"],
+            include_dirs=["postgres/src"],
             py_limited_api=True,
         )
     ],

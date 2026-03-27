@@ -7,7 +7,7 @@ VERSION := 0.0.1
 LANGUAGE_NAME := tree-sitter-postgres
 
 # repository
-SRC_DIR := src
+SRC_DIR := postgres/src
 
 PARSER_REPO_URL := $(shell git -C $(SRC_DIR) remote get-url origin 2>/dev/null)
 

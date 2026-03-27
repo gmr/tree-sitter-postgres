@@ -2,8 +2,8 @@
   "name": "tree-sitter-postgres",
   "version": "0.1.0",
   "description": "PostgreSQL grammar for tree-sitter, generated from Postgres source",
-  "main": "postgres/bindings/node",
-  "types": "postgres/bindings/node",
+  "main": "bindings/node",
+  "types": "bindings/node",
   "keywords": [
     "parser",
     "tree-sitter",
@@ -13,14 +13,14 @@
   ],
   "files": [
     "postgres/grammar.js",
-    "postgres/binding.gyp",
-    "postgres/bindings/node/*",
     "postgres/queries/*",
     "postgres/src/**",
+    "binding.gyp",
+    "bindings/node/*",
     "prebuilds/**",
     "*.wasm"
   ],
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "node-addon-api": "^8.0.0",
     "node-gyp-build": "^4.8.1"

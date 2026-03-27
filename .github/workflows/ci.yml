@@ -4,11 +4,25 @@ on:
     branches: [main]
     paths:
       - postgres/**
+      - bindings/**
       - script/**
+      - Cargo.toml
+      - package.json
+      - pyproject.toml
+      - Package.swift
+      - binding.gyp
+      - go.mod
   pull_request:
     paths:
       - postgres/**
+      - bindings/**
       - script/**
+      - Cargo.toml
+      - package.json
+      - pyproject.toml
+      - Package.swift
+      - binding.gyp
+      - go.mod
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
