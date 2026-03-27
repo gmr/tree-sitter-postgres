@@ -4,9 +4,11 @@ A [tree-sitter](https://tree-sitter.github.io/) grammar for PostgreSQL, generate
 
 ## Features
 
-- **727 grammar rules** covering the full PostgreSQL SQL syntax (REL_18_3)
+- **Current as of PostgreSQL 18** (generated from REL_18_3)
+- **727 grammar rules** covering the full PostgreSQL SQL syntax
 - **494 case-insensitive keywords** across all four PG keyword categories
 - **Correct operator precedence** — `1 + 2 * 3` parses as `1 + (2 * 3)`
+- **PL/pgSQL support** via a separate grammar with language injection
 - **Generated, not hand-written** — regenerate for any PostgreSQL version
 
 ## Quick start
@@ -54,17 +56,22 @@ cd postgres && npx tree-sitter generate
 postgres/               PostgreSQL SQL grammar
   grammar.js            Generated tree-sitter grammar
   src/                  Generated parser (C)
-  test/corpus/          Test cases (22 tests)
-  bindings/             Language bindings (Node, Rust, Python, Go, Swift, C)
+  test/corpus/          Test cases (35 tests)
   known-conflicts.json  GLR conflict pairs
 
+plpgsql/                PL/pgSQL grammar
+  grammar.js            Hand-written tree-sitter grammar
+  src/scanner.c         External scanner for dollar-quoting and keywords
+  test/corpus/          Test cases
+  queries/              Highlights and injection queries
+
 script/                 Shared generator code
-  generate-grammar.js   Orchestrator
+  generate-grammar.js   SQL grammar orchestrator
   parse-gram-y.js       Bison parser
   parse-kwlist.js       Keyword parser
   codegen.js            Grammar code generator
 
-plpgsql/                (future) PL/pgSQL grammar
+bindings/               Language bindings (Node, Rust, Python, Go, Swift, C)
 ```
 
 ## Design notes
@@ -79,7 +86,7 @@ Binary operators are split into a separate `a_expr_prec` rule resolved by static
 
 ### PL/pgSQL
 
-PL/pgSQL uses a separate Bison grammar (`src/pl/plpgsql/src/pl_gram.y`) in PostgreSQL. A future `plpgsql/` grammar can reuse the shared generator scripts and delegate SQL expression parsing to the postgres grammar via tree-sitter language injection.
+PL/pgSQL is implemented as a separate hand-written grammar in `plpgsql/` with an external scanner for dollar-quoting and context-sensitive keywords. SQL expressions and statements within PL/pgSQL blocks are delegated to the postgres grammar via tree-sitter language injection (`plpgsql/queries/injections.scm`).
 
 ## License
 
