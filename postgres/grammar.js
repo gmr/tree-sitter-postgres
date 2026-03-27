@@ -26,7 +26,15 @@ module.exports = grammar({
   // these as ambiguities. Conflict pairs are stored in script/known-conflicts.json
   // and regenerated into this file automatically via script/harvest-conflicts.sh.
   conflicts: $ => [
-
+    [$.utility_option_name, $.unreserved_keyword],
+    [$.ConstDatetime, $.col_name_keyword],
+    [$.simple_select, $.simple_select],
+    [$.a_expr, $.a_expr],
+    [$.target_el, $.target_el],
+    [$.ConstDatetime, $.ConstDatetime],
+    [$.table_ref, $.table_ref],
+    [$.OptTempTableName, $.unreserved_keyword],
+    [$.func_table, $.func_table],
   ],
 
   rules: {
