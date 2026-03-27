@@ -1,0 +1,134 @@
+==================
+Execute with using
+==================
+
+BEGIN
+  EXECUTE 'SELECT $1' INTO result USING x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
+          (sql_expression)
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier)))
+          (kw_using)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Execute strict into
+==================
+
+BEGIN
+  EXECUTE 'SELECT 1' INTO STRICT result;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
+          (sql_expression)
+          (kw_into)
+          (kw_strict)
+          (into_target
+            (any_identifier
+              (identifier))))))
+    (kw_end)))
+
+==================
+Return next
+==================
+
+BEGIN
+  RETURN NEXT x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (kw_next)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Return query
+==================
+
+BEGIN
+  RETURN QUERY SELECT id FROM t;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (kw_query)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Return query execute
+==================
+
+BEGIN
+  RETURN QUERY EXECUTE 'SELECT 1';
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (kw_query)
+          (kw_execute)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Call procedure
+==================
+
+BEGIN
+  CALL my_proc(1, 2);
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_call
+          (kw_call)
+          (sql_expression))))
+    (kw_end)))

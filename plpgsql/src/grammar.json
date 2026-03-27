@@ -279,6 +279,31 @@
               "name": "decl_varname"
             },
             {
+              "type": "SYMBOL",
+              "name": "kw_alias"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_for"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "any_identifier"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "decl_varname"
+            },
+            {
               "type": "CHOICE",
               "members": [
                 {
@@ -338,31 +363,6 @@
                   "type": "BLANK"
                 }
               ]
-            },
-            {
-              "type": "STRING",
-              "value": ";"
-            }
-          ]
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "decl_varname"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "kw_alias"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "kw_for"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "any_identifier"
             },
             {
               "type": "STRING",
@@ -2356,22 +2356,17 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_from"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "any_identifier"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "kw_from"
             },
             {
               "type": "BLANK"
             }
           ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
         },
         {
           "type": "SYMBOL",

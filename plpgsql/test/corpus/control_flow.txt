@@ -1,0 +1,258 @@
+==================
+If elsif else
+==================
+
+BEGIN
+  IF x = 1 THEN
+    NULL;
+  ELSIF x = 2 THEN
+    NULL;
+  ELSIF x = 3 THEN
+    NULL;
+  ELSE
+    NULL;
+  END IF;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (elsif_clause
+            (kw_elsif)
+            (sql_expression)
+            (kw_then)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (elsif_clause
+            (kw_elsif)
+            (sql_expression)
+            (kw_then)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (else_clause
+            (kw_else)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (kw_end)
+          (kw_if))))
+    (kw_end)))
+
+==================
+Case with expression
+==================
+
+BEGIN
+  CASE x
+    WHEN 1 THEN
+      NULL;
+    WHEN 2 THEN
+      NULL;
+    ELSE
+      NULL;
+  END CASE;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_case
+          (kw_case)
+          (sql_expression)
+          (case_when
+            (kw_when)
+            (sql_expression)
+            (kw_then)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (case_when
+            (kw_when)
+            (sql_expression)
+            (kw_then)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (kw_else)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_case))))
+    (kw_end)))
+
+==================
+Case searched (no expression)
+==================
+
+BEGIN
+  CASE
+    WHEN x > 0 THEN
+      NULL;
+  END CASE;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_case
+          (kw_case)
+          (case_when
+            (kw_when)
+            (sql_expression)
+            (kw_then)
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null)))))
+          (kw_end)
+          (kw_case))))
+    (kw_end)))
+
+==================
+Nested blocks
+==================
+
+BEGIN
+  <<inner>>
+  DECLARE
+    y integer;
+  BEGIN
+    NULL;
+  END inner;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (pl_block
+          (block_label
+            (identifier))
+          (decl_sect
+            (kw_declare)
+            (decl_stmt
+              (decl_statement
+                (decl_varname
+                  (identifier))
+                (decl_datatype
+                  (type_name
+                    (dotted_name
+                      (any_identifier
+                        (identifier))))))))
+          (kw_begin)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (end_label
+            (any_identifier
+              (identifier))))))
+    (kw_end)))
+
+==================
+Exit and continue
+==================
+
+BEGIN
+  LOOP
+    EXIT WHEN x > 10;
+    CONTINUE WHEN x = 5;
+    EXIT;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_loop
+          (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_exit
+                  (kw_exit)
+                  (kw_when)
+                  (sql_expression)))
+              (proc_stmt
+                (stmt_exit
+                  (kw_continue)
+                  (kw_when)
+                  (sql_expression)))
+              (proc_stmt
+                (stmt_exit
+                  (kw_exit))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+Labeled loop with exit
+==================
+
+BEGIN
+  <<outer>>
+  LOOP
+    EXIT outer;
+  END LOOP outer;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_loop
+          (loop_label
+            (identifier))
+          (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_exit
+                  (kw_exit)
+                  (any_identifier
+                    (identifier)))))
+            (kw_end)
+            (kw_loop)
+            (any_identifier
+              (identifier))))))
+    (kw_end)))

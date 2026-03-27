@@ -1,0 +1,143 @@
+==================
+Open cursor for query
+==================
+
+BEGIN
+  OPEN curs FOR SELECT id FROM t;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_open
+          (kw_open)
+          (any_identifier
+            (identifier))
+          (kw_for)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Open cursor for execute
+==================
+
+BEGIN
+  OPEN curs FOR EXECUTE 'SELECT 1';
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_open
+          (kw_open)
+          (any_identifier
+            (identifier))
+          (kw_for)
+          (kw_execute)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Fetch into variable
+==================
+
+BEGIN
+  FETCH curs INTO x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_fetch
+          (kw_fetch)
+          (any_identifier
+            (identifier))
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier))))))
+    (kw_end)))
+
+==================
+Fetch next from cursor
+==================
+
+BEGIN
+  FETCH NEXT FROM curs INTO x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_fetch
+          (kw_fetch)
+          (fetch_direction
+            (kw_next))
+          (kw_from)
+          (any_identifier
+            (identifier))
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier))))))
+    (kw_end)))
+
+==================
+Move cursor
+==================
+
+BEGIN
+  MOVE NEXT curs;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_move
+          (kw_move)
+          (fetch_direction
+            (kw_next))
+          (any_identifier
+            (identifier)))))
+    (kw_end)))
+
+==================
+Close cursor
+==================
+
+BEGIN
+  CLOSE curs;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_close
+          (kw_close)
+          (any_identifier
+            (identifier)))))
+    (kw_end)))

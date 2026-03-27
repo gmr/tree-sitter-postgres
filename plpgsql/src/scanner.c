@@ -60,6 +60,24 @@ bool tree_sitter_plpgsql_external_scanner_scan(
     /* At depth 0, semicolon terminates */
     if (depth == 0 && lexer->lookahead == ';') break;
 
+    /* At depth 0, << terminates (block/loop label) */
+    if (depth == 0 && lexer->lookahead == '<') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '<') {
+        /* << found — stop before it */
+        if (has_content) {
+          lexer->result_symbol = SQL_BODY;
+          return true;
+        }
+        return false;
+      }
+      /* Single < — part of SQL operator, continue */
+      has_non_ident = true;
+      has_content = true;
+      continue;
+    }
+
     /* At depth 0, := terminates (assignment operator) */
     if (depth == 0 && lexer->lookahead == ':') {
       lexer->mark_end(lexer);
@@ -241,7 +259,18 @@ bool tree_sitter_plpgsql_external_scanner_scan(
           strcmp(word, "commit") == 0 ||
           strcmp(word, "rollback") == 0 ||
           strcmp(word, "get") == 0 ||
-          strcmp(word, "do") == 0) {
+          strcmp(word, "do") == 0 ||
+          /* Additional context-sensitive delimiters */
+          strcmp(word, "next") == 0 ||
+          strcmp(word, "query") == 0 ||
+          strcmp(word, "reverse") == 0 ||
+          strcmp(word, "by") == 0 ||
+          strcmp(word, "alias") == 0 ||
+          strcmp(word, "strict") == 0 ||
+          strcmp(word, "cursor") == 0 ||
+          strcmp(word, "slice") == 0 ||
+          strcmp(word, "array") == 0 ||
+          strcmp(word, "all") == 0) {
         /* Stop before this keyword — it's a PL/pgSQL delimiter */
         if (has_content) {
           lexer->result_symbol = SQL_BODY;

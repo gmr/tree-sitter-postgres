@@ -84,6 +84,9 @@ module.exports = grammar({
     ),
 
     decl_statement: $ => choice(
+      // Alias declaration: name ALIAS FOR target ;
+      // Must precede variable declaration so ALIAS is not consumed as a type name.
+      seq($.decl_varname, $.kw_alias, $.kw_for, $.any_identifier, ';'),
       // Variable declaration: name [CONSTANT] type [COLLATE collation] [NOT NULL] [DEFAULT|:=|= expr] ;
       seq(
         $.decl_varname,
@@ -94,8 +97,6 @@ module.exports = grammar({
         optional($.decl_defval),
         ';'
       ),
-      // Alias declaration: name ALIAS FOR target ;
-      seq($.decl_varname, $.kw_alias, $.kw_for, $.any_identifier, ';'),
       // Cursor declaration: name [NO SCROLL | SCROLL] CURSOR [(args)] FOR|IS query ;
       seq(
         $.decl_varname,
@@ -445,10 +446,12 @@ module.exports = grammar({
     ),
 
     // ── FETCH ─────────────────────────────────────────────────────────────────
+    // FETCH [direction] [FROM] cursor INTO target ;
     stmt_fetch: $ => seq(
       $.kw_fetch,
       optional($.fetch_direction),
-      optional(seq($.kw_from, $.any_identifier)),
+      optional($.kw_from),
+      $.any_identifier,
       $.kw_into,
       $.into_target,
       ';'
