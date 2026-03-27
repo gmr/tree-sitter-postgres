@@ -1,0 +1,122 @@
+==================
+Empty block
+==================
+
+BEGIN
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (kw_end)))
+
+==================
+Block with declare
+==================
+
+DECLARE
+  x integer;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier))))))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Labeled block
+==================
+
+<<my_block>>
+BEGIN
+  NULL;
+END my_block
+
+---
+
+(source_file
+  (pl_block
+    (block_label
+      (identifier))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)
+    (end_label
+      (any_identifier
+        (identifier)))))
+
+==================
+If statement
+==================
+
+BEGIN
+  IF x > 0 THEN
+    NULL;
+  END IF;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_if))))
+    (kw_end)))
+
+==================
+Raise notice
+==================
+
+BEGIN
+  RAISE NOTICE 'hello %', x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_raise
+          (kw_raise)
+          (raise_level
+            (kw_notice))
+          (string_literal)
+          (sql_expression))))
+    (kw_end)))

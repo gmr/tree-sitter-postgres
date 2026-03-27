@@ -15,6 +15,9 @@
     "postgres/grammar.js",
     "postgres/queries/*",
     "postgres/src/**",
+    "plpgsql/grammar.js",
+    "plpgsql/queries/*",
+    "plpgsql/src/**",
     "binding.gyp",
     "bindings/node/*",
     "prebuilds/**",
@@ -40,7 +43,10 @@
   "scripts": {
     "install": "node-gyp-build",
     "generate": "node script/generate-grammar.js",
-    "test": "cd postgres && tree-sitter test"
+    "generate:plpgsql": "node script/generate-plpgsql-grammar.js",
+    "prestart": "tree-sitter build --wasm",
+    "start": "tree-sitter playground",
+    "test": "node --test bindings/node/*_test.js"
   },
   "tree-sitter": [
     {
@@ -53,6 +59,14 @@
       ],
       "highlights": "postgres/queries/highlights.scm",
       "injection-regex": "^(sql|postgres|postgresql)$"
+    },
+    {
+      "scope": "source.plpgsql",
+      "path": "plpgsql",
+      "file-types": [],
+      "highlights": "plpgsql/queries/highlights.scm",
+      "injections": "plpgsql/queries/injections.scm",
+      "injection-regex": "^plpgsql$"
     }
   ]
 }

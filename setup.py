@@ -36,7 +36,8 @@ setup(
             sources=[
                 "bindings/python/tree_sitter_postgres/binding.c",
                 "postgres/src/parser.c",
-                # NOTE: if your language uses an external scanner, add it here.
+                "plpgsql/src/parser.c",
+                "plpgsql/src/scanner.c",
             ],
             extra_compile_args=[
                 "-std=c11",
@@ -50,7 +51,7 @@ setup(
                 ("PY_SSIZE_T_CLEAN", None),
                 ("TREE_SITTER_HIDE_SYMBOLS", None),
             ],
-            include_dirs=["postgres/src"],
+            include_dirs=["postgres/src", "plpgsql/src"],
             py_limited_api=True,
         )
     ],

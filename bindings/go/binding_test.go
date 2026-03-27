@@ -13,3 +13,10 @@ func TestCanLoadGrammar(t *testing.T) {
 		t.Errorf("Error loading Postgres grammar")
 	}
 }
+
+func TestCanLoadPlpgsqlGrammar(t *testing.T) {
+	language := tree_sitter.NewLanguage(tree_sitter_postgres.LanguagePlpgsql())
+	if language == nil {
+		t.Errorf("Error loading PL/pgSQL grammar")
+	}
+}

@@ -1,0 +1,188 @@
+==================
+While loop
+==================
+
+BEGIN
+  WHILE x > 0 LOOP
+    x := x - 1;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_while
+          (kw_while)
+          (sql_expression)
+          (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_assign
+                  (sql_expression)
+                  (sql_expression))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+For integer loop
+==================
+
+BEGIN
+  FOR i IN 1..10 LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_for
+          (kw_for)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (for_integer_range
+            (sql_expression)
+            (sql_expression)
+            (kw_loop))
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+Return value
+==================
+
+BEGIN
+  RETURN 42;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Exception handling
+==================
+
+BEGIN
+  NULL;
+EXCEPTION
+  WHEN division_by_zero THEN
+    NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_null
+              (kw_null))))))
+    (kw_end)))
+
+==================
+Perform statement
+==================
+
+BEGIN
+  PERFORM pg_sleep(1);
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_perform
+          (kw_perform)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Dynamic execute
+==================
+
+BEGIN
+  EXECUTE 'SELECT 1' INTO result;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
+          (sql_expression)
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier))))))
+    (kw_end)))
+
+==================
+Commit and rollback
+==================
+
+BEGIN
+  COMMIT;
+  ROLLBACK;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_commit
+          (kw_commit)))
+      (proc_stmt
+        (stmt_rollback
+          (kw_rollback))))
+    (kw_end)))

@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - postgres/**
+      - plpgsql/**
       - bindings/**
       - script/**
       - Cargo.toml
@@ -15,6 +16,7 @@ on:
   pull_request:
     paths:
       - postgres/**
+      - plpgsql/**
       - bindings/**
       - script/**
       - Cargo.toml

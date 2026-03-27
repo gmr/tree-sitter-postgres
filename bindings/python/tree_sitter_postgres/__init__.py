@@ -1,8 +1,9 @@
-"""Postgres grammar for tree-sitter"""
+"""PostgreSQL and PL/pgSQL grammars for tree-sitter"""
 
 from importlib.resources import files as _files
 
 from ._binding import language
+from ._binding import language_plpgsql
 
 
 def _get_query(name, file):
@@ -28,6 +29,7 @@ def __getattr__(name):
 
 __all__ = [
     "language",
+    "language_plpgsql",
     # "HIGHLIGHTS_QUERY",
     # "INJECTIONS_QUERY",
     # "LOCALS_QUERY",

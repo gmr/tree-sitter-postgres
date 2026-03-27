@@ -1,7 +1,8 @@
-//! This crate provides Postgres language support for the [tree-sitter][] parsing library.
+//! This crate provides PostgreSQL and PL/pgSQL language support for the
+//! [tree-sitter][] parsing library.
 //!
-//! Typically, you will use the [LANGUAGE][] constant to add this language to a
-//! tree-sitter [Parser][], and then use the parser to parse some code:
+//! Typically, you will use the [LANGUAGE][] constant to add the PostgreSQL SQL
+//! grammar to a tree-sitter [Parser][], and [LANGUAGE_PLPGSQL][] for PL/pgSQL:
 //!
 //! ```
 //! let code = r#"
@@ -22,24 +23,20 @@ use tree_sitter_language::LanguageFn;
 
 extern "C" {
     fn tree_sitter_postgres() -> *const ();
+    fn tree_sitter_plpgsql() -> *const ();
 }
 
-/// The tree-sitter [`LanguageFn`][LanguageFn] for this grammar.
-///
-/// [LanguageFn]: https://docs.rs/tree-sitter-language/*/tree_sitter_language/struct.LanguageFn.html
+/// The tree-sitter [`LanguageFn`] for the PostgreSQL SQL grammar.
 pub const LANGUAGE: LanguageFn = unsafe { LanguageFn::from_raw(tree_sitter_postgres) };
 
-/// The content of the [`node-types.json`][] file for this grammar.
-///
-/// [`node-types.json`]: https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types
+/// The tree-sitter [`LanguageFn`] for the PL/pgSQL grammar.
+pub const LANGUAGE_PLPGSQL: LanguageFn = unsafe { LanguageFn::from_raw(tree_sitter_plpgsql) };
+
+/// The content of the [`node-types.json`][] file for the PostgreSQL grammar.
 pub const NODE_TYPES: &str = include_str!("../../postgres/src/node-types.json");
 
-// NOTE: uncomment these to include any queries that this grammar contains:
-
-// pub const HIGHLIGHTS_QUERY: &str = include_str!("../../postgres/queries/highlights.scm");
-// pub const INJECTIONS_QUERY: &str = include_str!("../../postgres/queries/injections.scm");
-// pub const LOCALS_QUERY: &str = include_str!("../../postgres/queries/locals.scm");
-// pub const TAGS_QUERY: &str = include_str!("../../postgres/queries/tags.scm");
+/// The content of the [`node-types.json`][] file for the PL/pgSQL grammar.
+pub const NODE_TYPES_PLPGSQL: &str = include_str!("../../plpgsql/src/node-types.json");
 
 #[cfg(test)]
 mod tests {
@@ -49,5 +46,13 @@ mod tests {
         parser
             .set_language(&super::LANGUAGE.into())
             .expect("Error loading Postgres parser");
+    }
+
+    #[test]
+    fn test_can_load_plpgsql_grammar() {
+        let mut parser = tree_sitter::Parser::new();
+        parser
+            .set_language(&super::LANGUAGE_PLPGSQL.into())
+            .expect("Error loading PL/pgSQL parser");
     }
 }

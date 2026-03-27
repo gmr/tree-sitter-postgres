@@ -16,13 +16,18 @@ let package = Package(
             path: ".",
             sources: [
                 "postgres/src/parser.c",
-                // NOTE: if your language has an external scanner, add it here.
+                "plpgsql/src/parser.c",
+                "plpgsql/src/scanner.c",
             ],
             resources: [
-                .copy("postgres/queries")
+                .copy("postgres/queries"),
+                .copy("plpgsql/queries")
             ],
             publicHeadersPath: "bindings/swift",
-            cSettings: [.headerSearchPath("postgres/src")]
+            cSettings: [
+                .headerSearchPath("postgres/src"),
+                .headerSearchPath("plpgsql/src")
+            ]
         ),
         .testTarget(
             name: "TreeSitterPostgresTests",

@@ -41,6 +41,14 @@ module.exports = grammar({
     // Top-level entry: a file is zero or more semicolon-terminated statements.
     source_file: $ => repeat(seq(optional($.toplevel_stmt), ';')),
 
+    // Override Sconst to accept all string literal forms (E'...', N'...', U&'...')
+    Sconst: $ => choice(
+      $.string_literal,
+      $.escape_string_literal,
+      $.unicode_string_literal,
+      $.national_string_literal
+    ),
+
     toplevel_stmt: $ => choice(
         $.stmt,
         $.TransactionStmtLegacy
@@ -3172,7 +3180,6 @@ module.exports = grammar({
         $.kw_null
       ),
     Iconst: $ => $.integer_literal,
-    Sconst: $ => $.string_literal,
     SignedIconst: $ => choice(
         $.Iconst,
         prec.left(13, prec.dynamic(13, seq('+', $.Iconst))),
@@ -4698,7 +4705,11 @@ module.exports = grammar({
     identifier: _ => token(prec(0, /[a-zA-Z_\u0080-\u00ff][a-zA-Z0-9_$\u0080-\u00ff]*/)),
 
     // Double-quoted delimited identifier: "my table" or "My""Column"
-    quoted_identifier: _ => token(/"([^"]|"")*"/),
+    // Also matches U&-prefix unicode identifiers.
+    quoted_identifier: _ => token(choice(
+      /"([^"]|"")*"/,
+      /[uU]&"([^"]|"")*"/
+    )),
 
     // Positional parameter: $1, $2, ...
     param: _ => /\$[0-9]+/,
@@ -4709,7 +4720,7 @@ module.exports = grammar({
 
     float_literal: _ => token(choice(
       /[0-9](_?[0-9])*\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)? /,
-      /\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)? /,
+      /\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)?/,
       /[0-9](_?[0-9])*[eE][+-]?[0-9](_?[0-9])*/
     )),
 
@@ -4719,7 +4730,15 @@ module.exports = grammar({
     string_literal: _ => token(/'([^']|'')*'/),
 
     // E-prefix escape string: E'hello\nworld'
-    escape_string_literal: _ => token(/[eE]'([^'\\]|\\.)*'/),
+    // prec(2) outranks identifier (prec 0) and keywords (prec 1) so E/N/U
+    // are not consumed as identifiers when followed by a quote.
+    escape_string_literal: _ => token(prec(2, /[eE]'([^'\\]|\\.)*'/)),
+
+    // Unicode escape string: U&'d\0061t\+000061'
+    unicode_string_literal: _ => token(prec(2, /[uU]&'([^']|'')*'/)),
+
+    // National character string: N'text'
+    national_string_literal: _ => token(prec(2, /[nN]'([^']|'')*'/)),
 
     // Dollar-quoted string: $$body$$ or $tag$body$tag$
     // NOTE: full correctness requires matching the open/close tags;
@@ -4731,9 +4750,6 @@ module.exports = grammar({
 
     // Hex string: X'deadbeef'
     hex_string_literal: _ => token(/[xX]'[0-9a-fA-F]*'/),
-
-    // National character string: N'text'
-    national_string_literal: _ => token(/[nN]'([^']|'')*'/),
 
     // ── Operators ────────────────────────────────────────────────────────────────
 

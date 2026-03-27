@@ -11,7 +11,7 @@ edition = "2024"
 autoexamples = false
 
 build = "bindings/rust/build.rs"
-include = ["bindings/rust/*", "postgres/grammar.js", "postgres/queries/*", "postgres/src/*"]
+include = ["bindings/rust/*", "postgres/grammar.js", "postgres/queries/*", "postgres/src/*", "plpgsql/grammar.js", "plpgsql/queries/*", "plpgsql/src/*"]
 
 [lib]
 path = "bindings/rust/lib.rs"

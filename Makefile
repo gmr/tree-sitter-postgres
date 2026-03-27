@@ -8,6 +8,7 @@ LANGUAGE_NAME := tree-sitter-postgres
 
 # repository
 SRC_DIR := postgres/src
+PLPGSQL_SRC_DIR := plpgsql/src
 
 PARSER_REPO_URL := $(shell git -C $(SRC_DIR) remote get-url origin 2>/dev/null)
 
@@ -30,11 +31,13 @@ PCLIBDIR ?= $(LIBDIR)/pkgconfig
 # source/object files
 PARSER := $(SRC_DIR)/parser.c
 EXTRAS := $(filter-out $(PARSER),$(wildcard $(SRC_DIR)/*.c))
-OBJS := $(patsubst %.c,%.o,$(PARSER) $(EXTRAS))
+PLPGSQL_PARSER := $(PLPGSQL_SRC_DIR)/parser.c
+PLPGSQL_EXTRAS := $(filter-out $(PLPGSQL_PARSER),$(wildcard $(PLPGSQL_SRC_DIR)/*.c))
+OBJS := $(patsubst %.c,%.o,$(PARSER) $(EXTRAS) $(PLPGSQL_PARSER) $(PLPGSQL_EXTRAS))
 
 # flags
 ARFLAGS ?= rcs
-override CFLAGS += -I$(SRC_DIR) -std=c11 -fPIC
+override CFLAGS += -I$(SRC_DIR) -I$(PLPGSQL_SRC_DIR) -std=c11 -fPIC
 
 # ABI versioning
 SONAME_MAJOR := $(word 1,$(subst ., ,$(VERSION)))

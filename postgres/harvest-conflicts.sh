@@ -23,7 +23,7 @@ echo "Postgres dir: $POSTGRES_DIR"
 echo ""
 
 for i in $(seq 1 $MAX_ITERATIONS); do
-  OUTPUT=$($TS generate 2>&1 || true)
+  OUTPUT=$($TS generate "$SCRIPT_DIR/grammar.js" 2>&1 || true)
 
   if ! echo "$OUTPUT" | grep -q "Unresolved conflict"; then
     if echo "$OUTPUT" | grep -qiE "^Error|Failed to load"; then

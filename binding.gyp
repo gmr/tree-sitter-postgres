@@ -7,11 +7,13 @@
       ],
       "include_dirs": [
         "postgres/src",
+        "plpgsql/src",
       ],
       "sources": [
         "bindings/node/binding.cc",
         "postgres/src/parser.c",
-        # NOTE: if your language has an external scanner, add it here.
+        "plpgsql/src/parser.c",
+        "plpgsql/src/scanner.c",
       ],
       "conditions": [
         ["OS!='win'", {

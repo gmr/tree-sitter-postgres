@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 const TSLanguage *tree_sitter_postgres(void);
+const TSLanguage *tree_sitter_plpgsql(void);
 
 #ifdef __cplusplus
 }
