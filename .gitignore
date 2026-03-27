@@ -41,3 +41,7 @@ dist/
 # Symlinks and generated dirs at root (real files are in postgres/)
 /test
 /src/
+
+# Generated plpgsql sources
+plpgsql/src/parser.c
+plpgsql/src/tree_sitter/
