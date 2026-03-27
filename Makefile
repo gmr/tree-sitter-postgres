@@ -2,7 +2,7 @@ ifeq ($(OS),Windows_NT)
 $(error Windows is not supported)
 endif
 
-VERSION := 0.0.1
+VERSION := 0.1.0
 
 LANGUAGE_NAME := tree-sitter-postgres
 
@@ -41,7 +41,7 @@ override CFLAGS += -I$(SRC_DIR) -I$(PLPGSQL_SRC_DIR) -std=c11 -fPIC
 
 # ABI versioning
 SONAME_MAJOR := $(word 1,$(subst ., ,$(VERSION)))
-SONAME_MINOR := $(shell sed -n 's/#define LANGUAGE_VERSION //p' $(PARSER))
+SONAME_MINOR := $(shell sed -n 's/\#define LANGUAGE_VERSION //p' $(PARSER))
 
 # OS-specific bits
 ifeq ($(shell uname),Darwin)
