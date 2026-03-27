@@ -71,7 +71,7 @@ if (knownConflicts.length > 0) {
 // ─── Generate ─────────────────────────────────────────────────────────────────
 
 console.log(`Generating grammar.js...`);
-const { content, ruleCount } = generateGrammarJs(keywords, terminals, rules, knownConflicts);
+const { content, ruleCount } = generateGrammarJs(keywords, terminals, rules, knownConflicts, precedence);
 
 fs.writeFileSync(outputPath, content, 'utf8');
 

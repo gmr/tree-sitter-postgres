@@ -59,6 +59,63 @@ const BASE_TOKEN_MAP = {
   PARAM:   '$.param',
 };
 
+// ─── Precedence ──────────────────────────────────────────────────────────────
+
+/**
+ * Build a lookup map from token/literal to { level, assoc }.
+ * Token names are stored as-is ("UNION"), single-char literals as ("'+'").
+ */
+function buildPrecedenceMap(precedence) {
+  const map = new Map();
+  for (const { type, tokens, level } of precedence) {
+    for (const tok of tokens) {
+      map.set(tok, { level, assoc: type });
+    }
+  }
+  return map;
+}
+
+/**
+ * Determine the precedence for an alternative.
+ *
+ * If an explicit %prec annotation is present, use that token's precedence.
+ * Otherwise, use the first terminal with declared precedence. This differs
+ * from Bison (which uses the rightmost terminal), but is more appropriate for
+ * tree-sitter: tree-sitter resolves shift/reduce conflicts by comparing rule
+ * precedences, and the first operator/keyword is what drives the conflict
+ * decision. E.g., `a_expr IN '(' expr_list ')'` should have IN's precedence
+ * (level 8), not ')'s (level 20), because the conflict occurs at the IN token.
+ *
+ * @param {Array} alt       — token array (may contain a trailing PREC token)
+ * @param {Map}   precMap   — token/literal -> { level, assoc }
+ * @param {Set}   terminals — terminal token names
+ * @returns {{ level: number, assoc: string }|null}
+ */
+function determinePrecedence(alt, precMap, terminals) {
+  // Explicit %prec annotation takes priority
+  for (const tok of alt) {
+    if (tok.type === 'PREC') {
+      return precMap.get(tok.value) || null;
+    }
+  }
+
+  // First terminal with declared precedence
+  for (let i = 0; i < alt.length; i++) {
+    const tok = alt[i];
+    if (tok.type === 'LITERAL') {
+      const key = "'" + tok.value + "'";
+      const info = precMap.get(key);
+      if (info) return info;
+    }
+    if (tok.type === 'SYMBOL' && terminals.has(tok.value)) {
+      const info = precMap.get(tok.value);
+      if (info) return info;
+    }
+  }
+
+  return null;
+}
+
 // ─── Symbol resolution ────────────────────────────────────────────────────────
 
 /**
@@ -127,12 +184,18 @@ function resolveLiteral(value) {
  * @param {Set} optionalRules — set of rule names that have empty alternatives;
  *   references to these are wrapped with optional() at the call site.
  */
-function altToExpr(alt, terminals, kwTokenMap, optionalRules) {
+function altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap) {
+  // Separate syntax tokens from PREC annotation
+  const syntaxAlt = alt.filter(tok => tok.type !== 'PREC');
+
+  // Determine precedence for this alternative (uses original alt with PREC)
+  const precInfo = precMap ? determinePrecedence(alt, precMap, terminals) : null;
+
   // Check if wrapping every optional element would make this entire
   // alternative match empty. If so, we must NOT wrap any element —
   // the containing rule is already in optionalRules (via propagation)
   // and will be wrapped at its call sites instead.
-  const allCanBeEmpty = alt.every(tok => {
+  const allCanBeEmpty = syntaxAlt.every(tok => {
     if (tok.type === 'LITERAL') return false;
     if (tok.type !== 'SYMBOL') return false;
     if (terminals.has(tok.value)) return false;
@@ -145,7 +208,7 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules) {
 
   const parts = [];
 
-  for (const tok of alt) {
+  for (const tok of syntaxAlt) {
     let expr;
     if (tok.type === 'LITERAL') {
       expr = resolveLiteral(tok.value);
@@ -169,8 +232,33 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules) {
   }
 
   if (parts.length === 0) return null;
-  if (parts.length === 1) return parts[0];
-  return `seq(${parts.join(', ')})`;
+  let expr;
+  if (parts.length === 1) expr = parts[0];
+  else expr = `seq(${parts.join(', ')})`;
+
+  // Wrap with precedence if applicable.
+  // We use both static precedence (prec/prec.left/prec.right) for
+  // generation-time conflict resolution and associativity, AND dynamic
+  // precedence (prec.dynamic) for runtime GLR disambiguation. This is
+  // necessary because rules declared in the conflicts array use GLR at
+  // parse time, where only prec.dynamic is consulted.
+  if (precInfo) {
+    const { level, assoc } = precInfo;
+    expr = `prec.dynamic(${level}, ${expr})`;
+    if (assoc === 'left') {
+      expr = `prec.left(${level}, ${expr})`;
+    } else if (assoc === 'right') {
+      expr = `prec.right(${level}, ${expr})`;
+    } else {
+      // nonassoc in Bison means the operator can't chain (a = b = c is invalid).
+      // tree-sitter has no prec.nonassoc, so we use prec.left as the closest
+      // approximation — it parses deterministically and accepts slightly more
+      // than Bison would (but rejects at the semantic level anyway).
+      expr = `prec.left(${level}, ${expr})`;
+    }
+  }
+
+  return expr;
 }
 
 // ─── Rule → grammar.js entry ──────────────────────────────────────────────────
@@ -191,12 +279,12 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules) {
  * @param {Set}      optionalRules — rules that have empty alternatives
  * @returns {string|null}          — JS snippet, or null to skip this rule
  */
-function generateRule(name, rule, terminals, kwTokenMap, optionalRules) {
+function generateRule(name, rule, terminals, kwTokenMap, optionalRules, precMap) {
   const { alternatives } = rule;
 
   // Convert each alternative to an expression, filtering nulls
   const altExprs = alternatives
-    .map(alt => altToExpr(alt, terminals, kwTokenMap, optionalRules))
+    .map(alt => altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap))
     .filter(e => e !== null);
 
   if (altExprs.length === 0) {
@@ -212,6 +300,134 @@ function generateRule(name, rule, terminals, kwTokenMap, optionalRules) {
   }
 
   return `    ${name}: $ => ${expr},\n`;
+}
+
+/**
+ * For expression rules (a_expr, b_expr), split alternatives into:
+ * - "prec-resolvable": clean binary/unary operators resolved by static prec
+ * - "complex": alternatives requiring GLR (IS, IN, BETWEEN, LIKE, subquery_Op)
+ *
+ * The prec alternatives go into a hidden _X_prec rule that is SELF-REFERENTIAL
+ * (operands reference _X_prec, not X) so it's completely decoupled from X's
+ * GLR conflicts. Static precedence cleanly resolves all _X_prec self-conflicts.
+ *
+ * The main rule X includes _X_prec as an alternative plus the complex alternatives.
+ */
+function generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, precMap) {
+  const { alternatives } = rule;
+  const precRuleName = `${name}_prec`;
+
+  const precAlts = [];
+  const complexAlts = [];
+
+  for (const alt of alternatives) {
+    const syntaxTokens = alt.filter(t => t.type !== 'PREC');
+    const precInfo = determinePrecedence(alt, precMap, terminals);
+
+    // A "prec-resolvable" alternative must be a simple binary/unary pattern
+    // with a LITERAL operator (single-char like +, -, *, etc.) or specific
+    // boolean keywords (AND, OR, NOT). Complex keyword operators (IS, LIKE,
+    // ILIKE, etc.) have multiple alternatives starting the same way and
+    // create multi-way conflicts that need GLR.
+    let isCleanOp = false;
+    if (precInfo && syntaxTokens.length >= 2 && syntaxTokens.length <= 3) {
+      // Binary: self OP self (where OP is a literal or operator token)
+      if (syntaxTokens.length === 3
+          && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
+          && syntaxTokens[2].type === 'SYMBOL' && syntaxTokens[2].value === name
+          && (syntaxTokens[1].type === 'LITERAL'
+              || (syntaxTokens[1].type === 'SYMBOL'
+                  && (syntaxTokens[1].value === 'AND' || syntaxTokens[1].value === 'OR')))) {
+        isCleanOp = true;
+      }
+      // Binary postfix: self OP arg (like TYPECAST Typename, COLLATE any_name)
+      // These have unique operator tokens that don't create multi-way conflicts.
+      // The operator must have declared precedence and not be a complex keyword
+      // that starts multiple alternatives (like IS, IN, LIKE, etc.)
+      const complexKw = new Set(['IS', 'ISNULL', 'NOTNULL', 'IN_P', 'LIKE', 'ILIKE',
+        'SIMILAR', 'BETWEEN', 'NOT', 'NOT_LA']);
+      if (syntaxTokens.length === 3
+          && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
+          && syntaxTokens[1].type === 'SYMBOL' && !complexKw.has(syntaxTokens[1].value)
+          && syntaxTokens[2].type === 'SYMBOL' && syntaxTokens[2].value !== name
+          && precInfo) {
+        isCleanOp = true;
+      }
+      // Unary prefix: OP self (where OP is a literal char like +, -)
+      if (syntaxTokens.length === 2
+          && syntaxTokens[0].type === 'LITERAL'
+          && syntaxTokens[1].type === 'SYMBOL' && syntaxTokens[1].value === name) {
+        isCleanOp = true;
+      }
+      // Boolean unary: NOT self
+      if (syntaxTokens.length === 2
+          && syntaxTokens[1].type === 'SYMBOL' && syntaxTokens[1].value === name
+          && syntaxTokens[0].type === 'SYMBOL'
+          && (syntaxTokens[0].value === 'NOT' || syntaxTokens[0].value === 'NOT_LA')) {
+        isCleanOp = true;
+      }
+    }
+
+    if (isCleanOp) {
+      precAlts.push(alt);
+    } else {
+      complexAlts.push(alt);
+    }
+  }
+
+  if (precAlts.length === 0) {
+    return generateRule(name, rule, terminals, kwTokenMap, optionalRules, precMap);
+  }
+
+  const result = [];
+
+  // Generate the _prec rule with SELF-REFERENTIAL operands.
+  // Replace references to the parent rule (e.g., $.a_expr) with the
+  // _prec rule (e.g., $._a_expr_prec) so the rule is self-contained
+  // and doesn't conflict with the parent's GLR alternatives.
+  const precExprs = precAlts
+    .map(alt => {
+      const expr = altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap);
+      if (expr === null) return null;
+      // Replace $.name with $.precRuleName
+      return expr.replace(
+        new RegExp(`\\$\\.${name}\\b`, 'g'),
+        `$.${precRuleName}`
+      );
+    })
+    .filter(e => e !== null);
+
+  if (precExprs.length > 0) {
+    // Add $.c_expr as the base case (leaf of the precedence chain)
+    const hasCExpr = alternatives.some(alt => {
+      const st = alt.filter(t => t.type !== 'PREC');
+      return st.length === 1 && st[0].type === 'SYMBOL' && st[0].value === 'c_expr';
+    });
+    const allPrecExprs = hasCExpr
+      ? ['$.c_expr', ...precExprs]
+      : precExprs;
+
+    const precExpr = allPrecExprs.length === 1
+      ? allPrecExprs[0]
+      : `choice(\n        ${allPrecExprs.join(',\n        ')}\n      )`;
+    result.push(`    ${precRuleName}: $ => ${precExpr},\n`);
+  }
+
+  // Generate the main rule: _prec + complex alternatives
+  const complexExprs = complexAlts
+    .map(alt => altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap))
+    .filter(e => e !== null);
+
+  const filteredComplexExprs = complexExprs.filter(e => e !== '$.c_expr');
+  // Alias the prec rule so its nodes appear with the parent's name in the tree
+  const mainExprs = [`alias($.${precRuleName}, $.${name})`, ...filteredComplexExprs];
+
+  const mainExpr = mainExprs.length === 1
+    ? mainExprs[0]
+    : `choice(\n        ${mainExprs.join(',\n        ')}\n      )`;
+  result.push(`    ${name}: $ => ${mainExpr},\n`);
+
+  return result.join('');
 }
 
 // ─── Keyword rules ────────────────────────────────────────────────────────────
@@ -312,12 +528,15 @@ function generateLexerRules() {
  * @param {Array}   knownConflicts  — array of [rule1, rule2] string pairs
  * @returns {{ content: string, ruleCount: number }}
  */
-function generateGrammarJs(keywords, terminals, rules, knownConflicts = []) {
+function generateGrammarJs(keywords, terminals, rules, knownConflicts = [], precedence = []) {
   // Build keyword token map: Bison token name -> keyword info
   const kwTokenMap = new Map();
   for (const kw of keywords) {
     kwTokenMap.set(kw.token, kw);
   }
+
+  // Build precedence lookup map
+  const precMap = buildPrecedenceMap(precedence);
 
   // Build set of "optional rules" — rules with empty alternatives.
   // References to these rules in other rules will be wrapped with optional()
@@ -338,6 +557,7 @@ function generateGrammarJs(keywords, terminals, rules, knownConflicts = []) {
   function altCanBeEmpty(alt) {
     if (alt.length === 0) return true;
     return alt.every(tok => {
+      if (tok.type === 'PREC') return true; // metadata, not syntax
       if (tok.type === 'LITERAL') return false;
       if (tok.type !== 'SYMBOL') return false;
       // Terminal symbols (keywords, operators, base tokens) are always required
@@ -430,11 +650,21 @@ ${knownConflicts.map(([a, b]) => `    [$.${a}, $.${b}],`).join('\n')}
     'reserved_keyword',
   ]);
 
+  // Expression rules that need split treatment: binary operators go into
+  // a hidden _prec rule (static prec, no GLR) while complex alternatives
+  // stay in the main rule (GLR via conflicts array).
+  const exprSplitRules = new Set(['a_expr', 'b_expr']);
+
   let ruleCount = 0;
   for (const [name, rule] of rules) {
     if (skipRules.has(name) || kwCategoryRules.has(name)) continue;
 
-    const snippet = generateRule(name, rule, terminals, kwTokenMap, optionalRules);
+    let snippet;
+    if (exprSplitRules.has(name)) {
+      snippet = generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, precMap);
+    } else {
+      snippet = generateRule(name, rule, terminals, kwTokenMap, optionalRules, precMap);
+    }
     if (snippet !== null) {
       lines.push(snippet);
       ruleCount++;

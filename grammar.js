@@ -26,32 +26,15 @@ module.exports = grammar({
   // these as ambiguities. Conflict pairs are stored in script/known-conflicts.json
   // and regenerated into this file automatically via script/harvest-conflicts.sh.
   conflicts: $ => [
-    [$.qual_Op, $.unreserved_keyword],
-    [$.relation_expr_opt_alias, $.relation_expr_opt_alias],
     [$.utility_option_name, $.unreserved_keyword],
-    [$.select_with_parens, $.c_expr],
-    [$.a_expr, $.a_expr],
-    [$.simple_select, $.simple_select],
-    [$.cube_clause, $.unreserved_keyword],
-    [$.rollup_clause, $.unreserved_keyword],
     [$.ConstDatetime, $.col_name_keyword],
-    [$.json_predicate_type_constraint, $.json_predicate_type_constraint],
+    [$.simple_select, $.simple_select],
+    [$.a_expr, $.a_expr],
     [$.target_el, $.target_el],
-    [$.b_expr, $.b_expr],
-    [$.opt_frame_clause, $.unreserved_keyword],
-    [$.joined_table, $.joined_table],
     [$.ConstDatetime, $.ConstDatetime],
     [$.table_ref, $.table_ref],
     [$.OptTempTableName, $.unreserved_keyword],
-    [$.a_expr, $.bare_label_keyword],
-    [$.json_key_uniqueness_constraint_opt, $.json_key_uniqueness_constraint_opt],
-    [$.frame_extent, $.col_name_keyword],
-    [$.frame_bound, $.unreserved_keyword],
-    [$.qual_all_Op, $.unreserved_keyword],
     [$.func_table, $.func_table],
-    [$.table_ref, $.joined_table],
-    [$.json_table_column_definition, $.unreserved_keyword],
-    [$.SelectStmt, $.select_with_parens],
   ],
 
   rules: {
@@ -198,7 +181,7 @@ module.exports = grammar({
     CallStmt: $ => seq($.kw_call, $.func_application),
     CreateRoleStmt: $ => seq($.kw_create, $.kw_role, $.RoleId, optional($.opt_with), optional($.OptRoleList)),
     opt_with: $ => choice(
-        $.kw_with,
+        prec.left(11, prec.dynamic(11, $.kw_with)),
         $.kw_with
       ),
     OptRoleList: $ => seq(optional($.OptRoleList), $.CreateOptRoleElem),
@@ -212,22 +195,22 @@ module.exports = grammar({
         seq($.kw_connection, $.kw_limit, $.SignedIconst),
         seq($.kw_valid, $.kw_until, $.Sconst),
         seq($.kw_user, $.role_list),
-        $.identifier
+        prec.left(11, prec.dynamic(11, $.identifier))
       ),
     CreateOptRoleElem: $ => choice(
         $.AlterOptRoleElem,
         seq($.kw_sysid, $.Iconst),
         seq($.kw_admin, $.role_list),
         seq($.kw_role, $.role_list),
-        seq($.kw_in, $.kw_role, $.role_list),
-        seq($.kw_in, $.kw_group, $.role_list)
+        prec.left(8, prec.dynamic(8, seq($.kw_in, $.kw_role, $.role_list))),
+        prec.left(8, prec.dynamic(8, seq($.kw_in, $.kw_group, $.role_list)))
       ),
     CreateUserStmt: $ => seq($.kw_create, $.kw_user, $.RoleId, optional($.opt_with), optional($.OptRoleList)),
     AlterRoleStmt: $ => choice(
         seq($.kw_alter, $.kw_role, $.RoleSpec, optional($.opt_with), optional($.AlterOptRoleList)),
         seq($.kw_alter, $.kw_user, $.RoleSpec, optional($.opt_with), optional($.AlterOptRoleList))
       ),
-    opt_in_database: $ => seq($.kw_in, $.kw_database, $.name),
+    opt_in_database: $ => prec.left(8, prec.dynamic(8, seq($.kw_in, $.kw_database, $.name))),
     AlterRoleSetStmt: $ => choice(
         seq($.kw_alter, $.kw_role, $.RoleSpec, optional($.opt_in_database), $.SetResetClause),
         seq($.kw_alter, $.kw_role, $.kw_all, optional($.opt_in_database), $.SetResetClause),
@@ -251,8 +234,8 @@ module.exports = grammar({
     CreateSchemaStmt: $ => choice(
         seq($.kw_create, $.kw_schema, optional($.opt_single_name), $.kw_authorization, $.RoleSpec, optional($.OptSchemaEltList)),
         seq($.kw_create, $.kw_schema, $.ColId, optional($.OptSchemaEltList)),
-        seq($.kw_create, $.kw_schema, $.kw_if, $.kw_not, $.kw_exists, optional($.opt_single_name), $.kw_authorization, $.RoleSpec, optional($.OptSchemaEltList)),
-        seq($.kw_create, $.kw_schema, $.kw_if, $.kw_not, $.kw_exists, $.ColId, optional($.OptSchemaEltList))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_schema, $.kw_if, $.kw_not, $.kw_exists, optional($.opt_single_name), $.kw_authorization, $.RoleSpec, optional($.OptSchemaEltList)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_schema, $.kw_if, $.kw_not, $.kw_exists, $.ColId, optional($.OptSchemaEltList))))
       ),
     OptSchemaEltList: $ => seq(optional($.OptSchemaEltList), $.schema_stmt),
     schema_stmt: $ => choice(
@@ -264,9 +247,9 @@ module.exports = grammar({
         $.ViewStmt
       ),
     VariableSetStmt: $ => choice(
-        seq($.kw_set, $.set_rest),
-        seq($.kw_set, $.kw_local, $.set_rest),
-        seq($.kw_set, $.kw_session, $.set_rest)
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.set_rest))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_local, $.set_rest))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_session, $.set_rest)))
       ),
     set_rest: $ => choice(
         seq($.kw_transaction, $.transaction_mode_list),
@@ -275,9 +258,9 @@ module.exports = grammar({
       ),
     generic_set: $ => choice(
         seq($.var_name, $.kw_to, $.var_list),
-        seq($.var_name, '=', $.var_list),
+        prec.left(7, prec.dynamic(7, seq($.var_name, '=', $.var_list))),
         seq($.var_name, $.kw_to, $.kw_default),
-        seq($.var_name, '=', $.kw_default)
+        prec.left(7, prec.dynamic(7, seq($.var_name, '=', $.kw_default)))
       ),
     set_rest_more: $ => choice(
         $.generic_set,
@@ -294,7 +277,7 @@ module.exports = grammar({
       ),
     var_name: $ => choice(
         $.ColId,
-        seq($.var_name, '.', $.ColId)
+        prec.left(22, prec.dynamic(22, seq($.var_name, '.', $.ColId)))
       ),
     var_list: $ => choice(
         $.var_value,
@@ -318,9 +301,9 @@ module.exports = grammar({
       ),
     zone_value: $ => choice(
         $.Sconst,
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         seq($.ConstInterval, $.Sconst, optional($.opt_interval)),
-        seq($.ConstInterval, '(', $.Iconst, ')', $.Sconst),
+        prec.left(20, prec.dynamic(20, seq($.ConstInterval, '(', $.Iconst, ')', $.Sconst))),
         $.NumericOnly,
         $.kw_default,
         $.kw_local
@@ -345,11 +328,11 @@ module.exports = grammar({
         $.kw_all
       ),
     SetResetClause: $ => choice(
-        seq($.kw_set, $.set_rest),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.set_rest))),
         $.VariableResetStmt
       ),
     FunctionSetResetClause: $ => choice(
-        seq($.kw_set, $.set_rest_more),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.set_rest_more))),
         $.VariableResetStmt
       ),
     VariableShowStmt: $ => choice(
@@ -359,7 +342,7 @@ module.exports = grammar({
         seq($.kw_show, $.kw_session, $.kw_authorization),
         seq($.kw_show, $.kw_all)
       ),
-    ConstraintsSetStmt: $ => seq($.kw_set, $.kw_constraints, $.constraints_set_list, $.constraints_set_mode),
+    ConstraintsSetStmt: $ => prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_constraints, $.constraints_set_list, $.constraints_set_mode))),
     constraints_set_list: $ => choice(
         $.kw_all,
         $.qualified_name_list
@@ -381,21 +364,21 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.alter_table_cmds),
         seq($.kw_alter, $.kw_table, $.relation_expr, $.partition_cmd),
         seq($.kw_alter, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.partition_cmd),
-        seq($.kw_alter, $.kw_table, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
-        seq($.kw_alter, $.kw_table, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_table, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_table, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
         seq($.kw_alter, $.kw_index, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_index, $.kw_if, $.kw_exists, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_index, $.qualified_name, $.index_partition_cmd),
-        seq($.kw_alter, $.kw_index, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
-        seq($.kw_alter, $.kw_index, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_index, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_index, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
         seq($.kw_alter, $.kw_sequence, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_sequence, $.kw_if, $.kw_exists, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_view, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_materialized, $.kw_view, $.qualified_name, $.alter_table_cmds),
         seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.alter_table_cmds),
-        seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
-        seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
+        prec.left(8, prec.dynamic(8, seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_all, $.kw_in, $.kw_tablespace, $.name, $.kw_owned, $.kw_by, $.role_list, $.kw_set, $.kw_tablespace, $.name, optional($.opt_nowait)))),
         seq($.kw_alter, $.kw_foreign, $.kw_table, $.relation_expr, $.alter_table_cmds),
         seq($.kw_alter, $.kw_foreign, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.alter_table_cmds)
       ),
@@ -404,28 +387,28 @@ module.exports = grammar({
         seq($.alter_table_cmds, ',', $.alter_table_cmd)
       ),
     partition_cmd: $ => choice(
-        seq($.kw_attach, $.kw_partition, $.qualified_name, $.PartitionBoundSpec),
-        seq($.kw_detach, $.kw_partition, $.qualified_name, optional($.opt_concurrently)),
-        seq($.kw_detach, $.kw_partition, $.qualified_name, $.kw_finalize)
+        prec.left(11, prec.dynamic(11, seq($.kw_attach, $.kw_partition, $.qualified_name, $.PartitionBoundSpec))),
+        prec.left(11, prec.dynamic(11, seq($.kw_detach, $.kw_partition, $.qualified_name, optional($.opt_concurrently)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_detach, $.kw_partition, $.qualified_name, $.kw_finalize)))
       ),
-    index_partition_cmd: $ => seq($.kw_attach, $.kw_partition, $.qualified_name),
+    index_partition_cmd: $ => prec.left(11, prec.dynamic(11, seq($.kw_attach, $.kw_partition, $.qualified_name))),
     alter_table_cmd: $ => choice(
         seq($.kw_add, $.columnDef),
-        seq($.kw_add, $.kw_if, $.kw_not, $.kw_exists, $.columnDef),
+        prec.right(5, prec.dynamic(5, seq($.kw_add, $.kw_if, $.kw_not, $.kw_exists, $.columnDef))),
         seq($.kw_add, $.kw_column, $.columnDef),
-        seq($.kw_add, $.kw_column, $.kw_if, $.kw_not, $.kw_exists, $.columnDef),
+        prec.right(5, prec.dynamic(5, seq($.kw_add, $.kw_column, $.kw_if, $.kw_not, $.kw_exists, $.columnDef))),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.alter_column_default),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_drop, $.kw_not, $.kw_null),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_not, $.kw_null),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_expression, $.kw_as, '(', $.a_expr, ')'),
+        prec.right(5, prec.dynamic(5, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_drop, $.kw_not, $.kw_null))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_not, $.kw_null))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_expression, $.kw_as, '(', $.a_expr, ')'))),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_drop, $.kw_expression),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_drop, $.kw_expression, $.kw_if, $.kw_exists),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_statistics, $.set_statistics_value),
-        seq($.kw_alter, optional($.opt_column), $.Iconst, $.kw_set, $.kw_statistics, $.set_statistics_value),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.reloptions),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.kw_statistics, $.set_statistics_value))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.Iconst, $.kw_set, $.kw_statistics, $.set_statistics_value))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.reloptions))),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_reset, $.reloptions),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.column_storage),
-        seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.column_compression),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.column_storage))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_set, $.column_compression))),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_add, $.kw_generated, $.generated_when, $.kw_as, $.kw_identity, optional($.OptParenthesizedSeqOptList)),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.alter_identity_column_option_list),
         seq($.kw_alter, optional($.opt_column), $.ColId, $.kw_drop, $.kw_identity),
@@ -440,11 +423,11 @@ module.exports = grammar({
         seq($.kw_validate, $.kw_constraint, $.name),
         seq($.kw_drop, $.kw_constraint, $.kw_if, $.kw_exists, $.name, optional($.opt_drop_behavior)),
         seq($.kw_drop, $.kw_constraint, $.name, optional($.opt_drop_behavior)),
-        seq($.kw_set, $.kw_without, $.kw_oids),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_without, $.kw_oids))),
         seq($.kw_cluster, $.kw_on, $.name),
-        seq($.kw_set, $.kw_without, $.kw_cluster),
-        seq($.kw_set, $.kw_logged),
-        seq($.kw_set, $.kw_unlogged),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_without, $.kw_cluster))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_logged))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_unlogged))),
         seq($.kw_enable, $.kw_trigger, $.name),
         seq($.kw_enable, $.kw_always, $.kw_trigger, $.name),
         seq($.kw_enable, $.kw_replica, $.kw_trigger, $.name),
@@ -460,11 +443,11 @@ module.exports = grammar({
         seq($.kw_inherit, $.qualified_name),
         seq($.kw_no, $.kw_inherit, $.qualified_name),
         seq($.kw_of, $.any_name),
-        seq($.kw_not, $.kw_of),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_of))),
         seq($.kw_owner, $.kw_to, $.RoleSpec),
-        seq($.kw_set, $.kw_access, $.kw_method, $.set_access_method_name),
-        seq($.kw_set, $.kw_tablespace, $.name),
-        seq($.kw_set, $.reloptions),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_access, $.kw_method, $.set_access_method_name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_tablespace, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.reloptions))),
         seq($.kw_reset, $.reloptions),
         seq($.kw_replica, $.kw_identity, $.replica_identity),
         seq($.kw_enable, $.kw_row, $.kw_level, $.kw_security),
@@ -474,28 +457,28 @@ module.exports = grammar({
         $.alter_generic_options
       ),
     alter_column_default: $ => choice(
-        seq($.kw_set, $.kw_default, $.a_expr),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_default, $.a_expr))),
         seq($.kw_drop, $.kw_default)
       ),
-    opt_collate_clause: $ => seq($.kw_collate, $.any_name),
+    opt_collate_clause: $ => prec.left(17, prec.dynamic(17, seq($.kw_collate, $.any_name))),
     alter_using: $ => seq($.kw_using, $.a_expr),
     replica_identity: $ => choice(
         $.kw_nothing,
-        $.kw_full,
+        prec.left(23, prec.dynamic(23, $.kw_full)),
         $.kw_default,
         seq($.kw_using, $.kw_index, $.name)
       ),
-    reloptions: $ => seq('(', $.reloption_list, ')'),
-    opt_reloptions: $ => seq($.kw_with, $.reloptions),
+    reloptions: $ => prec.left(20, prec.dynamic(20, seq('(', $.reloption_list, ')'))),
+    opt_reloptions: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, $.reloptions))),
     reloption_list: $ => choice(
         $.reloption_elem,
         seq($.reloption_list, ',', $.reloption_elem)
       ),
     reloption_elem: $ => choice(
-        seq($.ColLabel, '=', $.def_arg),
+        prec.left(7, prec.dynamic(7, seq($.ColLabel, '=', $.def_arg))),
         $.ColLabel,
-        seq($.ColLabel, '.', $.ColLabel, '=', $.def_arg),
-        seq($.ColLabel, '.', $.ColLabel)
+        prec.left(22, prec.dynamic(22, seq($.ColLabel, '.', $.ColLabel, '=', $.def_arg))),
+        prec.left(22, prec.dynamic(22, seq($.ColLabel, '.', $.ColLabel)))
       ),
     alter_identity_column_option_list: $ => choice(
         $.alter_identity_column_option,
@@ -504,8 +487,8 @@ module.exports = grammar({
     alter_identity_column_option: $ => choice(
         $.kw_restart,
         seq($.kw_restart, optional($.opt_with), $.NumericOnly),
-        seq($.kw_set, $.SeqOptElem),
-        seq($.kw_set, $.kw_generated, $.generated_when)
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.SeqOptElem))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_generated, $.generated_when)))
       ),
     set_statistics_value: $ => choice(
         $.SignedIconst,
@@ -516,9 +499,9 @@ module.exports = grammar({
         $.kw_default
       ),
     PartitionBoundSpec: $ => choice(
-        seq($.kw_for, $.kw_values, $.kw_with, '(', $.hash_partbound, ')'),
-        seq($.kw_for, $.kw_values, $.kw_in, '(', $.expr_list, ')'),
-        seq($.kw_for, $.kw_values, $.kw_from, '(', $.expr_list, ')', $.kw_to, '(', $.expr_list, ')'),
+        prec.left(11, prec.dynamic(11, seq($.kw_for, $.kw_values, $.kw_with, '(', $.hash_partbound, ')'))),
+        prec.left(8, prec.dynamic(8, seq($.kw_for, $.kw_values, $.kw_in, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_for, $.kw_values, $.kw_from, '(', $.expr_list, ')', $.kw_to, '(', $.expr_list, ')'))),
         $.kw_default
       ),
     hash_partbound_elem: $ => seq($.NonReservedWord, $.Iconst),
@@ -543,7 +526,7 @@ module.exports = grammar({
       ),
     CopyStmt: $ => choice(
         seq($.kw_copy, optional($.opt_binary), $.qualified_name, optional($.opt_column_list), $.copy_from, optional($.opt_program), $.copy_file_name, optional($.copy_delimiter), optional($.opt_with), optional($.copy_options), optional($.where_clause)),
-        seq($.kw_copy, '(', $.PreparableStmt, ')', $.kw_to, optional($.opt_program), $.copy_file_name, optional($.opt_with), optional($.copy_options))
+        prec.left(20, prec.dynamic(20, seq($.kw_copy, '(', $.PreparableStmt, ')', $.kw_to, optional($.opt_program), $.copy_file_name, optional($.opt_with), optional($.copy_options))))
       ),
     copy_from: $ => choice(
         $.kw_from,
@@ -557,7 +540,7 @@ module.exports = grammar({
       ),
     copy_options: $ => choice(
         $.copy_opt_list,
-        seq('(', $.copy_generic_opt_list, ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.copy_generic_opt_list, ')')))
       ),
     copy_opt_list: $ => seq(optional($.copy_opt_list), $.copy_opt_item),
     copy_opt_item: $ => choice(
@@ -568,13 +551,13 @@ module.exports = grammar({
         $.kw_csv,
         $.kw_header,
         seq($.kw_quote, optional($.opt_as), $.Sconst),
-        seq($.kw_escape, optional($.opt_as), $.Sconst),
+        prec.left(9, prec.dynamic(9, seq($.kw_escape, optional($.opt_as), $.Sconst))),
         seq($.kw_force, $.kw_quote, $.columnList),
-        seq($.kw_force, $.kw_quote, '*'),
-        seq($.kw_force, $.kw_not, $.kw_null, $.columnList),
-        seq($.kw_force, $.kw_not, $.kw_null, '*'),
+        prec.left(14, prec.dynamic(14, seq($.kw_force, $.kw_quote, '*'))),
+        prec.right(5, prec.dynamic(5, seq($.kw_force, $.kw_not, $.kw_null, $.columnList))),
+        prec.right(5, prec.dynamic(5, seq($.kw_force, $.kw_not, $.kw_null, '*'))),
         seq($.kw_force, $.kw_null, $.columnList),
-        seq($.kw_force, $.kw_null, '*'),
+        prec.left(14, prec.dynamic(14, seq($.kw_force, $.kw_null, '*'))),
         seq($.kw_encoding, $.Sconst)
       ),
     opt_binary: $ => $.kw_binary,
@@ -588,9 +571,9 @@ module.exports = grammar({
     copy_generic_opt_arg: $ => choice(
         $.opt_boolean_or_string,
         $.NumericOnly,
-        '*',
+        prec.left(14, prec.dynamic(14, '*')),
         $.kw_default,
-        seq('(', $.copy_generic_opt_arg_list, ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.copy_generic_opt_arg_list, ')')))
       ),
     copy_generic_opt_arg_list: $ => choice(
         $.copy_generic_opt_arg_list_item,
@@ -598,12 +581,12 @@ module.exports = grammar({
       ),
     copy_generic_opt_arg_list_item: $ => $.opt_boolean_or_string,
     CreateStmt: $ => choice(
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.OptTemp), $.kw_table, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)))),
         seq($.kw_create, optional($.OptTemp), $.kw_table, $.qualified_name, $.kw_of, $.any_name, optional($.OptTypedTableElementList), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_of, $.any_name, optional($.OptTypedTableElementList), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_of, $.any_name, optional($.OptTypedTableElementList), optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_create, optional($.OptTemp), $.kw_table, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, optional($.OptPartitionSpec), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace))))
       ),
     OptTemp: $ => choice(
         $.kw_temporary,
@@ -615,7 +598,7 @@ module.exports = grammar({
         $.kw_unlogged
       ),
     OptTableElementList: $ => $.TableElementList,
-    OptTypedTableElementList: $ => seq('(', $.TypedTableElementList, ')'),
+    OptTypedTableElementList: $ => prec.left(20, prec.dynamic(20, seq('(', $.TypedTableElementList, ')'))),
     TableElementList: $ => choice(
         $.TableElement,
         seq($.TableElementList, ',', $.TableElement)
@@ -636,7 +619,7 @@ module.exports = grammar({
     columnDef: $ => seq($.ColId, $.Typename, optional($.opt_column_storage), optional($.opt_column_compression), optional($.create_generic_options), optional($.ColQualList)),
     columnOptions: $ => choice(
         seq($.ColId, optional($.ColQualList)),
-        seq($.ColId, $.kw_with, $.kw_options, optional($.ColQualList))
+        prec.left(11, prec.dynamic(11, seq($.ColId, $.kw_with, $.kw_options, optional($.ColQualList))))
       ),
     column_compression: $ => choice(
         seq($.kw_compression, $.ColId),
@@ -653,22 +636,22 @@ module.exports = grammar({
         seq($.kw_constraint, $.name, $.ColConstraintElem),
         $.ColConstraintElem,
         $.ConstraintAttr,
-        seq($.kw_collate, $.any_name)
+        prec.left(17, prec.dynamic(17, seq($.kw_collate, $.any_name)))
       ),
     ColConstraintElem: $ => choice(
-        seq($.kw_not, $.kw_null, optional($.opt_no_inherit)),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_null, optional($.opt_no_inherit)))),
         $.kw_null,
         seq($.kw_unique, optional($.opt_unique_null_treatment), optional($.opt_definition), optional($.OptConsTableSpace)),
         seq($.kw_primary, $.kw_key, optional($.opt_definition), optional($.OptConsTableSpace)),
-        seq($.kw_check, '(', $.a_expr, ')', optional($.opt_no_inherit)),
+        prec.left(20, prec.dynamic(20, seq($.kw_check, '(', $.a_expr, ')', optional($.opt_no_inherit)))),
         seq($.kw_default, $.b_expr),
         seq($.kw_generated, $.generated_when, $.kw_as, $.kw_identity, optional($.OptParenthesizedSeqOptList)),
-        seq($.kw_generated, $.generated_when, $.kw_as, '(', $.a_expr, ')', optional($.opt_virtual_or_stored)),
+        prec.left(20, prec.dynamic(20, seq($.kw_generated, $.generated_when, $.kw_as, '(', $.a_expr, ')', optional($.opt_virtual_or_stored)))),
         seq($.kw_references, $.qualified_name, optional($.opt_column_list), optional($.key_match), optional($.key_actions))
       ),
     opt_unique_null_treatment: $ => choice(
         seq($.kw_nulls, $.kw_distinct),
-        seq($.kw_nulls, $.kw_not, $.kw_distinct)
+        prec.right(5, prec.dynamic(5, seq($.kw_nulls, $.kw_not, $.kw_distinct)))
       ),
     generated_when: $ => choice(
         $.kw_always,
@@ -680,13 +663,13 @@ module.exports = grammar({
       ),
     ConstraintAttr: $ => choice(
         $.kw_deferrable,
-        seq($.kw_not, $.kw_deferrable),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_deferrable))),
         seq($.kw_initially, $.kw_deferred),
         seq($.kw_initially, $.kw_immediate),
         $.kw_enforced,
-        seq($.kw_not, $.kw_enforced)
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_enforced)))
       ),
-    TableLikeClause: $ => seq($.kw_like, $.qualified_name, optional($.TableLikeOptionList)),
+    TableLikeClause: $ => prec.left(8, prec.dynamic(8, seq($.kw_like, $.qualified_name, optional($.TableLikeOptionList)))),
     TableLikeOptionList: $ => choice(
         seq(optional($.TableLikeOptionList), $.kw_including, $.TableLikeOption),
         seq(optional($.TableLikeOptionList), $.kw_excluding, $.TableLikeOption)
@@ -708,36 +691,36 @@ module.exports = grammar({
         $.ConstraintElem
       ),
     ConstraintElem: $ => choice(
-        seq($.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)),
-        seq($.kw_not, $.kw_null, $.ColId, optional($.ConstraintAttributeSpec)),
-        seq($.kw_unique, optional($.opt_unique_null_treatment), '(', $.columnList, optional($.opt_without_overlaps), ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.ConstraintAttributeSpec)),
+        prec.left(20, prec.dynamic(20, seq($.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_null, $.ColId, optional($.ConstraintAttributeSpec)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_unique, optional($.opt_unique_null_treatment), '(', $.columnList, optional($.opt_without_overlaps), ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.ConstraintAttributeSpec)))),
         seq($.kw_unique, $.ExistingIndex, optional($.ConstraintAttributeSpec)),
-        seq($.kw_primary, $.kw_key, '(', $.columnList, optional($.opt_without_overlaps), ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.ConstraintAttributeSpec)),
+        prec.left(20, prec.dynamic(20, seq($.kw_primary, $.kw_key, '(', $.columnList, optional($.opt_without_overlaps), ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.ConstraintAttributeSpec)))),
         seq($.kw_primary, $.kw_key, $.ExistingIndex, optional($.ConstraintAttributeSpec)),
-        seq($.kw_exclude, optional($.access_method_clause), '(', $.ExclusionConstraintList, ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.OptWhereClause), optional($.ConstraintAttributeSpec)),
-        seq($.kw_foreign, $.kw_key, '(', $.columnList, optional($.optionalPeriodName), ')', $.kw_references, $.qualified_name, optional($.opt_column_and_period_list), optional($.key_match), optional($.key_actions), optional($.ConstraintAttributeSpec))
+        prec.left(20, prec.dynamic(20, seq($.kw_exclude, optional($.access_method_clause), '(', $.ExclusionConstraintList, ')', optional($.opt_c_include), optional($.opt_definition), optional($.OptConsTableSpace), optional($.OptWhereClause), optional($.ConstraintAttributeSpec)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_foreign, $.kw_key, '(', $.columnList, optional($.optionalPeriodName), ')', $.kw_references, $.qualified_name, optional($.opt_column_and_period_list), optional($.key_match), optional($.key_actions), optional($.ConstraintAttributeSpec))))
       ),
     DomainConstraint: $ => choice(
         seq($.kw_constraint, $.name, $.DomainConstraintElem),
         $.DomainConstraintElem
       ),
     DomainConstraintElem: $ => choice(
-        seq($.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)),
-        seq($.kw_not, $.kw_null, optional($.ConstraintAttributeSpec))
+        prec.left(20, prec.dynamic(20, seq($.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_null, optional($.ConstraintAttributeSpec))))
       ),
     opt_no_inherit: $ => seq($.kw_no, $.kw_inherit),
-    opt_without_overlaps: $ => seq($.kw_without, $.kw_overlaps),
-    opt_column_list: $ => seq('(', $.columnList, ')'),
+    opt_without_overlaps: $ => prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_overlaps))),
+    opt_column_list: $ => prec.left(20, prec.dynamic(20, seq('(', $.columnList, ')'))),
     columnList: $ => choice(
         $.columnElem,
         seq($.columnList, ',', $.columnElem)
       ),
     optionalPeriodName: $ => seq(',', $.kw_period, $.columnElem),
-    opt_column_and_period_list: $ => seq('(', $.columnList, optional($.optionalPeriodName), ')'),
+    opt_column_and_period_list: $ => prec.left(20, prec.dynamic(20, seq('(', $.columnList, optional($.optionalPeriodName), ')'))),
     columnElem: $ => $.ColId,
-    opt_c_include: $ => seq($.kw_include, '(', $.columnList, ')'),
+    opt_c_include: $ => prec.left(20, prec.dynamic(20, seq($.kw_include, '(', $.columnList, ')'))),
     key_match: $ => choice(
-        seq($.kw_match, $.kw_full),
+        prec.left(23, prec.dynamic(23, seq($.kw_match, $.kw_full))),
         seq($.kw_match, $.kw_partial),
         seq($.kw_match, $.kw_simple)
       ),
@@ -746,10 +729,10 @@ module.exports = grammar({
         seq($.ExclusionConstraintList, ',', $.ExclusionConstraintElem)
       ),
     ExclusionConstraintElem: $ => choice(
-        seq($.index_elem, $.kw_with, $.any_operator),
-        seq($.index_elem, $.kw_with, $.kw_operator, '(', $.any_operator, ')')
+        prec.left(11, prec.dynamic(11, seq($.index_elem, $.kw_with, $.any_operator))),
+        prec.left(11, prec.dynamic(11, seq($.index_elem, $.kw_with, $.kw_operator, '(', $.any_operator, ')')))
       ),
-    OptWhereClause: $ => seq($.kw_where, '(', $.a_expr, ')'),
+    OptWhereClause: $ => prec.left(20, prec.dynamic(20, seq($.kw_where, '(', $.a_expr, ')'))),
     key_actions: $ => choice(
         $.key_update,
         $.key_delete,
@@ -762,12 +745,12 @@ module.exports = grammar({
         seq($.kw_no, $.kw_action),
         $.kw_restrict,
         $.kw_cascade,
-        seq($.kw_set, $.kw_null, optional($.opt_column_list)),
-        seq($.kw_set, $.kw_default, optional($.opt_column_list))
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_null, optional($.opt_column_list)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_default, optional($.opt_column_list))))
       ),
-    OptInherit: $ => seq($.kw_inherits, '(', $.qualified_name_list, ')'),
+    OptInherit: $ => prec.left(20, prec.dynamic(20, seq($.kw_inherits, '(', $.qualified_name_list, ')'))),
     OptPartitionSpec: $ => $.PartitionSpec,
-    PartitionSpec: $ => seq($.kw_partition, $.kw_by, $.ColId, '(', $.part_params, ')'),
+    PartitionSpec: $ => prec.left(11, prec.dynamic(11, seq($.kw_partition, $.kw_by, $.ColId, '(', $.part_params, ')'))),
     part_params: $ => choice(
         $.part_elem,
         seq($.part_params, ',', $.part_elem)
@@ -775,24 +758,24 @@ module.exports = grammar({
     part_elem: $ => choice(
         seq($.ColId, optional($.opt_collate), optional($.opt_qualified_name)),
         seq($.func_expr_windowless, optional($.opt_collate), optional($.opt_qualified_name)),
-        seq('(', $.a_expr, ')', optional($.opt_collate), optional($.opt_qualified_name))
+        prec.left(20, prec.dynamic(20, seq('(', $.a_expr, ')', optional($.opt_collate), optional($.opt_qualified_name))))
       ),
     table_access_method_clause: $ => seq($.kw_using, $.name),
     OptWith: $ => choice(
-        seq($.kw_with, $.reloptions),
-        seq($.kw_without, $.kw_oids)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.reloptions))),
+        prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_oids)))
       ),
     OnCommitOption: $ => choice(
         seq($.kw_on, $.kw_commit, $.kw_drop),
-        seq($.kw_on, $.kw_commit, $.kw_delete, $.kw_rows),
-        seq($.kw_on, $.kw_commit, $.kw_preserve, $.kw_rows)
+        prec.left(11, prec.dynamic(11, seq($.kw_on, $.kw_commit, $.kw_delete, $.kw_rows))),
+        prec.left(11, prec.dynamic(11, seq($.kw_on, $.kw_commit, $.kw_preserve, $.kw_rows)))
       ),
     OptTableSpace: $ => seq($.kw_tablespace, $.name),
     OptConsTableSpace: $ => seq($.kw_using, $.kw_index, $.kw_tablespace, $.name),
     ExistingIndex: $ => seq($.kw_using, $.kw_index, $.name),
     CreateStatsStmt: $ => choice(
         seq($.kw_create, $.kw_statistics, optional($.opt_qualified_name), optional($.opt_name_list), $.kw_on, $.stats_params, $.kw_from, $.from_list),
-        seq($.kw_create, $.kw_statistics, $.kw_if, $.kw_not, $.kw_exists, $.any_name, optional($.opt_name_list), $.kw_on, $.stats_params, $.kw_from, $.from_list)
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_statistics, $.kw_if, $.kw_not, $.kw_exists, $.any_name, optional($.opt_name_list), $.kw_on, $.stats_params, $.kw_from, $.from_list)))
       ),
     stats_params: $ => choice(
         $.stats_param,
@@ -801,38 +784,38 @@ module.exports = grammar({
     stats_param: $ => choice(
         $.ColId,
         $.func_expr_windowless,
-        seq('(', $.a_expr, ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.a_expr, ')')))
       ),
     AlterStatsStmt: $ => choice(
-        seq($.kw_alter, $.kw_statistics, $.any_name, $.kw_set, $.kw_statistics, $.set_statistics_value),
-        seq($.kw_alter, $.kw_statistics, $.kw_if, $.kw_exists, $.any_name, $.kw_set, $.kw_statistics, $.set_statistics_value)
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_statistics, $.any_name, $.kw_set, $.kw_statistics, $.set_statistics_value))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_statistics, $.kw_if, $.kw_exists, $.any_name, $.kw_set, $.kw_statistics, $.set_statistics_value)))
       ),
     CreateAsStmt: $ => choice(
         seq($.kw_create, optional($.OptTemp), $.kw_table, $.create_as_target, $.kw_as, $.SelectStmt, optional($.opt_with_data)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.create_as_target, $.kw_as, $.SelectStmt, optional($.opt_with_data))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.create_as_target, $.kw_as, $.SelectStmt, optional($.opt_with_data))))
       ),
     create_as_target: $ => seq($.qualified_name, optional($.opt_column_list), optional($.table_access_method_clause), optional($.OptWith), optional($.OnCommitOption), optional($.OptTableSpace)),
     opt_with_data: $ => choice(
-        seq($.kw_with, $.kw_data),
-        seq($.kw_with, $.kw_no, $.kw_data)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_data))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_no, $.kw_data)))
       ),
     CreateMatViewStmt: $ => choice(
         seq($.kw_create, optional($.OptNoLog), $.kw_materialized, $.kw_view, $.create_mv_target, $.kw_as, $.SelectStmt, optional($.opt_with_data)),
-        seq($.kw_create, optional($.OptNoLog), $.kw_materialized, $.kw_view, $.kw_if, $.kw_not, $.kw_exists, $.create_mv_target, $.kw_as, $.SelectStmt, optional($.opt_with_data))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptNoLog), $.kw_materialized, $.kw_view, $.kw_if, $.kw_not, $.kw_exists, $.create_mv_target, $.kw_as, $.SelectStmt, optional($.opt_with_data))))
       ),
     create_mv_target: $ => seq($.qualified_name, optional($.opt_column_list), optional($.table_access_method_clause), optional($.opt_reloptions), optional($.OptTableSpace)),
     OptNoLog: $ => $.kw_unlogged,
     RefreshMatViewStmt: $ => seq($.kw_refresh, $.kw_materialized, $.kw_view, optional($.opt_concurrently), $.qualified_name, optional($.opt_with_data)),
     CreateSeqStmt: $ => choice(
         seq($.kw_create, optional($.OptTemp), $.kw_sequence, $.qualified_name, optional($.OptSeqOptList)),
-        seq($.kw_create, optional($.OptTemp), $.kw_sequence, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, optional($.OptSeqOptList))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_sequence, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, optional($.OptSeqOptList))))
       ),
     AlterSeqStmt: $ => choice(
         seq($.kw_alter, $.kw_sequence, $.qualified_name, $.SeqOptList),
         seq($.kw_alter, $.kw_sequence, $.kw_if, $.kw_exists, $.qualified_name, $.SeqOptList)
       ),
     OptSeqOptList: $ => $.SeqOptList,
-    OptParenthesizedSeqOptList: $ => seq('(', $.SeqOptList, ')'),
+    OptParenthesizedSeqOptList: $ => prec.left(20, prec.dynamic(20, seq('(', $.SeqOptList, ')'))),
     SeqOptList: $ => choice(
         $.SeqOptElem,
         seq($.SeqOptList, $.SeqOptElem)
@@ -858,8 +841,8 @@ module.exports = grammar({
     opt_by: $ => $.kw_by,
     NumericOnly: $ => choice(
         $.float_literal,
-        seq('+', $.float_literal),
-        seq('-', $.float_literal),
+        prec.left(13, prec.dynamic(13, seq('+', $.float_literal))),
+        prec.left(13, prec.dynamic(13, seq('-', $.float_literal))),
         $.SignedIconst
       ),
     NumericOnly_list: $ => choice(
@@ -890,7 +873,7 @@ module.exports = grammar({
       ),
     CreateExtensionStmt: $ => choice(
         seq($.kw_create, $.kw_extension, $.name, optional($.opt_with), optional($.create_extension_opt_list)),
-        seq($.kw_create, $.kw_extension, $.kw_if, $.kw_not, $.kw_exists, $.name, optional($.opt_with), optional($.create_extension_opt_list))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_extension, $.kw_if, $.kw_not, $.kw_exists, $.name, optional($.opt_with), optional($.create_extension_opt_list))))
       ),
     create_extension_opt_list: $ => seq(optional($.create_extension_opt_list), $.create_extension_opt_item),
     create_extension_opt_item: $ => choice(
@@ -906,12 +889,12 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.object_type_name, $.name),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.object_type_any_name, $.any_name),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_aggregate, $.aggregate_with_argtypes),
-        seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')'))),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_domain, $.Typename),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_function, $.function_with_argtypes),
-        seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.operator_with_argtypes),
-        seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name),
-        seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.operator_with_argtypes))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name))),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_procedure, $.function_with_argtypes),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_routine, $.function_with_argtypes),
         seq($.kw_alter, $.kw_extension, $.name, $.add_drop, $.kw_transform, $.kw_for, $.Typename, $.kw_language, $.name),
@@ -933,19 +916,19 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_foreign, $.kw_data, $.kw_wrapper, $.name, optional($.opt_fdw_options), $.alter_generic_options),
         seq($.kw_alter, $.kw_foreign, $.kw_data, $.kw_wrapper, $.name, $.fdw_options)
       ),
-    create_generic_options: $ => seq($.kw_options, '(', $.generic_option_list, ')'),
+    create_generic_options: $ => prec.left(20, prec.dynamic(20, seq($.kw_options, '(', $.generic_option_list, ')'))),
     generic_option_list: $ => choice(
         $.generic_option_elem,
         seq($.generic_option_list, ',', $.generic_option_elem)
       ),
-    alter_generic_options: $ => seq($.kw_options, '(', $.alter_generic_option_list, ')'),
+    alter_generic_options: $ => prec.left(20, prec.dynamic(20, seq($.kw_options, '(', $.alter_generic_option_list, ')'))),
     alter_generic_option_list: $ => choice(
         $.alter_generic_option_elem,
         seq($.alter_generic_option_list, ',', $.alter_generic_option_elem)
       ),
     alter_generic_option_elem: $ => choice(
         $.generic_option_elem,
-        seq($.kw_set, $.generic_option_elem),
+        prec.left(11, prec.dynamic(11, seq($.kw_set, $.generic_option_elem))),
         seq($.kw_add, $.generic_option_elem),
         seq($.kw_drop, $.generic_option_name)
       ),
@@ -954,7 +937,7 @@ module.exports = grammar({
     generic_option_arg: $ => $.Sconst,
     CreateForeignServerStmt: $ => choice(
         seq($.kw_create, $.kw_server, $.name, optional($.opt_type), optional($.opt_foreign_server_version), $.kw_foreign, $.kw_data, $.kw_wrapper, $.name, optional($.create_generic_options)),
-        seq($.kw_create, $.kw_server, $.kw_if, $.kw_not, $.kw_exists, $.name, optional($.opt_type), optional($.opt_foreign_server_version), $.kw_foreign, $.kw_data, $.kw_wrapper, $.name, optional($.create_generic_options))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_server, $.kw_if, $.kw_not, $.kw_exists, $.name, optional($.opt_type), optional($.opt_foreign_server_version), $.kw_foreign, $.kw_data, $.kw_wrapper, $.name, optional($.create_generic_options))))
       ),
     opt_type: $ => seq($.kw_type, $.Sconst),
     foreign_server_version: $ => choice(
@@ -968,20 +951,20 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_server, $.name, $.alter_generic_options)
       ),
     CreateForeignTableStmt: $ => choice(
-        seq($.kw_create, $.kw_foreign, $.kw_table, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), $.kw_server, $.name, optional($.create_generic_options)),
-        seq($.kw_create, $.kw_foreign, $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), $.kw_server, $.name, optional($.create_generic_options)),
-        seq($.kw_create, $.kw_foreign, $.kw_table, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, $.kw_server, $.name, optional($.create_generic_options)),
-        seq($.kw_create, $.kw_foreign, $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, $.kw_server, $.name, optional($.create_generic_options))
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_foreign, $.kw_table, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), $.kw_server, $.name, optional($.create_generic_options)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_foreign, $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, '(', optional($.OptTableElementList), ')', optional($.OptInherit), $.kw_server, $.name, optional($.create_generic_options)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_create, $.kw_foreign, $.kw_table, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, $.kw_server, $.name, optional($.create_generic_options)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_foreign, $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.qualified_name, $.kw_partition, $.kw_of, $.qualified_name, optional($.OptTypedTableElementList), $.PartitionBoundSpec, $.kw_server, $.name, optional($.create_generic_options))))
       ),
     ImportForeignSchemaStmt: $ => seq($.kw_import, $.kw_foreign, $.kw_schema, $.name, optional($.import_qualification), $.kw_from, $.kw_server, $.name, $.kw_into, $.name, optional($.create_generic_options)),
     import_qualification_type: $ => choice(
         seq($.kw_limit, $.kw_to),
-        $.kw_except
+        prec.left(1, prec.dynamic(1, $.kw_except))
       ),
-    import_qualification: $ => seq($.import_qualification_type, '(', $.relation_expr_list, ')'),
+    import_qualification: $ => prec.left(20, prec.dynamic(20, seq($.import_qualification_type, '(', $.relation_expr_list, ')'))),
     CreateUserMappingStmt: $ => choice(
         seq($.kw_create, $.kw_user, $.kw_mapping, $.kw_for, $.auth_ident, $.kw_server, $.name, optional($.create_generic_options)),
-        seq($.kw_create, $.kw_user, $.kw_mapping, $.kw_if, $.kw_not, $.kw_exists, $.kw_for, $.auth_ident, $.kw_server, $.name, optional($.create_generic_options))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_user, $.kw_mapping, $.kw_if, $.kw_not, $.kw_exists, $.kw_for, $.auth_ident, $.kw_server, $.name, optional($.create_generic_options))))
       ),
     auth_ident: $ => choice(
         $.RoleSpec,
@@ -994,11 +977,11 @@ module.exports = grammar({
     AlterUserMappingStmt: $ => seq($.kw_alter, $.kw_user, $.kw_mapping, $.kw_for, $.auth_ident, $.kw_server, $.name, $.alter_generic_options),
     CreatePolicyStmt: $ => seq($.kw_create, $.kw_policy, $.name, $.kw_on, $.qualified_name, optional($.RowSecurityDefaultPermissive), optional($.RowSecurityDefaultForCmd), optional($.RowSecurityDefaultToRole), optional($.RowSecurityOptionalExpr), optional($.RowSecurityOptionalWithCheck)),
     AlterPolicyStmt: $ => seq($.kw_alter, $.kw_policy, $.name, $.kw_on, $.qualified_name, optional($.RowSecurityOptionalToRole), optional($.RowSecurityOptionalExpr), optional($.RowSecurityOptionalWithCheck)),
-    RowSecurityOptionalExpr: $ => seq($.kw_using, '(', $.a_expr, ')'),
-    RowSecurityOptionalWithCheck: $ => seq($.kw_with, $.kw_check, '(', $.a_expr, ')'),
+    RowSecurityOptionalExpr: $ => prec.left(20, prec.dynamic(20, seq($.kw_using, '(', $.a_expr, ')'))),
+    RowSecurityOptionalWithCheck: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_check, '(', $.a_expr, ')'))),
     RowSecurityDefaultToRole: $ => seq($.kw_to, $.role_list),
     RowSecurityOptionalToRole: $ => seq($.kw_to, $.role_list),
-    RowSecurityDefaultPermissive: $ => seq($.kw_as, $.identifier),
+    RowSecurityDefaultPermissive: $ => prec.left(11, prec.dynamic(11, seq($.kw_as, $.identifier))),
     RowSecurityDefaultForCmd: $ => seq($.kw_for, $.row_security_cmd),
     row_security_cmd: $ => choice(
         $.kw_all,
@@ -1013,8 +996,8 @@ module.exports = grammar({
         $.kw_table
       ),
     CreateTrigStmt: $ => choice(
-        seq($.kw_create, optional($.opt_or_replace), $.kw_trigger, $.name, $.TriggerActionTime, $.TriggerEvents, $.kw_on, $.qualified_name, optional($.TriggerReferencing), optional($.TriggerForSpec), optional($.TriggerWhen), $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', optional($.TriggerFuncArgs), ')'),
-        seq($.kw_create, optional($.opt_or_replace), $.kw_constraint, $.kw_trigger, $.name, $.kw_after, $.TriggerEvents, $.kw_on, $.qualified_name, optional($.OptConstrFromTable), optional($.ConstraintAttributeSpec), $.kw_for, $.kw_each, $.kw_row, optional($.TriggerWhen), $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', optional($.TriggerFuncArgs), ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.opt_or_replace), $.kw_trigger, $.name, $.TriggerActionTime, $.TriggerEvents, $.kw_on, $.qualified_name, optional($.TriggerReferencing), optional($.TriggerForSpec), optional($.TriggerWhen), $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', optional($.TriggerFuncArgs), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.opt_or_replace), $.kw_constraint, $.kw_trigger, $.name, $.kw_after, $.TriggerEvents, $.kw_on, $.qualified_name, optional($.OptConstrFromTable), optional($.ConstraintAttributeSpec), $.kw_for, $.kw_each, $.kw_row, optional($.TriggerWhen), $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', optional($.TriggerFuncArgs), ')')))
       ),
     TriggerActionTime: $ => choice(
         $.kw_before,
@@ -1023,7 +1006,7 @@ module.exports = grammar({
       ),
     TriggerEvents: $ => choice(
         $.TriggerOneEvent,
-        seq($.TriggerEvents, $.kw_or, $.TriggerOneEvent)
+        prec.left(3, prec.dynamic(3, seq($.TriggerEvents, $.kw_or, $.TriggerOneEvent)))
       ),
     TriggerOneEvent: $ => choice(
         $.kw_insert,
@@ -1053,7 +1036,7 @@ module.exports = grammar({
         $.kw_row,
         $.kw_statement
       ),
-    TriggerWhen: $ => seq($.kw_when, '(', $.a_expr, ')'),
+    TriggerWhen: $ => prec.left(20, prec.dynamic(20, seq($.kw_when, '(', $.a_expr, ')'))),
     FUNCTION_or_PROCEDURE: $ => choice(
         $.kw_function,
         $.kw_procedure
@@ -1071,24 +1054,24 @@ module.exports = grammar({
     OptConstrFromTable: $ => seq($.kw_from, $.qualified_name),
     ConstraintAttributeSpec: $ => seq(optional($.ConstraintAttributeSpec), $.ConstraintAttributeElem),
     ConstraintAttributeElem: $ => choice(
-        seq($.kw_not, $.kw_deferrable),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_deferrable))),
         $.kw_deferrable,
         seq($.kw_initially, $.kw_immediate),
         seq($.kw_initially, $.kw_deferred),
-        seq($.kw_not, $.kw_valid),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_valid))),
         seq($.kw_no, $.kw_inherit),
-        seq($.kw_not, $.kw_enforced),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_enforced))),
         $.kw_enforced
       ),
     CreateEventTrigStmt: $ => choice(
-        seq($.kw_create, $.kw_event, $.kw_trigger, $.name, $.kw_on, $.ColLabel, $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', ')'),
-        seq($.kw_create, $.kw_event, $.kw_trigger, $.name, $.kw_on, $.ColLabel, $.kw_when, $.event_trigger_when_list, $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_event, $.kw_trigger, $.name, $.kw_on, $.ColLabel, $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_event, $.kw_trigger, $.name, $.kw_on, $.ColLabel, $.kw_when, $.event_trigger_when_list, $.kw_execute, $.FUNCTION_or_PROCEDURE, $.func_name, '(', ')')))
       ),
     event_trigger_when_list: $ => choice(
         $.event_trigger_when_item,
-        seq($.event_trigger_when_list, $.kw_and, $.event_trigger_when_item)
+        prec.left(4, prec.dynamic(4, seq($.event_trigger_when_list, $.kw_and, $.event_trigger_when_item)))
       ),
-    event_trigger_when_item: $ => seq($.ColId, $.kw_in, '(', $.event_trigger_value_list, ')'),
+    event_trigger_when_item: $ => prec.left(8, prec.dynamic(8, seq($.ColId, $.kw_in, '(', $.event_trigger_value_list, ')'))),
     event_trigger_value_list: $ => choice(
         $.string_literal,
         seq($.event_trigger_value_list, ',', $.string_literal)
@@ -1100,32 +1083,32 @@ module.exports = grammar({
         seq($.kw_enable, $.kw_always),
         $.kw_disable
       ),
-    CreateAssertionStmt: $ => seq($.kw_create, $.kw_assertion, $.any_name, $.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)),
+    CreateAssertionStmt: $ => prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_assertion, $.any_name, $.kw_check, '(', $.a_expr, ')', optional($.ConstraintAttributeSpec)))),
     DefineStmt: $ => choice(
         seq($.kw_create, optional($.opt_or_replace), $.kw_aggregate, $.func_name, $.aggr_args, $.definition),
         seq($.kw_create, optional($.opt_or_replace), $.kw_aggregate, $.func_name, $.old_aggr_definition),
-        seq($.kw_create, $.kw_operator, $.any_operator, $.definition),
+        prec.left(12, prec.dynamic(12, seq($.kw_create, $.kw_operator, $.any_operator, $.definition))),
         seq($.kw_create, $.kw_type, $.any_name, $.definition),
         seq($.kw_create, $.kw_type, $.any_name),
-        seq($.kw_create, $.kw_type, $.any_name, $.kw_as, '(', optional($.OptTableFuncElementList), ')'),
-        seq($.kw_create, $.kw_type, $.any_name, $.kw_as, $.kw_enum, '(', optional($.opt_enum_val_list), ')'),
-        seq($.kw_create, $.kw_type, $.any_name, $.kw_as, $.kw_range, $.definition),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_type, $.any_name, $.kw_as, '(', optional($.OptTableFuncElementList), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_type, $.any_name, $.kw_as, $.kw_enum, '(', optional($.opt_enum_val_list), ')'))),
+        prec.left(11, prec.dynamic(11, seq($.kw_create, $.kw_type, $.any_name, $.kw_as, $.kw_range, $.definition))),
         seq($.kw_create, $.kw_text, $.kw_search, $.kw_parser, $.any_name, $.definition),
         seq($.kw_create, $.kw_text, $.kw_search, $.kw_dictionary, $.any_name, $.definition),
         seq($.kw_create, $.kw_text, $.kw_search, $.kw_template, $.any_name, $.definition),
         seq($.kw_create, $.kw_text, $.kw_search, $.kw_configuration, $.any_name, $.definition),
         seq($.kw_create, $.kw_collation, $.any_name, $.definition),
-        seq($.kw_create, $.kw_collation, $.kw_if, $.kw_not, $.kw_exists, $.any_name, $.definition),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_collation, $.kw_if, $.kw_not, $.kw_exists, $.any_name, $.definition))),
         seq($.kw_create, $.kw_collation, $.any_name, $.kw_from, $.any_name),
-        seq($.kw_create, $.kw_collation, $.kw_if, $.kw_not, $.kw_exists, $.any_name, $.kw_from, $.any_name)
+        prec.right(5, prec.dynamic(5, seq($.kw_create, $.kw_collation, $.kw_if, $.kw_not, $.kw_exists, $.any_name, $.kw_from, $.any_name)))
       ),
-    definition: $ => seq('(', $.def_list, ')'),
+    definition: $ => prec.left(20, prec.dynamic(20, seq('(', $.def_list, ')'))),
     def_list: $ => choice(
         $.def_elem,
         seq($.def_list, ',', $.def_elem)
       ),
     def_elem: $ => choice(
-        seq($.ColLabel, '=', $.def_arg),
+        prec.left(7, prec.dynamic(7, seq($.ColLabel, '=', $.def_arg))),
         $.ColLabel
       ),
     def_arg: $ => choice(
@@ -1136,35 +1119,35 @@ module.exports = grammar({
         $.Sconst,
         $.kw_none
       ),
-    old_aggr_definition: $ => seq('(', $.old_aggr_list, ')'),
+    old_aggr_definition: $ => prec.left(20, prec.dynamic(20, seq('(', $.old_aggr_list, ')'))),
     old_aggr_list: $ => choice(
         $.old_aggr_elem,
         seq($.old_aggr_list, ',', $.old_aggr_elem)
       ),
-    old_aggr_elem: $ => seq($.identifier, '=', $.def_arg),
+    old_aggr_elem: $ => prec.left(11, prec.dynamic(11, seq($.identifier, '=', $.def_arg))),
     opt_enum_val_list: $ => $.enum_val_list,
     enum_val_list: $ => choice(
         $.Sconst,
         seq($.enum_val_list, ',', $.Sconst)
       ),
     AlterEnumStmt: $ => choice(
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst),
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst, $.kw_before, $.Sconst),
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst, $.kw_after, $.Sconst),
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_rename, $.kw_value, $.Sconst, $.kw_to, $.Sconst),
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_drop, $.kw_value, $.Sconst)
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst, $.kw_before, $.Sconst))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_add, $.kw_value, optional($.opt_if_not_exists), $.Sconst, $.kw_after, $.Sconst))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_rename, $.kw_value, $.Sconst, $.kw_to, $.Sconst))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_drop, $.kw_value, $.Sconst)))
       ),
-    opt_if_not_exists: $ => seq($.kw_if, $.kw_not, $.kw_exists),
-    CreateOpClassStmt: $ => seq($.kw_create, $.kw_operator, $.kw_class, $.any_name, optional($.opt_default), $.kw_for, $.kw_type, $.Typename, $.kw_using, $.name, optional($.opt_opfamily), $.kw_as, $.opclass_item_list),
+    opt_if_not_exists: $ => prec.right(5, prec.dynamic(5, seq($.kw_if, $.kw_not, $.kw_exists))),
+    CreateOpClassStmt: $ => prec.left(12, prec.dynamic(12, seq($.kw_create, $.kw_operator, $.kw_class, $.any_name, optional($.opt_default), $.kw_for, $.kw_type, $.Typename, $.kw_using, $.name, optional($.opt_opfamily), $.kw_as, $.opclass_item_list))),
     opclass_item_list: $ => choice(
         $.opclass_item,
         seq($.opclass_item_list, ',', $.opclass_item)
       ),
     opclass_item: $ => choice(
-        seq($.kw_operator, $.Iconst, $.any_operator, optional($.opclass_purpose)),
-        seq($.kw_operator, $.Iconst, $.operator_with_argtypes, optional($.opclass_purpose)),
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, $.Iconst, $.any_operator, optional($.opclass_purpose)))),
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, $.Iconst, $.operator_with_argtypes, optional($.opclass_purpose)))),
         seq($.kw_function, $.Iconst, $.function_with_argtypes),
-        seq($.kw_function, $.Iconst, '(', $.type_list, ')', $.function_with_argtypes),
+        prec.left(20, prec.dynamic(20, seq($.kw_function, $.Iconst, '(', $.type_list, ')', $.function_with_argtypes))),
         seq($.kw_storage, $.Typename)
       ),
     opt_default: $ => $.kw_default,
@@ -1173,26 +1156,26 @@ module.exports = grammar({
         seq($.kw_for, $.kw_search),
         seq($.kw_for, $.kw_order, $.kw_by, $.any_name)
       ),
-    CreateOpFamilyStmt: $ => seq($.kw_create, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name),
+    CreateOpFamilyStmt: $ => prec.left(12, prec.dynamic(12, seq($.kw_create, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name))),
     AlterOpFamilyStmt: $ => choice(
-        seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_add, $.opclass_item_list),
-        seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_drop, $.opclass_drop_list)
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_add, $.opclass_item_list))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_drop, $.opclass_drop_list)))
       ),
     opclass_drop_list: $ => choice(
         $.opclass_drop,
         seq($.opclass_drop_list, ',', $.opclass_drop)
       ),
     opclass_drop: $ => choice(
-        seq($.kw_operator, $.Iconst, '(', $.type_list, ')'),
-        seq($.kw_function, $.Iconst, '(', $.type_list, ')')
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, $.Iconst, '(', $.type_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_function, $.Iconst, '(', $.type_list, ')')))
       ),
     DropOpClassStmt: $ => choice(
-        seq($.kw_drop, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior)),
-        seq($.kw_drop, $.kw_operator, $.kw_class, $.kw_if, $.kw_exists, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior))
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior)))),
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.kw_class, $.kw_if, $.kw_exists, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior))))
       ),
     DropOpFamilyStmt: $ => choice(
-        seq($.kw_drop, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior)),
-        seq($.kw_drop, $.kw_operator, $.kw_family, $.kw_if, $.kw_exists, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior))
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior)))),
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.kw_family, $.kw_if, $.kw_exists, $.any_name, $.kw_using, $.name, optional($.opt_drop_behavior))))
       ),
     DropOwnedStmt: $ => seq($.kw_drop, $.kw_owned, $.kw_by, $.role_list, optional($.opt_drop_behavior)),
     ReassignOwnedStmt: $ => seq($.kw_reassign, $.kw_owned, $.kw_by, $.role_list, $.kw_to, $.RoleSpec),
@@ -1256,8 +1239,8 @@ module.exports = grammar({
         seq($.ColId, $.attrs)
       ),
     attrs: $ => choice(
-        seq('.', $.attr_name),
-        seq($.attrs, '.', $.attr_name)
+        prec.left(22, prec.dynamic(22, seq('.', $.attr_name))),
+        prec.left(22, prec.dynamic(22, seq($.attrs, '.', $.attr_name)))
       ),
     type_name_list: $ => choice(
         $.Typename,
@@ -1269,40 +1252,40 @@ module.exports = grammar({
         seq($.kw_restart, $.kw_identity)
       ),
     CommentStmt: $ => choice(
-        seq($.kw_comment, $.kw_on, $.object_type_any_name, $.any_name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_column, $.any_name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.object_type_name, $.name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_type, $.Typename, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_domain, $.Typename, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_function, $.function_with_argtypes, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_operator, $.operator_with_argtypes, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_constraint, $.name, $.kw_on, $.any_name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_constraint, $.name, $.kw_on, $.kw_domain, $.any_name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.object_type_name_on_any_name, $.name, $.kw_on, $.any_name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_procedure, $.function_with_argtypes, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_routine, $.function_with_argtypes, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_transform, $.kw_for, $.Typename, $.kw_language, $.name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_large, $.kw_object, $.NumericOnly, $.kw_is, $.comment_text),
-        seq($.kw_comment, $.kw_on, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_is, $.comment_text)
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.object_type_any_name, $.any_name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_column, $.any_name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.object_type_name, $.name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_type, $.Typename, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_domain, $.Typename, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_function, $.function_with_argtypes, $.kw_is, $.comment_text))),
+        prec.left(12, prec.dynamic(12, seq($.kw_comment, $.kw_on, $.kw_operator, $.operator_with_argtypes, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_constraint, $.name, $.kw_on, $.any_name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_constraint, $.name, $.kw_on, $.kw_domain, $.any_name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.object_type_name_on_any_name, $.name, $.kw_on, $.any_name, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_procedure, $.function_with_argtypes, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_routine, $.function_with_argtypes, $.kw_is, $.comment_text))),
+        prec.left(6, prec.dynamic(6, seq($.kw_comment, $.kw_on, $.kw_transform, $.kw_for, $.Typename, $.kw_language, $.name, $.kw_is, $.comment_text))),
+        prec.left(12, prec.dynamic(12, seq($.kw_comment, $.kw_on, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_is, $.comment_text))),
+        prec.left(12, prec.dynamic(12, seq($.kw_comment, $.kw_on, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_is, $.comment_text))),
+        prec.left(11, prec.dynamic(11, seq($.kw_comment, $.kw_on, $.kw_large, $.kw_object, $.NumericOnly, $.kw_is, $.comment_text))),
+        prec.left(20, prec.dynamic(20, seq($.kw_comment, $.kw_on, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_is, $.comment_text)))
       ),
     comment_text: $ => choice(
         $.Sconst,
         $.kw_null
       ),
     SecLabelStmt: $ => choice(
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.object_type_any_name, $.any_name, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_column, $.any_name, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.object_type_name, $.name, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_type, $.Typename, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_domain, $.Typename, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_function, $.function_with_argtypes, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_large, $.kw_object, $.NumericOnly, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_procedure, $.function_with_argtypes, $.kw_is, $.security_label),
-        seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_routine, $.function_with_argtypes, $.kw_is, $.security_label)
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.object_type_any_name, $.any_name, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_column, $.any_name, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.object_type_name, $.name, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_type, $.Typename, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_domain, $.Typename, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_function, $.function_with_argtypes, $.kw_is, $.security_label))),
+        prec.left(11, prec.dynamic(11, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_large, $.kw_object, $.NumericOnly, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_procedure, $.function_with_argtypes, $.kw_is, $.security_label))),
+        prec.left(6, prec.dynamic(6, seq($.kw_security, $.kw_label, optional($.opt_provider), $.kw_on, $.kw_routine, $.function_with_argtypes, $.kw_is, $.security_label)))
       ),
     opt_provider: $ => seq($.kw_for, $.NonReservedWord_or_Sconst),
     security_label: $ => choice(
@@ -1333,7 +1316,7 @@ module.exports = grammar({
       ),
     from_in: $ => choice(
         $.kw_from,
-        $.kw_in
+        prec.left(8, prec.dynamic(8, $.kw_in))
       ),
     opt_from_in: $ => $.from_in,
     GrantStmt: $ => seq($.kw_grant, $.privileges, $.kw_on, $.privilege_target, $.kw_to, $.grantee_list, optional($.opt_grant_grant_option), optional($.opt_granted_by)),
@@ -1345,8 +1328,8 @@ module.exports = grammar({
         $.privilege_list,
         $.kw_all,
         seq($.kw_all, $.kw_privileges),
-        seq($.kw_all, '(', $.columnList, ')'),
-        seq($.kw_all, $.kw_privileges, '(', $.columnList, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_all, '(', $.columnList, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_all, $.kw_privileges, '(', $.columnList, ')')))
       ),
     privilege_list: $ => choice(
         $.privilege,
@@ -1365,7 +1348,7 @@ module.exports = grammar({
       ),
     parameter_name: $ => choice(
         $.ColId,
-        seq($.parameter_name, '.', $.ColId)
+        prec.left(22, prec.dynamic(22, seq($.parameter_name, '.', $.ColId)))
       ),
     privilege_target: $ => choice(
         $.qualified_name_list,
@@ -1379,16 +1362,16 @@ module.exports = grammar({
         seq($.kw_database, $.name_list),
         seq($.kw_domain, $.any_name_list),
         seq($.kw_language, $.name_list),
-        seq($.kw_large, $.kw_object, $.NumericOnly_list),
+        prec.left(11, prec.dynamic(11, seq($.kw_large, $.kw_object, $.NumericOnly_list))),
         seq($.kw_parameter, $.parameter_name_list),
         seq($.kw_schema, $.name_list),
         seq($.kw_tablespace, $.name_list),
         seq($.kw_type, $.any_name_list),
-        seq($.kw_all, $.kw_tables, $.kw_in, $.kw_schema, $.name_list),
-        seq($.kw_all, $.kw_sequences, $.kw_in, $.kw_schema, $.name_list),
-        seq($.kw_all, $.kw_functions, $.kw_in, $.kw_schema, $.name_list),
-        seq($.kw_all, $.kw_procedures, $.kw_in, $.kw_schema, $.name_list),
-        seq($.kw_all, $.kw_routines, $.kw_in, $.kw_schema, $.name_list)
+        prec.left(8, prec.dynamic(8, seq($.kw_all, $.kw_tables, $.kw_in, $.kw_schema, $.name_list))),
+        prec.left(8, prec.dynamic(8, seq($.kw_all, $.kw_sequences, $.kw_in, $.kw_schema, $.name_list))),
+        prec.left(8, prec.dynamic(8, seq($.kw_all, $.kw_functions, $.kw_in, $.kw_schema, $.name_list))),
+        prec.left(8, prec.dynamic(8, seq($.kw_all, $.kw_procedures, $.kw_in, $.kw_schema, $.name_list))),
+        prec.left(8, prec.dynamic(8, seq($.kw_all, $.kw_routines, $.kw_in, $.kw_schema, $.name_list)))
       ),
     grantee_list: $ => choice(
         $.grantee,
@@ -1398,10 +1381,10 @@ module.exports = grammar({
         $.RoleSpec,
         seq($.kw_group, $.RoleSpec)
       ),
-    opt_grant_grant_option: $ => seq($.kw_with, $.kw_grant, $.kw_option),
+    opt_grant_grant_option: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_grant, $.kw_option))),
     GrantRoleStmt: $ => choice(
         seq($.kw_grant, $.privilege_list, $.kw_to, $.role_list, optional($.opt_granted_by)),
-        seq($.kw_grant, $.privilege_list, $.kw_to, $.role_list, $.kw_with, $.grant_role_opt_list, optional($.opt_granted_by))
+        prec.left(11, prec.dynamic(11, seq($.kw_grant, $.privilege_list, $.kw_to, $.role_list, $.kw_with, $.grant_role_opt_list, optional($.opt_granted_by))))
       ),
     RevokeRoleStmt: $ => choice(
         seq($.kw_revoke, $.privilege_list, $.kw_from, $.role_list, optional($.opt_granted_by), optional($.opt_drop_behavior)),
@@ -1421,7 +1404,7 @@ module.exports = grammar({
     AlterDefaultPrivilegesStmt: $ => seq($.kw_alter, $.kw_default, $.kw_privileges, optional($.DefACLOptionList), $.DefACLAction),
     DefACLOptionList: $ => seq(optional($.DefACLOptionList), $.DefACLOption),
     DefACLOption: $ => choice(
-        seq($.kw_in, $.kw_schema, $.name_list),
+        prec.left(8, prec.dynamic(8, seq($.kw_in, $.kw_schema, $.name_list))),
         seq($.kw_for, $.kw_role, $.role_list),
         seq($.kw_for, $.kw_user, $.role_list)
       ),
@@ -1440,8 +1423,8 @@ module.exports = grammar({
         seq($.kw_large, $.kw_objects)
       ),
     IndexStmt: $ => choice(
-        seq($.kw_create, optional($.opt_unique), $.kw_index, optional($.opt_concurrently), optional($.opt_single_name), $.kw_on, $.relation_expr, optional($.access_method_clause), '(', $.index_params, ')', optional($.opt_include), optional($.opt_unique_null_treatment), optional($.opt_reloptions), optional($.OptTableSpace), optional($.where_clause)),
-        seq($.kw_create, optional($.opt_unique), $.kw_index, optional($.opt_concurrently), $.kw_if, $.kw_not, $.kw_exists, $.name, $.kw_on, $.relation_expr, optional($.access_method_clause), '(', $.index_params, ')', optional($.opt_include), optional($.opt_unique_null_treatment), optional($.opt_reloptions), optional($.OptTableSpace), optional($.where_clause))
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.opt_unique), $.kw_index, optional($.opt_concurrently), optional($.opt_single_name), $.kw_on, $.relation_expr, optional($.access_method_clause), '(', $.index_params, ')', optional($.opt_include), optional($.opt_unique_null_treatment), optional($.opt_reloptions), optional($.OptTableSpace), optional($.where_clause)))),
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.opt_unique), $.kw_index, optional($.opt_concurrently), $.kw_if, $.kw_not, $.kw_exists, $.name, $.kw_on, $.relation_expr, optional($.access_method_clause), '(', $.index_params, ')', optional($.opt_include), optional($.opt_unique_null_treatment), optional($.opt_reloptions), optional($.OptTableSpace), optional($.where_clause))))
       ),
     opt_unique: $ => $.kw_unique,
     access_method_clause: $ => seq($.kw_using, $.name),
@@ -1456,14 +1439,14 @@ module.exports = grammar({
     index_elem: $ => choice(
         seq($.ColId, optional($.index_elem_options)),
         seq($.func_expr_windowless, optional($.index_elem_options)),
-        seq('(', $.a_expr, ')', optional($.index_elem_options))
+        prec.left(20, prec.dynamic(20, seq('(', $.a_expr, ')', optional($.index_elem_options))))
       ),
-    opt_include: $ => seq($.kw_include, '(', $.index_including_params, ')'),
+    opt_include: $ => prec.left(20, prec.dynamic(20, seq($.kw_include, '(', $.index_including_params, ')'))),
     index_including_params: $ => choice(
         $.index_elem,
         seq($.index_including_params, ',', $.index_elem)
       ),
-    opt_collate: $ => seq($.kw_collate, $.any_name),
+    opt_collate: $ => prec.left(17, prec.dynamic(17, seq($.kw_collate, $.any_name))),
     opt_asc_desc: $ => choice(
         $.kw_asc,
         $.kw_desc
@@ -1474,14 +1457,14 @@ module.exports = grammar({
       ),
     CreateFunctionStmt: $ => choice(
         seq($.kw_create, optional($.opt_or_replace), $.kw_function, $.func_name, $.func_args_with_defaults, $.kw_returns, $.func_return, optional($.opt_createfunc_opt_list), optional($.opt_routine_body)),
-        seq($.kw_create, optional($.opt_or_replace), $.kw_function, $.func_name, $.func_args_with_defaults, $.kw_returns, $.kw_table, '(', $.table_func_column_list, ')', optional($.opt_createfunc_opt_list), optional($.opt_routine_body)),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.opt_or_replace), $.kw_function, $.func_name, $.func_args_with_defaults, $.kw_returns, $.kw_table, '(', $.table_func_column_list, ')', optional($.opt_createfunc_opt_list), optional($.opt_routine_body)))),
         seq($.kw_create, optional($.opt_or_replace), $.kw_function, $.func_name, $.func_args_with_defaults, optional($.opt_createfunc_opt_list), optional($.opt_routine_body)),
         seq($.kw_create, optional($.opt_or_replace), $.kw_procedure, $.func_name, $.func_args_with_defaults, optional($.opt_createfunc_opt_list), optional($.opt_routine_body))
       ),
-    opt_or_replace: $ => seq($.kw_or, $.kw_replace),
+    opt_or_replace: $ => prec.left(3, prec.dynamic(3, seq($.kw_or, $.kw_replace))),
     func_args: $ => choice(
-        seq('(', $.func_args_list, ')'),
-        seq('(', ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.func_args_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', ')')))
       ),
     func_args_list: $ => choice(
         $.func_arg,
@@ -1498,8 +1481,8 @@ module.exports = grammar({
         seq($.ColId, $.indirection)
       ),
     func_args_with_defaults: $ => choice(
-        seq('(', $.func_args_with_defaults_list, ')'),
-        seq('(', ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.func_args_with_defaults_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', ')')))
       ),
     func_args_with_defaults_list: $ => choice(
         $.func_arg_with_default,
@@ -1513,30 +1496,30 @@ module.exports = grammar({
         $.func_type
       ),
     arg_class: $ => choice(
-        $.kw_in,
+        prec.left(8, prec.dynamic(8, $.kw_in)),
         $.kw_out,
         $.kw_inout,
-        seq($.kw_in, $.kw_out),
+        prec.left(8, prec.dynamic(8, seq($.kw_in, $.kw_out))),
         $.kw_variadic
       ),
     param_name: $ => $.type_function_name,
     func_return: $ => $.func_type,
     func_type: $ => choice(
         $.Typename,
-        seq($.type_function_name, $.attrs, '%', $.kw_type),
-        seq($.kw_setof, $.type_function_name, $.attrs, '%', $.kw_type)
+        prec.left(14, prec.dynamic(14, seq($.type_function_name, $.attrs, '%', $.kw_type))),
+        prec.left(14, prec.dynamic(14, seq($.kw_setof, $.type_function_name, $.attrs, '%', $.kw_type)))
       ),
     func_arg_with_default: $ => choice(
         $.func_arg,
         seq($.func_arg, $.kw_default, $.a_expr),
-        seq($.func_arg, '=', $.a_expr)
+        prec.left(7, prec.dynamic(7, seq($.func_arg, '=', $.a_expr)))
       ),
     aggr_arg: $ => $.func_arg,
     aggr_args: $ => choice(
-        seq('(', '*', ')'),
-        seq('(', $.aggr_args_list, ')'),
-        seq('(', $.kw_order, $.kw_by, $.aggr_args_list, ')'),
-        seq('(', $.aggr_args_list, $.kw_order, $.kw_by, $.aggr_args_list, ')')
+        prec.left(20, prec.dynamic(20, seq('(', '*', ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.aggr_args_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.kw_order, $.kw_by, $.aggr_args_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.aggr_args_list, $.kw_order, $.kw_by, $.aggr_args_list, ')')))
       ),
     aggr_args_list: $ => choice(
         $.aggr_arg,
@@ -1564,9 +1547,9 @@ module.exports = grammar({
         seq($.kw_security, $.kw_definer),
         seq($.kw_security, $.kw_invoker),
         $.kw_leakproof,
-        seq($.kw_not, $.kw_leakproof),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_leakproof))),
         seq($.kw_cost, $.NumericOnly),
-        seq($.kw_rows, $.NumericOnly),
+        prec.left(11, prec.dynamic(11, seq($.kw_rows, $.NumericOnly))),
         seq($.kw_support, $.any_name),
         $.FunctionSetResetClause,
         seq($.kw_parallel, $.ColId)
@@ -1596,7 +1579,7 @@ module.exports = grammar({
         seq($.kw_for, $.kw_type, $.Typename),
         seq($.transform_type_list, ',', $.kw_for, $.kw_type, $.Typename)
       ),
-    opt_definition: $ => seq($.kw_with, $.definition),
+    opt_definition: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, $.definition))),
     table_func_column: $ => seq($.param_name, $.func_type),
     table_func_column_list: $ => choice(
         $.table_func_column,
@@ -1625,18 +1608,18 @@ module.exports = grammar({
         seq($.kw_drop, $.kw_aggregate, $.kw_if, $.kw_exists, $.aggregate_with_argtypes_list, optional($.opt_drop_behavior))
       ),
     RemoveOperStmt: $ => choice(
-        seq($.kw_drop, $.kw_operator, $.operator_with_argtypes_list, optional($.opt_drop_behavior)),
-        seq($.kw_drop, $.kw_operator, $.kw_if, $.kw_exists, $.operator_with_argtypes_list, optional($.opt_drop_behavior))
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.operator_with_argtypes_list, optional($.opt_drop_behavior)))),
+        prec.left(12, prec.dynamic(12, seq($.kw_drop, $.kw_operator, $.kw_if, $.kw_exists, $.operator_with_argtypes_list, optional($.opt_drop_behavior))))
       ),
     oper_argtypes: $ => choice(
-        seq('(', $.Typename, ')'),
-        seq('(', $.Typename, ',', $.Typename, ')'),
-        seq('(', $.kw_none, ',', $.Typename, ')'),
-        seq('(', $.Typename, ',', $.kw_none, ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.Typename, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.Typename, ',', $.Typename, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.kw_none, ',', $.Typename, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.Typename, ',', $.kw_none, ')')))
       ),
     any_operator: $ => choice(
         $.all_Op,
-        seq($.ColId, '.', $.any_operator)
+        prec.left(22, prec.dynamic(22, seq($.ColId, '.', $.any_operator)))
       ),
     operator_with_argtypes_list: $ => choice(
         $.operator_with_argtypes,
@@ -1653,22 +1636,22 @@ module.exports = grammar({
         seq($.kw_language, $.NonReservedWord_or_Sconst)
       ),
     CreateCastStmt: $ => choice(
-        seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_with, $.kw_function, $.function_with_argtypes, optional($.cast_context)),
-        seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_without, $.kw_function, optional($.cast_context)),
-        seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_with, $.kw_inout, optional($.cast_context))
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_with, $.kw_function, $.function_with_argtypes, optional($.cast_context)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_without, $.kw_function, optional($.cast_context)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, $.kw_cast, '(', $.Typename, $.kw_as, $.Typename, ')', $.kw_with, $.kw_inout, optional($.cast_context))))
       ),
     cast_context: $ => choice(
         seq($.kw_as, $.kw_implicit),
         seq($.kw_as, $.kw_assignment)
       ),
-    DropCastStmt: $ => seq($.kw_drop, $.kw_cast, optional($.opt_if_exists), '(', $.Typename, $.kw_as, $.Typename, ')', optional($.opt_drop_behavior)),
+    DropCastStmt: $ => prec.left(20, prec.dynamic(20, seq($.kw_drop, $.kw_cast, optional($.opt_if_exists), '(', $.Typename, $.kw_as, $.Typename, ')', optional($.opt_drop_behavior)))),
     opt_if_exists: $ => seq($.kw_if, $.kw_exists),
-    CreateTransformStmt: $ => seq($.kw_create, optional($.opt_or_replace), $.kw_transform, $.kw_for, $.Typename, $.kw_language, $.name, '(', $.transform_element_list, ')'),
+    CreateTransformStmt: $ => prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.opt_or_replace), $.kw_transform, $.kw_for, $.Typename, $.kw_language, $.name, '(', $.transform_element_list, ')'))),
     transform_element_list: $ => choice(
-        seq($.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes, ',', $.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes),
-        seq($.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes, ',', $.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes),
-        seq($.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes),
-        seq($.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes)
+        prec.left(11, prec.dynamic(11, seq($.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes, ',', $.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes))),
+        prec.left(11, prec.dynamic(11, seq($.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes, ',', $.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes))),
+        prec.left(11, prec.dynamic(11, seq($.kw_from, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes))),
+        prec.left(11, prec.dynamic(11, seq($.kw_to, $.kw_sql, $.kw_with, $.kw_function, $.function_with_argtypes)))
       ),
     DropTransformStmt: $ => seq($.kw_drop, $.kw_transform, optional($.opt_if_exists), $.kw_for, $.Typename, $.kw_language, $.name, optional($.opt_drop_behavior)),
     ReindexStmt: $ => choice(
@@ -1684,9 +1667,9 @@ module.exports = grammar({
         $.kw_system,
         $.kw_database
       ),
-    opt_reindex_option_list: $ => seq('(', $.utility_option_list, ')'),
+    opt_reindex_option_list: $ => prec.left(20, prec.dynamic(20, seq('(', $.utility_option_list, ')'))),
     AlterTblSpcStmt: $ => choice(
-        seq($.kw_alter, $.kw_tablespace, $.name, $.kw_set, $.reloptions),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_tablespace, $.name, $.kw_set, $.reloptions))),
         seq($.kw_alter, $.kw_tablespace, $.name, $.kw_reset, $.reloptions)
       ),
     RenameStmt: $ => choice(
@@ -1700,8 +1683,8 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_function, $.function_with_argtypes, $.kw_rename, $.kw_to, $.name),
         seq($.kw_alter, $.kw_group, $.RoleId, $.kw_rename, $.kw_to, $.RoleId),
         seq($.kw_alter, optional($.opt_procedural), $.kw_language, $.name, $.kw_rename, $.kw_to, $.name),
-        seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_rename, $.kw_to, $.name),
-        seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_rename, $.kw_to, $.name),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_rename, $.kw_to, $.name))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_rename, $.kw_to, $.name))),
         seq($.kw_alter, $.kw_policy, $.name, $.kw_on, $.qualified_name, $.kw_rename, $.kw_to, $.name),
         seq($.kw_alter, $.kw_policy, $.kw_if, $.kw_exists, $.name, $.kw_on, $.qualified_name, $.kw_rename, $.kw_to, $.name),
         seq($.kw_alter, $.kw_procedure, $.function_with_argtypes, $.kw_rename, $.kw_to, $.name),
@@ -1747,7 +1730,7 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_type, $.any_name, $.kw_rename, $.kw_attribute, $.name, $.kw_to, $.name, optional($.opt_drop_behavior))
       ),
     opt_column: $ => $.kw_column,
-    opt_set_data: $ => seq($.kw_set, $.kw_data),
+    opt_set_data: $ => prec.left(11, prec.dynamic(11, seq($.kw_set, $.kw_data))),
     AlterObjectDependsStmt: $ => choice(
         seq($.kw_alter, $.kw_function, $.function_with_argtypes, optional($.opt_no), $.kw_depends, $.kw_on, $.kw_extension, $.name),
         seq($.kw_alter, $.kw_procedure, $.function_with_argtypes, optional($.opt_no), $.kw_depends, $.kw_on, $.kw_extension, $.name),
@@ -1758,42 +1741,42 @@ module.exports = grammar({
       ),
     opt_no: $ => $.kw_no,
     AlterObjectSchemaStmt: $ => choice(
-        seq($.kw_alter, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_collation, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_conversion, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_domain, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_extension, $.name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_function, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_procedure, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_routine, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_table, $.relation_expr, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_statistics, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_text, $.kw_search, $.kw_parser, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_text, $.kw_search, $.kw_dictionary, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_text, $.kw_search, $.kw_template, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_text, $.kw_search, $.kw_configuration, $.any_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_sequence, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_sequence, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_view, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_materialized, $.kw_view, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_foreign, $.kw_table, $.relation_expr, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_foreign, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.kw_set, $.kw_schema, $.name),
-        seq($.kw_alter, $.kw_type, $.any_name, $.kw_set, $.kw_schema, $.name)
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_collation, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_conversion, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_domain, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_extension, $.name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_function, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_set, $.kw_schema, $.name))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_procedure, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_routine, $.function_with_argtypes, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_table, $.relation_expr, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_statistics, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_text, $.kw_search, $.kw_parser, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_text, $.kw_search, $.kw_dictionary, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_text, $.kw_search, $.kw_template, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_text, $.kw_search, $.kw_configuration, $.any_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_sequence, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_sequence, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_view, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_materialized, $.kw_view, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_materialized, $.kw_view, $.kw_if, $.kw_exists, $.qualified_name, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_foreign, $.kw_table, $.relation_expr, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_foreign, $.kw_table, $.kw_if, $.kw_exists, $.relation_expr, $.kw_set, $.kw_schema, $.name))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_set, $.kw_schema, $.name)))
       ),
-    AlterOperatorStmt: $ => seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_set, '(', $.operator_def_list, ')'),
+    AlterOperatorStmt: $ => prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_set, '(', $.operator_def_list, ')'))),
     operator_def_list: $ => choice(
         $.operator_def_elem,
         seq($.operator_def_list, ',', $.operator_def_elem)
       ),
     operator_def_elem: $ => choice(
-        seq($.ColLabel, '=', $.kw_none),
-        seq($.ColLabel, '=', $.operator_def_arg),
+        prec.left(7, prec.dynamic(7, seq($.ColLabel, '=', $.kw_none))),
+        prec.left(7, prec.dynamic(7, seq($.ColLabel, '=', $.operator_def_arg))),
         $.ColLabel
       ),
     operator_def_arg: $ => choice(
@@ -1803,7 +1786,7 @@ module.exports = grammar({
         $.NumericOnly,
         $.Sconst
       ),
-    AlterTypeStmt: $ => seq($.kw_alter, $.kw_type, $.any_name, $.kw_set, '(', $.operator_def_list, ')'),
+    AlterTypeStmt: $ => prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_type, $.any_name, $.kw_set, '(', $.operator_def_list, ')'))),
     AlterOwnerStmt: $ => choice(
         seq($.kw_alter, $.kw_aggregate, $.aggregate_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec),
         seq($.kw_alter, $.kw_collation, $.any_name, $.kw_owner, $.kw_to, $.RoleSpec),
@@ -1812,10 +1795,10 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_domain, $.any_name, $.kw_owner, $.kw_to, $.RoleSpec),
         seq($.kw_alter, $.kw_function, $.function_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec),
         seq($.kw_alter, optional($.opt_procedural), $.kw_language, $.name, $.kw_owner, $.kw_to, $.RoleSpec),
-        seq($.kw_alter, $.kw_large, $.kw_object, $.NumericOnly, $.kw_owner, $.kw_to, $.RoleSpec),
-        seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec),
-        seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_owner, $.kw_to, $.RoleSpec),
-        seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_owner, $.kw_to, $.RoleSpec),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_large, $.kw_object, $.NumericOnly, $.kw_owner, $.kw_to, $.RoleSpec))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.operator_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_class, $.any_name, $.kw_using, $.name, $.kw_owner, $.kw_to, $.RoleSpec))),
+        prec.left(12, prec.dynamic(12, seq($.kw_alter, $.kw_operator, $.kw_family, $.any_name, $.kw_using, $.name, $.kw_owner, $.kw_to, $.RoleSpec))),
         seq($.kw_alter, $.kw_procedure, $.function_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec),
         seq($.kw_alter, $.kw_routine, $.function_with_argtypes, $.kw_owner, $.kw_to, $.RoleSpec),
         seq($.kw_alter, $.kw_schema, $.name, $.kw_owner, $.kw_to, $.RoleSpec),
@@ -1837,8 +1820,8 @@ module.exports = grammar({
       ),
     PublicationObjSpec: $ => choice(
         seq($.kw_table, $.relation_expr, optional($.opt_column_list), optional($.OptWhereClause)),
-        seq($.kw_tables, $.kw_in, $.kw_schema, $.ColId),
-        seq($.kw_tables, $.kw_in, $.kw_schema, $.kw_current_schema),
+        prec.left(8, prec.dynamic(8, seq($.kw_tables, $.kw_in, $.kw_schema, $.ColId))),
+        prec.left(8, prec.dynamic(8, seq($.kw_tables, $.kw_in, $.kw_schema, $.kw_current_schema))),
         seq($.ColId, optional($.opt_column_list), optional($.OptWhereClause)),
         seq($.ColId, $.indirection, optional($.opt_column_list), optional($.OptWhereClause)),
         seq($.extended_relation_expr, optional($.opt_column_list), optional($.OptWhereClause)),
@@ -1849,19 +1832,19 @@ module.exports = grammar({
         seq($.pub_obj_list, ',', $.PublicationObjSpec)
       ),
     AlterPublicationStmt: $ => choice(
-        seq($.kw_alter, $.kw_publication, $.name, $.kw_set, $.definition),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_publication, $.name, $.kw_set, $.definition))),
         seq($.kw_alter, $.kw_publication, $.name, $.kw_add, $.pub_obj_list),
-        seq($.kw_alter, $.kw_publication, $.name, $.kw_set, $.pub_obj_list),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_publication, $.name, $.kw_set, $.pub_obj_list))),
         seq($.kw_alter, $.kw_publication, $.name, $.kw_drop, $.pub_obj_list)
       ),
     CreateSubscriptionStmt: $ => seq($.kw_create, $.kw_subscription, $.name, $.kw_connection, $.Sconst, $.kw_publication, $.name_list, optional($.opt_definition)),
     AlterSubscriptionStmt: $ => choice(
-        seq($.kw_alter, $.kw_subscription, $.name, $.kw_set, $.definition),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_subscription, $.name, $.kw_set, $.definition))),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_connection, $.Sconst),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_refresh, $.kw_publication, optional($.opt_definition)),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_add, $.kw_publication, $.name_list, optional($.opt_definition)),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_drop, $.kw_publication, $.name_list, optional($.opt_definition)),
-        seq($.kw_alter, $.kw_subscription, $.name, $.kw_set, $.kw_publication, $.name_list, optional($.opt_definition)),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_subscription, $.name, $.kw_set, $.kw_publication, $.name_list, optional($.opt_definition)))),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_enable),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_disable),
         seq($.kw_alter, $.kw_subscription, $.name, $.kw_skip, $.definition)
@@ -1874,7 +1857,7 @@ module.exports = grammar({
     RuleActionList: $ => choice(
         $.kw_nothing,
         $.RuleActionStmt,
-        seq('(', optional($.RuleActionMulti), ')')
+        prec.left(20, prec.dynamic(20, seq('(', optional($.RuleActionMulti), ')')))
       ),
     RuleActionMulti: $ => choice(
         seq(optional($.RuleActionMulti), ';', optional($.RuleActionStmtOrEmpty)),
@@ -1903,7 +1886,7 @@ module.exports = grammar({
     ListenStmt: $ => seq($.kw_listen, $.ColId),
     UnlistenStmt: $ => choice(
         seq($.kw_unlisten, $.ColId),
-        seq($.kw_unlisten, '*')
+        prec.left(14, prec.dynamic(14, seq($.kw_unlisten, '*')))
       ),
     TransactionStmt: $ => choice(
         seq($.kw_abort, optional($.opt_transaction), optional($.opt_transaction_chain)),
@@ -1932,7 +1915,7 @@ module.exports = grammar({
         seq($.kw_read, $.kw_only),
         seq($.kw_read, $.kw_write),
         $.kw_deferrable,
-        seq($.kw_not, $.kw_deferrable)
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_deferrable)))
       ),
     transaction_mode_list: $ => choice(
         $.transaction_mode_item,
@@ -1941,19 +1924,19 @@ module.exports = grammar({
       ),
     transaction_mode_list_or_empty: $ => $.transaction_mode_list,
     opt_transaction_chain: $ => choice(
-        seq($.kw_and, $.kw_chain),
-        seq($.kw_and, $.kw_no, $.kw_chain)
+        prec.left(4, prec.dynamic(4, seq($.kw_and, $.kw_chain))),
+        prec.left(4, prec.dynamic(4, seq($.kw_and, $.kw_no, $.kw_chain)))
       ),
     ViewStmt: $ => choice(
         seq($.kw_create, optional($.OptTemp), $.kw_view, $.qualified_name, optional($.opt_column_list), optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option)),
-        seq($.kw_create, $.kw_or, $.kw_replace, optional($.OptTemp), $.kw_view, $.qualified_name, optional($.opt_column_list), optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option)),
-        seq($.kw_create, optional($.OptTemp), $.kw_recursive, $.kw_view, $.qualified_name, '(', $.columnList, ')', optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option)),
-        seq($.kw_create, $.kw_or, $.kw_replace, optional($.OptTemp), $.kw_recursive, $.kw_view, $.qualified_name, '(', $.columnList, ')', optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option))
+        prec.left(3, prec.dynamic(3, seq($.kw_create, $.kw_or, $.kw_replace, optional($.OptTemp), $.kw_view, $.qualified_name, optional($.opt_column_list), optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_create, optional($.OptTemp), $.kw_recursive, $.kw_view, $.qualified_name, '(', $.columnList, ')', optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option)))),
+        prec.left(3, prec.dynamic(3, seq($.kw_create, $.kw_or, $.kw_replace, optional($.OptTemp), $.kw_recursive, $.kw_view, $.qualified_name, '(', $.columnList, ')', optional($.opt_reloptions), $.kw_as, $.SelectStmt, optional($.opt_check_option))))
       ),
     opt_check_option: $ => choice(
-        seq($.kw_with, $.kw_check, $.kw_option),
-        seq($.kw_with, $.kw_cascaded, $.kw_check, $.kw_option),
-        seq($.kw_with, $.kw_local, $.kw_check, $.kw_option)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_check, $.kw_option))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_cascaded, $.kw_check, $.kw_option))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_local, $.kw_check, $.kw_option)))
       ),
     LoadStmt: $ => seq($.kw_load, $.file_name),
     CreatedbStmt: $ => seq($.kw_create, $.kw_database, $.name, optional($.opt_with), optional($.createdb_opt_list)),
@@ -1968,7 +1951,7 @@ module.exports = grammar({
         seq($.createdb_opt_name, optional($.opt_equal), $.kw_default)
       ),
     createdb_opt_name: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         seq($.kw_connection, $.kw_limit),
         $.kw_encoding,
         $.kw_location,
@@ -1976,19 +1959,19 @@ module.exports = grammar({
         $.kw_tablespace,
         $.kw_template
       ),
-    opt_equal: $ => '=',
+    opt_equal: $ => prec.left(7, prec.dynamic(7, '=')),
     AlterDatabaseStmt: $ => choice(
-        seq($.kw_alter, $.kw_database, $.name, $.kw_with, optional($.createdb_opt_list)),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_database, $.name, $.kw_with, optional($.createdb_opt_list)))),
         seq($.kw_alter, $.kw_database, $.name, optional($.createdb_opt_list)),
-        seq($.kw_alter, $.kw_database, $.name, $.kw_set, $.kw_tablespace, $.name),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_database, $.name, $.kw_set, $.kw_tablespace, $.name))),
         seq($.kw_alter, $.kw_database, $.name, $.kw_refresh, $.kw_collation, $.kw_version)
       ),
     AlterDatabaseSetStmt: $ => seq($.kw_alter, $.kw_database, $.name, $.SetResetClause),
     DropdbStmt: $ => choice(
         seq($.kw_drop, $.kw_database, $.name),
         seq($.kw_drop, $.kw_database, $.kw_if, $.kw_exists, $.name),
-        seq($.kw_drop, $.kw_database, $.name, optional($.opt_with), '(', $.drop_option_list, ')'),
-        seq($.kw_drop, $.kw_database, $.kw_if, $.kw_exists, $.name, optional($.opt_with), '(', $.drop_option_list, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_drop, $.kw_database, $.name, optional($.opt_with), '(', $.drop_option_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_drop, $.kw_database, $.kw_if, $.kw_exists, $.name, optional($.opt_with), '(', $.drop_option_list, ')')))
       ),
     drop_option_list: $ => choice(
         $.drop_option,
@@ -1997,14 +1980,14 @@ module.exports = grammar({
     drop_option: $ => $.kw_force,
     AlterCollationStmt: $ => seq($.kw_alter, $.kw_collation, $.any_name, $.kw_refresh, $.kw_version),
     AlterSystemStmt: $ => choice(
-        seq($.kw_alter, $.kw_system, $.kw_set, $.generic_set),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_system, $.kw_set, $.generic_set))),
         seq($.kw_alter, $.kw_system, $.kw_reset, $.generic_reset)
       ),
     CreateDomainStmt: $ => seq($.kw_create, $.kw_domain, $.any_name, optional($.opt_as), $.Typename, optional($.ColQualList)),
     AlterDomainStmt: $ => choice(
         seq($.kw_alter, $.kw_domain, $.any_name, $.alter_column_default),
-        seq($.kw_alter, $.kw_domain, $.any_name, $.kw_drop, $.kw_not, $.kw_null),
-        seq($.kw_alter, $.kw_domain, $.any_name, $.kw_set, $.kw_not, $.kw_null),
+        prec.right(5, prec.dynamic(5, seq($.kw_alter, $.kw_domain, $.any_name, $.kw_drop, $.kw_not, $.kw_null))),
+        prec.left(11, prec.dynamic(11, seq($.kw_alter, $.kw_domain, $.any_name, $.kw_set, $.kw_not, $.kw_null))),
         seq($.kw_alter, $.kw_domain, $.any_name, $.kw_add, $.DomainConstraint),
         seq($.kw_alter, $.kw_domain, $.any_name, $.kw_drop, $.kw_constraint, $.name, optional($.opt_drop_behavior)),
         seq($.kw_alter, $.kw_domain, $.any_name, $.kw_drop, $.kw_constraint, $.kw_if, $.kw_exists, $.name, optional($.opt_drop_behavior)),
@@ -2021,13 +2004,13 @@ module.exports = grammar({
         seq($.kw_alter, $.kw_text, $.kw_search, $.kw_configuration, $.any_name, $.kw_drop, $.kw_mapping, $.kw_if, $.kw_exists, $.kw_for, $.name_list)
       ),
     any_with: $ => choice(
-        $.kw_with,
+        prec.left(11, prec.dynamic(11, $.kw_with)),
         $.kw_with
       ),
     CreateConversionStmt: $ => seq($.kw_create, optional($.opt_default), $.kw_conversion, $.any_name, $.kw_for, $.Sconst, $.kw_to, $.Sconst, $.kw_from, $.any_name),
     ClusterStmt: $ => choice(
-        seq($.kw_cluster, '(', $.utility_option_list, ')', $.qualified_name, optional($.cluster_index_specification)),
-        seq($.kw_cluster, '(', $.utility_option_list, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_cluster, '(', $.utility_option_list, ')', $.qualified_name, optional($.cluster_index_specification)))),
+        prec.left(20, prec.dynamic(20, seq($.kw_cluster, '(', $.utility_option_list, ')'))),
         seq($.kw_cluster, optional($.opt_verbose), $.qualified_name, optional($.cluster_index_specification)),
         seq($.kw_cluster, optional($.opt_verbose)),
         seq($.kw_cluster, optional($.opt_verbose), $.name, $.kw_on, $.qualified_name)
@@ -2035,11 +2018,11 @@ module.exports = grammar({
     cluster_index_specification: $ => seq($.kw_using, $.name),
     VacuumStmt: $ => choice(
         seq($.kw_vacuum, optional($.opt_full), optional($.opt_freeze), optional($.opt_verbose), optional($.opt_analyze), optional($.opt_vacuum_relation_list)),
-        seq($.kw_vacuum, '(', $.utility_option_list, ')', optional($.opt_vacuum_relation_list))
+        prec.left(20, prec.dynamic(20, seq($.kw_vacuum, '(', $.utility_option_list, ')', optional($.opt_vacuum_relation_list))))
       ),
     AnalyzeStmt: $ => choice(
         seq($.analyze_keyword, optional($.opt_verbose), optional($.opt_vacuum_relation_list)),
-        seq($.analyze_keyword, '(', $.utility_option_list, ')', optional($.opt_vacuum_relation_list))
+        prec.left(20, prec.dynamic(20, seq($.analyze_keyword, '(', $.utility_option_list, ')', optional($.opt_vacuum_relation_list))))
       ),
     utility_option_list: $ => choice(
         $.utility_option_elem,
@@ -2061,9 +2044,9 @@ module.exports = grammar({
       ),
     opt_analyze: $ => $.analyze_keyword,
     opt_verbose: $ => $.kw_verbose,
-    opt_full: $ => $.kw_full,
+    opt_full: $ => prec.left(23, prec.dynamic(23, $.kw_full)),
     opt_freeze: $ => $.kw_freeze,
-    opt_name_list: $ => seq('(', $.name_list, ')'),
+    opt_name_list: $ => prec.left(20, prec.dynamic(20, seq('(', $.name_list, ')'))),
     vacuum_relation: $ => seq($.relation_expr, optional($.opt_name_list)),
     vacuum_relation_list: $ => choice(
         $.vacuum_relation,
@@ -2074,7 +2057,7 @@ module.exports = grammar({
         seq($.kw_explain, $.ExplainableStmt),
         seq($.kw_explain, $.analyze_keyword, optional($.opt_verbose), $.ExplainableStmt),
         seq($.kw_explain, $.kw_verbose, $.ExplainableStmt),
-        seq($.kw_explain, '(', $.utility_option_list, ')', $.ExplainableStmt)
+        prec.left(20, prec.dynamic(20, seq($.kw_explain, '(', $.utility_option_list, ')', $.ExplainableStmt)))
       ),
     ExplainableStmt: $ => choice(
         $.SelectStmt,
@@ -2089,7 +2072,7 @@ module.exports = grammar({
         $.ExecuteStmt
       ),
     PrepareStmt: $ => seq($.kw_prepare, $.name, optional($.prep_type_clause), $.kw_as, $.PreparableStmt),
-    prep_type_clause: $ => seq('(', $.type_list, ')'),
+    prep_type_clause: $ => prec.left(20, prec.dynamic(20, seq('(', $.type_list, ')'))),
     PreparableStmt: $ => choice(
         $.SelectStmt,
         $.InsertStmt,
@@ -2100,9 +2083,9 @@ module.exports = grammar({
     ExecuteStmt: $ => choice(
         seq($.kw_execute, $.name, optional($.execute_param_clause)),
         seq($.kw_create, optional($.OptTemp), $.kw_table, $.create_as_target, $.kw_as, $.kw_execute, $.name, optional($.execute_param_clause), optional($.opt_with_data)),
-        seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.create_as_target, $.kw_as, $.kw_execute, $.name, optional($.execute_param_clause), optional($.opt_with_data))
+        prec.right(5, prec.dynamic(5, seq($.kw_create, optional($.OptTemp), $.kw_table, $.kw_if, $.kw_not, $.kw_exists, $.create_as_target, $.kw_as, $.kw_execute, $.name, optional($.execute_param_clause), optional($.opt_with_data))))
       ),
-    execute_param_clause: $ => seq('(', $.expr_list, ')'),
+    execute_param_clause: $ => prec.left(20, prec.dynamic(20, seq('(', $.expr_list, ')'))),
     DeallocateStmt: $ => choice(
         seq($.kw_deallocate, $.name),
         seq($.kw_deallocate, $.kw_prepare, $.name),
@@ -2116,9 +2099,9 @@ module.exports = grammar({
       ),
     insert_rest: $ => choice(
         $.SelectStmt,
-        seq($.kw_overriding, $.override_kind, $.kw_value, $.SelectStmt),
-        seq('(', $.insert_column_list, ')', $.SelectStmt),
-        seq('(', $.insert_column_list, ')', $.kw_overriding, $.override_kind, $.kw_value, $.SelectStmt),
+        prec.left(11, prec.dynamic(11, seq($.kw_overriding, $.override_kind, $.kw_value, $.SelectStmt))),
+        prec.left(20, prec.dynamic(20, seq('(', $.insert_column_list, ')', $.SelectStmt))),
+        prec.left(20, prec.dynamic(20, seq('(', $.insert_column_list, ')', $.kw_overriding, $.override_kind, $.kw_value, $.SelectStmt))),
         seq($.kw_default, $.kw_values)
       ),
     override_kind: $ => choice(
@@ -2131,15 +2114,15 @@ module.exports = grammar({
       ),
     insert_column_item: $ => seq($.ColId, optional($.opt_indirection)),
     opt_on_conflict: $ => choice(
-        seq($.kw_on, $.kw_conflict, optional($.opt_conf_expr), $.kw_do, $.kw_update, $.kw_set, $.set_clause_list, optional($.where_clause)),
+        prec.left(11, prec.dynamic(11, seq($.kw_on, $.kw_conflict, optional($.opt_conf_expr), $.kw_do, $.kw_update, $.kw_set, $.set_clause_list, optional($.where_clause)))),
         seq($.kw_on, $.kw_conflict, optional($.opt_conf_expr), $.kw_do, $.kw_nothing)
       ),
     opt_conf_expr: $ => choice(
-        seq('(', $.index_params, ')', optional($.where_clause)),
+        prec.left(20, prec.dynamic(20, seq('(', $.index_params, ')', optional($.where_clause)))),
         seq($.kw_on, $.kw_constraint, $.name)
       ),
     returning_clause: $ => seq($.kw_returning, optional($.returning_with_clause), $.target_list),
-    returning_with_clause: $ => seq($.kw_with, '(', $.returning_options, ')'),
+    returning_with_clause: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, '(', $.returning_options, ')'))),
     returning_options: $ => choice(
         $.returning_option,
         seq($.returning_options, ',', $.returning_option)
@@ -2152,7 +2135,7 @@ module.exports = grammar({
     DeleteStmt: $ => seq(optional($.opt_with_clause), $.kw_delete, $.kw_from, $.relation_expr_opt_alias, optional($.using_clause), optional($.where_or_current_clause), optional($.returning_clause)),
     using_clause: $ => seq($.kw_using, $.from_list),
     LockStmt: $ => seq($.kw_lock, optional($.opt_table), $.relation_expr_list, optional($.opt_lock), optional($.opt_nowait)),
-    opt_lock: $ => seq($.kw_in, $.lock_type, $.kw_mode),
+    opt_lock: $ => prec.left(8, prec.dynamic(8, seq($.kw_in, $.lock_type, $.kw_mode))),
     lock_type: $ => choice(
         seq($.kw_access, $.kw_share),
         seq($.kw_row, $.kw_share),
@@ -2168,14 +2151,14 @@ module.exports = grammar({
         $.kw_nowait,
         seq($.kw_skip, $.kw_locked)
       ),
-    UpdateStmt: $ => seq(optional($.opt_with_clause), $.kw_update, $.relation_expr_opt_alias, $.kw_set, $.set_clause_list, optional($.from_clause), optional($.where_or_current_clause), optional($.returning_clause)),
+    UpdateStmt: $ => prec.left(11, prec.dynamic(11, seq(optional($.opt_with_clause), $.kw_update, $.relation_expr_opt_alias, $.kw_set, $.set_clause_list, optional($.from_clause), optional($.where_or_current_clause), optional($.returning_clause)))),
     set_clause_list: $ => choice(
         $.set_clause,
         seq($.set_clause_list, ',', $.set_clause)
       ),
     set_clause: $ => choice(
-        seq($.set_target, '=', $.a_expr),
-        seq('(', $.set_target_list, ')', '=', $.a_expr)
+        prec.left(7, prec.dynamic(7, seq($.set_target, '=', $.a_expr))),
+        prec.left(20, prec.dynamic(20, seq('(', $.set_target_list, ')', '=', $.a_expr)))
       ),
     set_target: $ => seq($.ColId, optional($.opt_indirection)),
     set_target_list: $ => choice(
@@ -2196,23 +2179,23 @@ module.exports = grammar({
       ),
     merge_when_tgt_matched: $ => choice(
         seq($.kw_when, $.kw_matched),
-        seq($.kw_when, $.kw_not, $.kw_matched, $.kw_by, $.kw_source)
+        prec.right(5, prec.dynamic(5, seq($.kw_when, $.kw_not, $.kw_matched, $.kw_by, $.kw_source)))
       ),
     merge_when_tgt_not_matched: $ => choice(
-        seq($.kw_when, $.kw_not, $.kw_matched),
-        seq($.kw_when, $.kw_not, $.kw_matched, $.kw_by, $.kw_target)
+        prec.right(5, prec.dynamic(5, seq($.kw_when, $.kw_not, $.kw_matched))),
+        prec.right(5, prec.dynamic(5, seq($.kw_when, $.kw_not, $.kw_matched, $.kw_by, $.kw_target)))
       ),
-    opt_merge_when_condition: $ => seq($.kw_and, $.a_expr),
-    merge_update: $ => seq($.kw_update, $.kw_set, $.set_clause_list),
+    opt_merge_when_condition: $ => prec.left(4, prec.dynamic(4, seq($.kw_and, $.a_expr))),
+    merge_update: $ => prec.left(11, prec.dynamic(11, seq($.kw_update, $.kw_set, $.set_clause_list))),
     merge_delete: $ => $.kw_delete,
     merge_insert: $ => choice(
         seq($.kw_insert, $.merge_values_clause),
-        seq($.kw_insert, $.kw_overriding, $.override_kind, $.kw_value, $.merge_values_clause),
-        seq($.kw_insert, '(', $.insert_column_list, ')', $.merge_values_clause),
-        seq($.kw_insert, '(', $.insert_column_list, ')', $.kw_overriding, $.override_kind, $.kw_value, $.merge_values_clause),
+        prec.left(11, prec.dynamic(11, seq($.kw_insert, $.kw_overriding, $.override_kind, $.kw_value, $.merge_values_clause))),
+        prec.left(20, prec.dynamic(20, seq($.kw_insert, '(', $.insert_column_list, ')', $.merge_values_clause))),
+        prec.left(20, prec.dynamic(20, seq($.kw_insert, '(', $.insert_column_list, ')', $.kw_overriding, $.override_kind, $.kw_value, $.merge_values_clause))),
         seq($.kw_insert, $.kw_default, $.kw_values)
       ),
-    merge_values_clause: $ => seq($.kw_values, '(', $.expr_list, ')'),
+    merge_values_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_values, '(', $.expr_list, ')'))),
     DeclareCursorStmt: $ => seq($.kw_declare, $.cursor_name, optional($.cursor_options), $.kw_cursor, optional($.opt_hold), $.kw_for, $.SelectStmt),
     cursor_name: $ => $.name,
     cursor_options: $ => choice(
@@ -2223,16 +2206,16 @@ module.exports = grammar({
         seq(optional($.cursor_options), $.kw_insensitive)
       ),
     opt_hold: $ => choice(
-        seq($.kw_with, $.kw_hold),
-        seq($.kw_without, $.kw_hold)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_hold))),
+        prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_hold)))
       ),
     SelectStmt: $ => choice(
-        $.select_no_parens,
-        $.select_with_parens
+        prec.right(18, prec.dynamic(18, $.select_no_parens)),
+        prec.right(18, prec.dynamic(18, $.select_with_parens))
       ),
     select_with_parens: $ => choice(
-        seq('(', $.select_no_parens, ')'),
-        seq('(', $.select_with_parens, ')')
+        prec.left(20, prec.dynamic(20, seq('(', $.select_no_parens, ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.select_with_parens, ')')))
       ),
     select_no_parens: $ => choice(
         $.simple_select,
@@ -2253,31 +2236,31 @@ module.exports = grammar({
         seq($.kw_select, $.distinct_clause, $.target_list, optional($.into_clause), optional($.from_clause), optional($.where_clause), optional($.group_clause), optional($.having_clause), optional($.window_clause)),
         $.values_clause,
         seq($.kw_table, $.relation_expr),
-        seq($.select_clause, $.kw_union, optional($.set_quantifier), $.select_clause),
-        seq($.select_clause, $.kw_intersect, optional($.set_quantifier), $.select_clause),
-        seq($.select_clause, $.kw_except, optional($.set_quantifier), $.select_clause)
+        prec.left(1, prec.dynamic(1, seq($.select_clause, $.kw_union, optional($.set_quantifier), $.select_clause))),
+        prec.left(2, prec.dynamic(2, seq($.select_clause, $.kw_intersect, optional($.set_quantifier), $.select_clause))),
+        prec.left(1, prec.dynamic(1, seq($.select_clause, $.kw_except, optional($.set_quantifier), $.select_clause)))
       ),
     with_clause: $ => choice(
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.cte_list))),
         seq($.kw_with, $.cte_list),
-        seq($.kw_with, $.cte_list),
-        seq($.kw_with, $.kw_recursive, $.cte_list)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_recursive, $.cte_list)))
       ),
     cte_list: $ => choice(
         $.common_table_expr,
         seq($.cte_list, ',', $.common_table_expr)
       ),
-    common_table_expr: $ => seq($.name, optional($.opt_name_list), $.kw_as, optional($.opt_materialized), '(', $.PreparableStmt, ')', optional($.opt_search_clause), optional($.opt_cycle_clause)),
+    common_table_expr: $ => prec.left(20, prec.dynamic(20, seq($.name, optional($.opt_name_list), $.kw_as, optional($.opt_materialized), '(', $.PreparableStmt, ')', optional($.opt_search_clause), optional($.opt_cycle_clause)))),
     opt_materialized: $ => choice(
         $.kw_materialized,
-        seq($.kw_not, $.kw_materialized)
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_materialized)))
       ),
     opt_search_clause: $ => choice(
-        seq($.kw_search, $.kw_depth, $.kw_first, $.kw_by, $.columnList, $.kw_set, $.ColId),
-        seq($.kw_search, $.kw_breadth, $.kw_first, $.kw_by, $.columnList, $.kw_set, $.ColId)
+        prec.left(11, prec.dynamic(11, seq($.kw_search, $.kw_depth, $.kw_first, $.kw_by, $.columnList, $.kw_set, $.ColId))),
+        prec.left(11, prec.dynamic(11, seq($.kw_search, $.kw_breadth, $.kw_first, $.kw_by, $.columnList, $.kw_set, $.ColId)))
       ),
     opt_cycle_clause: $ => choice(
-        seq($.kw_cycle, $.columnList, $.kw_set, $.ColId, $.kw_to, $.AexprConst, $.kw_default, $.AexprConst, $.kw_using, $.ColId),
-        seq($.kw_cycle, $.columnList, $.kw_set, $.ColId, $.kw_using, $.ColId)
+        prec.left(11, prec.dynamic(11, seq($.kw_cycle, $.columnList, $.kw_set, $.ColId, $.kw_to, $.AexprConst, $.kw_default, $.AexprConst, $.kw_using, $.ColId))),
+        prec.left(11, prec.dynamic(11, seq($.kw_cycle, $.columnList, $.kw_set, $.ColId, $.kw_using, $.ColId)))
       ),
     opt_with_clause: $ => $.with_clause,
     into_clause: $ => seq($.kw_into, $.OptTempTableName),
@@ -2299,7 +2282,7 @@ module.exports = grammar({
       ),
     distinct_clause: $ => choice(
         $.kw_distinct,
-        seq($.kw_distinct, $.kw_on, '(', $.expr_list, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_distinct, $.kw_on, '(', $.expr_list, ')')))
       ),
     opt_all_clause: $ => $.kw_all,
     opt_distinct_clause: $ => choice(
@@ -2327,9 +2310,9 @@ module.exports = grammar({
         seq($.kw_limit, $.select_limit_value),
         seq($.kw_limit, $.select_limit_value, ',', $.select_offset_value),
         seq($.kw_fetch, $.first_or_next, $.select_fetch_first_value, $.row_or_rows, $.kw_only),
-        seq($.kw_fetch, $.first_or_next, $.select_fetch_first_value, $.row_or_rows, $.kw_with, $.kw_ties),
+        prec.left(11, prec.dynamic(11, seq($.kw_fetch, $.first_or_next, $.select_fetch_first_value, $.row_or_rows, $.kw_with, $.kw_ties))),
         seq($.kw_fetch, $.first_or_next, $.row_or_rows, $.kw_only),
-        seq($.kw_fetch, $.first_or_next, $.row_or_rows, $.kw_with, $.kw_ties)
+        prec.left(11, prec.dynamic(11, seq($.kw_fetch, $.first_or_next, $.row_or_rows, $.kw_with, $.kw_ties)))
       ),
     offset_clause: $ => choice(
         seq($.kw_offset, $.select_offset_value),
@@ -2342,8 +2325,8 @@ module.exports = grammar({
     select_offset_value: $ => $.a_expr,
     select_fetch_first_value: $ => choice(
         $.c_expr,
-        seq('+', $.I_or_F_const),
-        seq('-', $.I_or_F_const)
+        prec.left(13, prec.dynamic(13, seq('+', $.I_or_F_const))),
+        prec.left(13, prec.dynamic(13, seq('-', $.I_or_F_const)))
       ),
     I_or_F_const: $ => choice(
         $.Iconst,
@@ -2351,7 +2334,7 @@ module.exports = grammar({
       ),
     row_or_rows: $ => choice(
         $.kw_row,
-        $.kw_rows
+        prec.left(11, prec.dynamic(11, $.kw_rows))
       ),
     first_or_next: $ => choice(
         $.kw_first,
@@ -2369,10 +2352,10 @@ module.exports = grammar({
         $.rollup_clause,
         $.grouping_sets_clause
       ),
-    empty_grouping_set: $ => seq('(', ')'),
-    rollup_clause: $ => seq($.kw_rollup, '(', $.expr_list, ')'),
-    cube_clause: $ => seq($.kw_cube, '(', $.expr_list, ')'),
-    grouping_sets_clause: $ => seq($.kw_grouping, $.kw_sets, '(', $.group_by_list, ')'),
+    empty_grouping_set: $ => prec.left(20, prec.dynamic(20, seq('(', ')'))),
+    rollup_clause: $ => prec.left(11, prec.dynamic(11, seq($.kw_rollup, '(', $.expr_list, ')'))),
+    cube_clause: $ => prec.left(11, prec.dynamic(11, seq($.kw_cube, '(', $.expr_list, ')'))),
+    grouping_sets_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_grouping, $.kw_sets, '(', $.group_by_list, ')'))),
     having_clause: $ => seq($.kw_having, $.a_expr),
     for_locking_clause: $ => choice(
         $.for_locking_items,
@@ -2392,8 +2375,8 @@ module.exports = grammar({
       ),
     locked_rels_list: $ => seq($.kw_of, $.qualified_name_list),
     values_clause: $ => choice(
-        seq($.kw_values, '(', $.expr_list, ')'),
-        seq($.values_clause, ',', '(', $.expr_list, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_values, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.values_clause, ',', '(', $.expr_list, ')')))
       ),
     from_clause: $ => seq($.kw_from, $.from_list),
     from_list: $ => choice(
@@ -2410,41 +2393,41 @@ module.exports = grammar({
         seq($.select_with_parens, optional($.opt_alias_clause)),
         seq($.kw_lateral, $.select_with_parens, optional($.opt_alias_clause)),
         $.joined_table,
-        seq('(', $.joined_table, ')', $.alias_clause),
+        prec.left(20, prec.dynamic(20, seq('(', $.joined_table, ')', $.alias_clause))),
         seq($.json_table, optional($.opt_alias_clause)),
         seq($.kw_lateral, $.json_table, optional($.opt_alias_clause))
       ),
     joined_table: $ => choice(
-        seq('(', $.joined_table, ')'),
-        seq($.table_ref, $.kw_cross, $.kw_join, $.table_ref),
-        seq($.table_ref, $.join_type, $.kw_join, $.table_ref, $.join_qual),
-        seq($.table_ref, $.kw_join, $.table_ref, $.join_qual),
-        seq($.table_ref, $.kw_natural, $.join_type, $.kw_join, $.table_ref),
-        seq($.table_ref, $.kw_natural, $.kw_join, $.table_ref)
+        prec.left(20, prec.dynamic(20, seq('(', $.joined_table, ')'))),
+        prec.left(23, prec.dynamic(23, seq($.table_ref, $.kw_cross, $.kw_join, $.table_ref))),
+        prec.left(23, prec.dynamic(23, seq($.table_ref, $.join_type, $.kw_join, $.table_ref, $.join_qual))),
+        prec.left(23, prec.dynamic(23, seq($.table_ref, $.kw_join, $.table_ref, $.join_qual))),
+        prec.left(23, prec.dynamic(23, seq($.table_ref, $.kw_natural, $.join_type, $.kw_join, $.table_ref))),
+        prec.left(23, prec.dynamic(23, seq($.table_ref, $.kw_natural, $.kw_join, $.table_ref)))
       ),
     alias_clause: $ => choice(
-        seq($.kw_as, $.ColId, '(', $.name_list, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_as, $.ColId, '(', $.name_list, ')'))),
         seq($.kw_as, $.ColId),
-        seq($.ColId, '(', $.name_list, ')'),
+        prec.left(20, prec.dynamic(20, seq($.ColId, '(', $.name_list, ')'))),
         $.ColId
       ),
     opt_alias_clause: $ => $.alias_clause,
     opt_alias_clause_for_join_using: $ => seq($.kw_as, $.ColId),
     func_alias_clause: $ => choice(
         $.alias_clause,
-        seq($.kw_as, '(', $.TableFuncElementList, ')'),
-        seq($.kw_as, $.ColId, '(', $.TableFuncElementList, ')'),
-        seq($.ColId, '(', $.TableFuncElementList, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_as, '(', $.TableFuncElementList, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_as, $.ColId, '(', $.TableFuncElementList, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.ColId, '(', $.TableFuncElementList, ')')))
       ),
     join_type: $ => choice(
-        seq($.kw_full, optional($.opt_outer)),
-        seq($.kw_left, optional($.opt_outer)),
-        seq($.kw_right, optional($.opt_outer)),
-        $.kw_inner
+        prec.left(23, prec.dynamic(23, seq($.kw_full, optional($.opt_outer)))),
+        prec.left(23, prec.dynamic(23, seq($.kw_left, optional($.opt_outer)))),
+        prec.left(23, prec.dynamic(23, seq($.kw_right, optional($.opt_outer)))),
+        prec.left(23, prec.dynamic(23, $.kw_inner))
       ),
     opt_outer: $ => $.kw_outer,
     join_qual: $ => choice(
-        seq($.kw_using, '(', $.name_list, ')', optional($.opt_alias_clause_for_join_using)),
+        prec.left(20, prec.dynamic(20, seq($.kw_using, '(', $.name_list, ')', optional($.opt_alias_clause_for_join_using)))),
         seq($.kw_on, $.a_expr)
       ),
     relation_expr: $ => choice(
@@ -2452,31 +2435,31 @@ module.exports = grammar({
         $.extended_relation_expr
       ),
     extended_relation_expr: $ => choice(
-        seq($.qualified_name, '*'),
+        prec.left(14, prec.dynamic(14, seq($.qualified_name, '*'))),
         seq($.kw_only, $.qualified_name),
-        seq($.kw_only, '(', $.qualified_name, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_only, '(', $.qualified_name, ')')))
       ),
     relation_expr_list: $ => choice(
         $.relation_expr,
         seq($.relation_expr_list, ',', $.relation_expr)
       ),
     relation_expr_opt_alias: $ => choice(
-        $.relation_expr,
+        prec.right(18, prec.dynamic(18, $.relation_expr)),
         seq($.relation_expr, $.ColId),
         seq($.relation_expr, $.kw_as, $.ColId)
       ),
-    tablesample_clause: $ => seq($.kw_tablesample, $.func_name, '(', $.expr_list, ')', optional($.opt_repeatable_clause)),
-    opt_repeatable_clause: $ => seq($.kw_repeatable, '(', $.a_expr, ')'),
+    tablesample_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_tablesample, $.func_name, '(', $.expr_list, ')', optional($.opt_repeatable_clause)))),
+    opt_repeatable_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_repeatable, '(', $.a_expr, ')'))),
     func_table: $ => choice(
         seq($.func_expr_windowless, optional($.opt_ordinality)),
-        seq($.kw_rows, $.kw_from, '(', $.rowsfrom_list, ')', optional($.opt_ordinality))
+        prec.left(11, prec.dynamic(11, seq($.kw_rows, $.kw_from, '(', $.rowsfrom_list, ')', optional($.opt_ordinality))))
       ),
     rowsfrom_item: $ => seq($.func_expr_windowless, optional($.opt_col_def_list)),
     rowsfrom_list: $ => choice(
         $.rowsfrom_item,
         seq($.rowsfrom_list, ',', $.rowsfrom_item)
       ),
-    opt_col_def_list: $ => seq($.kw_as, '(', $.TableFuncElementList, ')'),
+    opt_col_def_list: $ => prec.left(20, prec.dynamic(20, seq($.kw_as, '(', $.TableFuncElementList, ')'))),
     opt_ordinality: $ => seq($.kw_with, $.kw_ordinality),
     where_clause: $ => seq($.kw_where, $.a_expr),
     where_or_current_clause: $ => choice(
@@ -2490,8 +2473,8 @@ module.exports = grammar({
       ),
     TableFuncElement: $ => seq($.ColId, $.Typename, optional($.opt_collate_clause)),
     xmltable: $ => choice(
-        seq($.kw_xmltable, '(', $.c_expr, $.xmlexists_argument, $.kw_columns, $.xmltable_column_list, ')'),
-        seq($.kw_xmltable, '(', $.kw_xmlnamespaces, '(', $.xml_namespace_list, ')', ',', $.c_expr, $.xmlexists_argument, $.kw_columns, $.xmltable_column_list, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_xmltable, '(', $.c_expr, $.xmlexists_argument, $.kw_columns, $.xmltable_column_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmltable, '(', $.kw_xmlnamespaces, '(', $.xml_namespace_list, ')', ',', $.c_expr, $.xmlexists_argument, $.kw_columns, $.xmltable_column_list, ')')))
       ),
     xmltable_column_list: $ => choice(
         $.xmltable_column_el,
@@ -2507,11 +2490,11 @@ module.exports = grammar({
         seq($.xmltable_column_option_list, $.xmltable_column_option_el)
       ),
     xmltable_column_option_el: $ => choice(
-        seq($.identifier, $.b_expr),
+        prec.left(11, prec.dynamic(11, seq($.identifier, $.b_expr))),
         seq($.kw_default, $.b_expr),
-        seq($.kw_not, $.kw_null),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_null))),
         $.kw_null,
-        seq($.kw_path, $.b_expr)
+        prec.left(11, prec.dynamic(11, seq($.kw_path, $.b_expr)))
       ),
     xml_namespace_list: $ => choice(
         $.xml_namespace_el,
@@ -2521,7 +2504,7 @@ module.exports = grammar({
         seq($.b_expr, $.kw_as, $.ColLabel),
         seq($.kw_default, $.b_expr)
       ),
-    json_table: $ => seq($.kw_json_table, '(', $.json_value_expr, ',', $.a_expr, optional($.json_table_path_name_opt), optional($.json_passing_clause_opt), $.kw_columns, '(', $.json_table_column_definition_list, ')', optional($.json_on_error_clause_opt), ')'),
+    json_table: $ => prec.left(20, prec.dynamic(20, seq($.kw_json_table, '(', $.json_value_expr, ',', $.a_expr, optional($.json_table_path_name_opt), optional($.json_passing_clause_opt), $.kw_columns, '(', $.json_table_column_definition_list, ')', optional($.json_on_error_clause_opt), ')'))),
     json_table_path_name_opt: $ => seq($.kw_as, $.name),
     json_table_column_definition_list: $ => choice(
         $.json_table_column_definition,
@@ -2532,22 +2515,22 @@ module.exports = grammar({
         seq($.ColId, $.Typename, optional($.json_table_column_path_clause_opt), optional($.json_wrapper_behavior), optional($.json_quotes_clause_opt), optional($.json_behavior_clause_opt)),
         seq($.ColId, $.Typename, $.json_format_clause, optional($.json_table_column_path_clause_opt), optional($.json_wrapper_behavior), optional($.json_quotes_clause_opt), optional($.json_behavior_clause_opt)),
         seq($.ColId, $.Typename, $.kw_exists, optional($.json_table_column_path_clause_opt), optional($.json_on_error_clause_opt)),
-        seq($.kw_nested, optional($.path_opt), $.Sconst, $.kw_columns, '(', $.json_table_column_definition_list, ')'),
-        seq($.kw_nested, optional($.path_opt), $.Sconst, $.kw_as, $.name, $.kw_columns, '(', $.json_table_column_definition_list, ')')
+        prec.left(10, prec.dynamic(10, seq($.kw_nested, optional($.path_opt), $.Sconst, $.kw_columns, '(', $.json_table_column_definition_list, ')'))),
+        prec.left(10, prec.dynamic(10, seq($.kw_nested, optional($.path_opt), $.Sconst, $.kw_as, $.name, $.kw_columns, '(', $.json_table_column_definition_list, ')')))
       ),
-    path_opt: $ => $.kw_path,
-    json_table_column_path_clause_opt: $ => seq($.kw_path, $.Sconst),
+    path_opt: $ => prec.left(11, prec.dynamic(11, $.kw_path)),
+    json_table_column_path_clause_opt: $ => prec.left(11, prec.dynamic(11, seq($.kw_path, $.Sconst))),
     Typename: $ => choice(
         seq($.SimpleTypename, optional($.opt_array_bounds)),
         seq($.kw_setof, $.SimpleTypename, optional($.opt_array_bounds)),
-        seq($.SimpleTypename, $.kw_array, '[', $.Iconst, ']'),
-        seq($.kw_setof, $.SimpleTypename, $.kw_array, '[', $.Iconst, ']'),
+        prec.left(19, prec.dynamic(19, seq($.SimpleTypename, $.kw_array, '[', $.Iconst, ']'))),
+        prec.left(19, prec.dynamic(19, seq($.kw_setof, $.SimpleTypename, $.kw_array, '[', $.Iconst, ']'))),
         seq($.SimpleTypename, $.kw_array),
         seq($.kw_setof, $.SimpleTypename, $.kw_array)
       ),
     opt_array_bounds: $ => choice(
-        seq(optional($.opt_array_bounds), '[', ']'),
-        seq(optional($.opt_array_bounds), '[', $.Iconst, ']')
+        prec.left(19, prec.dynamic(19, seq(optional($.opt_array_bounds), '[', ']'))),
+        prec.left(19, prec.dynamic(19, seq(optional($.opt_array_bounds), '[', $.Iconst, ']')))
       ),
     SimpleTypename: $ => choice(
         $.GenericType,
@@ -2556,7 +2539,7 @@ module.exports = grammar({
         $.Character,
         $.ConstDatetime,
         seq($.ConstInterval, optional($.opt_interval)),
-        seq($.ConstInterval, '(', $.Iconst, ')'),
+        prec.left(20, prec.dynamic(20, seq($.ConstInterval, '(', $.Iconst, ')'))),
         $.JsonType
       ),
     ConstTypename: $ => choice(
@@ -2570,7 +2553,7 @@ module.exports = grammar({
         seq($.type_function_name, optional($.opt_type_modifiers)),
         seq($.type_function_name, $.attrs, optional($.opt_type_modifiers))
       ),
-    opt_type_modifiers: $ => seq('(', $.expr_list, ')'),
+    opt_type_modifiers: $ => prec.left(20, prec.dynamic(20, seq('(', $.expr_list, ')'))),
     Numeric: $ => choice(
         $.kw_int,
         $.kw_integer,
@@ -2584,7 +2567,7 @@ module.exports = grammar({
         seq($.kw_numeric, optional($.opt_type_modifiers)),
         $.kw_boolean
       ),
-    opt_float: $ => seq('(', $.Iconst, ')'),
+    opt_float: $ => prec.left(20, prec.dynamic(20, seq('(', $.Iconst, ')'))),
     Bit: $ => choice(
         $.BitWithLength,
         $.BitWithoutLength
@@ -2593,7 +2576,7 @@ module.exports = grammar({
         $.BitWithLength,
         $.BitWithoutLength
       ),
-    BitWithLength: $ => seq($.kw_bit, optional($.opt_varying), '(', $.expr_list, ')'),
+    BitWithLength: $ => prec.left(20, prec.dynamic(20, seq($.kw_bit, optional($.opt_varying), '(', $.expr_list, ')'))),
     BitWithoutLength: $ => seq($.kw_bit, optional($.opt_varying)),
     Character: $ => choice(
         $.CharacterWithLength,
@@ -2603,7 +2586,7 @@ module.exports = grammar({
         $.CharacterWithLength,
         $.CharacterWithoutLength
       ),
-    CharacterWithLength: $ => seq($.character, '(', $.Iconst, ')'),
+    CharacterWithLength: $ => prec.left(20, prec.dynamic(20, seq($.character, '(', $.Iconst, ')'))),
     CharacterWithoutLength: $ => $.character,
     character: $ => choice(
         seq($.kw_character, optional($.opt_varying)),
@@ -2615,9 +2598,9 @@ module.exports = grammar({
       ),
     opt_varying: $ => $.kw_varying,
     ConstDatetime: $ => choice(
-        seq($.kw_timestamp, '(', $.Iconst, ')', optional($.opt_timezone)),
+        prec.left(20, prec.dynamic(20, seq($.kw_timestamp, '(', $.Iconst, ')', optional($.opt_timezone)))),
         seq($.kw_timestamp, optional($.opt_timezone)),
-        seq($.kw_time, '(', $.Iconst, ')', optional($.opt_timezone)),
+        prec.left(20, prec.dynamic(20, seq($.kw_time, '(', $.Iconst, ')', optional($.opt_timezone)))),
         seq($.kw_time, optional($.opt_timezone))
       ),
     ConstInterval: $ => $.kw_interval,
@@ -2642,129 +2625,135 @@ module.exports = grammar({
       ),
     interval_second: $ => choice(
         $.kw_second,
-        seq($.kw_second, '(', $.Iconst, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_second, '(', $.Iconst, ')')))
       ),
     JsonType: $ => $.kw_json,
-    a_expr: $ => choice(
+    a_expr_prec: $ => choice(
         $.c_expr,
-        seq($.a_expr, '::', $.Typename),
-        seq($.a_expr, $.kw_collate, $.any_name),
-        seq($.a_expr, $.kw_at, $.kw_time, $.kw_zone, $.a_expr),
-        seq($.a_expr, $.kw_at, $.kw_local),
-        seq('+', $.a_expr),
-        seq('-', $.a_expr),
-        seq($.a_expr, '+', $.a_expr),
-        seq($.a_expr, '-', $.a_expr),
-        seq($.a_expr, '*', $.a_expr),
-        seq($.a_expr, '/', $.a_expr),
-        seq($.a_expr, '%', $.a_expr),
-        seq($.a_expr, '^', $.a_expr),
-        seq($.a_expr, '<', $.a_expr),
-        seq($.a_expr, '>', $.a_expr),
-        seq($.a_expr, '=', $.a_expr),
-        seq($.a_expr, '<=', $.a_expr),
-        seq($.a_expr, '>=', $.a_expr),
-        seq($.a_expr, '<>', $.a_expr),
-        seq($.a_expr, $.qual_Op, $.a_expr),
-        seq($.qual_Op, $.a_expr),
-        seq($.a_expr, $.kw_and, $.a_expr),
-        seq($.a_expr, $.kw_or, $.a_expr),
-        seq($.kw_not, $.a_expr),
-        seq($.kw_not, $.a_expr),
-        seq($.a_expr, $.kw_like, $.a_expr),
-        seq($.a_expr, $.kw_like, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_like, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_like, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_ilike, $.a_expr),
-        seq($.a_expr, $.kw_ilike, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_ilike, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_ilike, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_similar, $.kw_to, $.a_expr),
-        seq($.a_expr, $.kw_similar, $.kw_to, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_similar, $.kw_to, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_similar, $.kw_to, $.a_expr, $.kw_escape, $.a_expr),
-        seq($.a_expr, $.kw_is, $.kw_null),
-        seq($.a_expr, $.kw_isnull),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_null),
-        seq($.a_expr, $.kw_notnull),
+        prec.left(21, prec.dynamic(21, seq($.a_expr_prec, '::', $.Typename))),
+        prec.left(17, prec.dynamic(17, seq($.a_expr_prec, $.kw_collate, $.any_name))),
+        prec.left(16, prec.dynamic(16, seq($.a_expr_prec, $.kw_at, $.kw_local))),
+        prec.right(18, prec.dynamic(18, seq('+', $.a_expr_prec))),
+        prec.right(18, prec.dynamic(18, seq('-', $.a_expr_prec))),
+        prec.left(13, prec.dynamic(13, seq($.a_expr_prec, '+', $.a_expr_prec))),
+        prec.left(13, prec.dynamic(13, seq($.a_expr_prec, '-', $.a_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.a_expr_prec, '*', $.a_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.a_expr_prec, '/', $.a_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.a_expr_prec, '%', $.a_expr_prec))),
+        prec.left(15, prec.dynamic(15, seq($.a_expr_prec, '^', $.a_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '<', $.a_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '>', $.a_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '=', $.a_expr_prec))),
+        prec.left(4, prec.dynamic(4, seq($.a_expr_prec, $.kw_and, $.a_expr_prec))),
+        prec.left(3, prec.dynamic(3, seq($.a_expr_prec, $.kw_or, $.a_expr_prec))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr_prec))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr_prec)))
+      ),
+    a_expr: $ => choice(
+        alias($.a_expr_prec, $.a_expr),
+        prec.left(16, prec.dynamic(16, seq($.a_expr, $.kw_at, $.kw_time, $.kw_zone, $.a_expr))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr, '<=', $.a_expr))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr, '>=', $.a_expr))),
+        prec.left(7, prec.dynamic(7, seq($.a_expr, '<>', $.a_expr))),
+        prec.left(12, prec.dynamic(12, seq($.a_expr, $.qual_Op, $.a_expr))),
+        prec.left(12, prec.dynamic(12, seq($.qual_Op, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_like, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_like, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_like, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_like, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_ilike, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_ilike, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_ilike, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_ilike, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_similar, $.kw_to, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_similar, $.kw_to, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_similar, $.kw_to, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_similar, $.kw_to, $.a_expr, $.kw_escape, $.a_expr))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_null))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_isnull))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_null))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_notnull))),
         seq($.row, $.kw_overlaps, $.row),
-        seq($.a_expr, $.kw_is, $.kw_true),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_true),
-        seq($.a_expr, $.kw_is, $.kw_false),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_false),
-        seq($.a_expr, $.kw_is, $.kw_unknown),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_unknown),
-        seq($.a_expr, $.kw_is, $.kw_distinct, $.kw_from, $.a_expr),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_distinct, $.kw_from, $.a_expr),
-        seq($.a_expr, $.kw_between, optional($.opt_asymmetric), $.b_expr, $.kw_and, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_between, optional($.opt_asymmetric), $.b_expr, $.kw_and, $.a_expr),
-        seq($.a_expr, $.kw_between, $.kw_symmetric, $.b_expr, $.kw_and, $.a_expr),
-        seq($.a_expr, $.kw_not, $.kw_between, $.kw_symmetric, $.b_expr, $.kw_and, $.a_expr),
-        seq($.a_expr, $.kw_in, $.select_with_parens),
-        seq($.a_expr, $.kw_in, '(', $.expr_list, ')'),
-        seq($.a_expr, $.kw_not, $.kw_in, $.select_with_parens),
-        seq($.a_expr, $.kw_not, $.kw_in, '(', $.expr_list, ')'),
-        seq($.a_expr, $.subquery_Op, $.sub_type, $.select_with_parens),
-        seq($.a_expr, $.subquery_Op, $.sub_type, '(', $.a_expr, ')'),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_true))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_true))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_false))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_false))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_unknown))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_unknown))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_distinct, $.kw_from, $.a_expr))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_distinct, $.kw_from, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_between, optional($.opt_asymmetric), $.b_expr, $.kw_and, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_between, optional($.opt_asymmetric), $.b_expr, $.kw_and, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_between, $.kw_symmetric, $.b_expr, $.kw_and, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_between, $.kw_symmetric, $.b_expr, $.kw_and, $.a_expr))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_in, $.select_with_parens))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_in, '(', $.expr_list, ')'))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_in, $.select_with_parens))),
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_in, '(', $.expr_list, ')'))),
+        prec.left(12, prec.dynamic(12, seq($.a_expr, $.subquery_Op, $.sub_type, $.select_with_parens))),
+        prec.left(12, prec.dynamic(12, seq($.a_expr, $.subquery_Op, $.sub_type, '(', $.a_expr, ')'))),
         seq($.kw_unique, optional($.opt_unique_null_treatment), $.select_with_parens),
-        seq($.a_expr, $.kw_is, $.kw_document),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_document),
-        seq($.a_expr, $.kw_is, $.kw_normalized),
-        seq($.a_expr, $.kw_is, $.unicode_normal_form, $.kw_normalized),
-        seq($.a_expr, $.kw_is, $.kw_not, $.kw_normalized),
-        seq($.a_expr, $.kw_is, $.kw_not, $.unicode_normal_form, $.kw_normalized),
-        seq($.a_expr, $.kw_is, $.json_predicate_type_constraint, optional($.json_key_uniqueness_constraint_opt)),
-        seq($.a_expr, $.kw_is, $.kw_not, $.json_predicate_type_constraint, optional($.json_key_uniqueness_constraint_opt)),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_document))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_document))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_normalized))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.unicode_normal_form, $.kw_normalized))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.kw_normalized))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.unicode_normal_form, $.kw_normalized))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.json_predicate_type_constraint, optional($.json_key_uniqueness_constraint_opt)))),
+        prec.left(6, prec.dynamic(6, seq($.a_expr, $.kw_is, $.kw_not, $.json_predicate_type_constraint, optional($.json_key_uniqueness_constraint_opt)))),
         $.kw_default
       ),
-    b_expr: $ => choice(
+    b_expr_prec: $ => choice(
         $.c_expr,
-        seq($.b_expr, '::', $.Typename),
-        seq('+', $.b_expr),
-        seq('-', $.b_expr),
-        seq($.b_expr, '+', $.b_expr),
-        seq($.b_expr, '-', $.b_expr),
-        seq($.b_expr, '*', $.b_expr),
-        seq($.b_expr, '/', $.b_expr),
-        seq($.b_expr, '%', $.b_expr),
-        seq($.b_expr, '^', $.b_expr),
-        seq($.b_expr, '<', $.b_expr),
-        seq($.b_expr, '>', $.b_expr),
-        seq($.b_expr, '=', $.b_expr),
-        seq($.b_expr, '<=', $.b_expr),
-        seq($.b_expr, '>=', $.b_expr),
-        seq($.b_expr, '<>', $.b_expr),
-        seq($.b_expr, $.qual_Op, $.b_expr),
-        seq($.qual_Op, $.b_expr),
-        seq($.b_expr, $.kw_is, $.kw_distinct, $.kw_from, $.b_expr),
-        seq($.b_expr, $.kw_is, $.kw_not, $.kw_distinct, $.kw_from, $.b_expr),
-        seq($.b_expr, $.kw_is, $.kw_document),
-        seq($.b_expr, $.kw_is, $.kw_not, $.kw_document)
+        prec.left(21, prec.dynamic(21, seq($.b_expr_prec, '::', $.Typename))),
+        prec.right(18, prec.dynamic(18, seq('+', $.b_expr_prec))),
+        prec.right(18, prec.dynamic(18, seq('-', $.b_expr_prec))),
+        prec.left(13, prec.dynamic(13, seq($.b_expr_prec, '+', $.b_expr_prec))),
+        prec.left(13, prec.dynamic(13, seq($.b_expr_prec, '-', $.b_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.b_expr_prec, '*', $.b_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.b_expr_prec, '/', $.b_expr_prec))),
+        prec.left(14, prec.dynamic(14, seq($.b_expr_prec, '%', $.b_expr_prec))),
+        prec.left(15, prec.dynamic(15, seq($.b_expr_prec, '^', $.b_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.b_expr_prec, '<', $.b_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.b_expr_prec, '>', $.b_expr_prec))),
+        prec.left(7, prec.dynamic(7, seq($.b_expr_prec, '=', $.b_expr_prec)))
+      ),
+    b_expr: $ => choice(
+        alias($.b_expr_prec, $.b_expr),
+        prec.left(7, prec.dynamic(7, seq($.b_expr, '<=', $.b_expr))),
+        prec.left(7, prec.dynamic(7, seq($.b_expr, '>=', $.b_expr))),
+        prec.left(7, prec.dynamic(7, seq($.b_expr, '<>', $.b_expr))),
+        prec.left(12, prec.dynamic(12, seq($.b_expr, $.qual_Op, $.b_expr))),
+        prec.left(12, prec.dynamic(12, seq($.qual_Op, $.b_expr))),
+        prec.left(6, prec.dynamic(6, seq($.b_expr, $.kw_is, $.kw_distinct, $.kw_from, $.b_expr))),
+        prec.left(6, prec.dynamic(6, seq($.b_expr, $.kw_is, $.kw_not, $.kw_distinct, $.kw_from, $.b_expr))),
+        prec.left(6, prec.dynamic(6, seq($.b_expr, $.kw_is, $.kw_document))),
+        prec.left(6, prec.dynamic(6, seq($.b_expr, $.kw_is, $.kw_not, $.kw_document)))
       ),
     c_expr: $ => choice(
         $.columnref,
         $.AexprConst,
         seq($.param, optional($.opt_indirection)),
-        seq('(', $.a_expr, ')', optional($.opt_indirection)),
+        prec.left(20, prec.dynamic(20, seq('(', $.a_expr, ')', optional($.opt_indirection)))),
         $.case_expr,
         $.func_expr,
-        $.select_with_parens,
+        prec.right(18, prec.dynamic(18, $.select_with_parens)),
         seq($.select_with_parens, $.indirection),
         seq($.kw_exists, $.select_with_parens),
         seq($.kw_array, $.select_with_parens),
         seq($.kw_array, $.array_expr),
         $.explicit_row,
         $.implicit_row,
-        seq($.kw_grouping, '(', $.expr_list, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_grouping, '(', $.expr_list, ')')))
       ),
     func_application: $ => choice(
-        seq($.func_name, '(', ')'),
-        seq($.func_name, '(', $.func_arg_list, optional($.opt_sort_clause), ')'),
-        seq($.func_name, '(', $.kw_variadic, $.func_arg_expr, optional($.opt_sort_clause), ')'),
-        seq($.func_name, '(', $.func_arg_list, ',', $.kw_variadic, $.func_arg_expr, optional($.opt_sort_clause), ')'),
-        seq($.func_name, '(', $.kw_all, $.func_arg_list, optional($.opt_sort_clause), ')'),
-        seq($.func_name, '(', $.kw_distinct, $.func_arg_list, optional($.opt_sort_clause), ')'),
-        seq($.func_name, '(', '*', ')')
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.func_arg_list, optional($.opt_sort_clause), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.kw_variadic, $.func_arg_expr, optional($.opt_sort_clause), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.func_arg_list, ',', $.kw_variadic, $.func_arg_expr, optional($.opt_sort_clause), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.kw_all, $.func_arg_list, optional($.opt_sort_clause), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.kw_distinct, $.func_arg_list, optional($.opt_sort_clause), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', '*', ')')))
       ),
     func_expr: $ => choice(
         seq($.func_application, optional($.within_group_clause), optional($.filter_clause), optional($.over_clause)),
@@ -2777,16 +2766,16 @@ module.exports = grammar({
         $.json_aggregate_func
       ),
     func_expr_common_subexpr: $ => choice(
-        seq($.kw_collation, $.kw_for, '(', $.a_expr, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_collation, $.kw_for, '(', $.a_expr, ')'))),
         $.kw_current_date,
         $.kw_current_time,
-        seq($.kw_current_time, '(', $.Iconst, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_current_time, '(', $.Iconst, ')'))),
         $.kw_current_timestamp,
-        seq($.kw_current_timestamp, '(', $.Iconst, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_current_timestamp, '(', $.Iconst, ')'))),
         $.kw_localtime,
-        seq($.kw_localtime, '(', $.Iconst, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_localtime, '(', $.Iconst, ')'))),
         $.kw_localtimestamp,
-        seq($.kw_localtimestamp, '(', $.Iconst, ')'),
+        prec.left(20, prec.dynamic(20, seq($.kw_localtimestamp, '(', $.Iconst, ')'))),
         $.kw_current_role,
         $.kw_current_user,
         $.kw_session_user,
@@ -2794,60 +2783,60 @@ module.exports = grammar({
         $.kw_user,
         $.kw_current_catalog,
         $.kw_current_schema,
-        seq($.kw_cast, '(', $.a_expr, $.kw_as, $.Typename, ')'),
-        seq($.kw_extract, '(', $.extract_list, ')'),
-        seq($.kw_normalize, '(', $.a_expr, ')'),
-        seq($.kw_normalize, '(', $.a_expr, ',', $.unicode_normal_form, ')'),
-        seq($.kw_overlay, '(', $.overlay_list, ')'),
-        seq($.kw_overlay, '(', optional($.func_arg_list_opt), ')'),
-        seq($.kw_position, '(', $.position_list, ')'),
-        seq($.kw_substring, '(', $.substr_list, ')'),
-        seq($.kw_substring, '(', optional($.func_arg_list_opt), ')'),
-        seq($.kw_treat, '(', $.a_expr, $.kw_as, $.Typename, ')'),
-        seq($.kw_trim, '(', $.kw_both, $.trim_list, ')'),
-        seq($.kw_trim, '(', $.kw_leading, $.trim_list, ')'),
-        seq($.kw_trim, '(', $.kw_trailing, $.trim_list, ')'),
-        seq($.kw_trim, '(', $.trim_list, ')'),
-        seq($.kw_nullif, '(', $.a_expr, ',', $.a_expr, ')'),
-        seq($.kw_coalesce, '(', $.expr_list, ')'),
-        seq($.kw_greatest, '(', $.expr_list, ')'),
-        seq($.kw_least, '(', $.expr_list, ')'),
-        seq($.kw_xmlconcat, '(', $.expr_list, ')'),
-        seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ')'),
-        seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.xml_attributes, ')'),
-        seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.expr_list, ')'),
-        seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.xml_attributes, ',', $.expr_list, ')'),
-        seq($.kw_xmlexists, '(', $.c_expr, $.xmlexists_argument, ')'),
-        seq($.kw_xmlforest, '(', $.xml_attribute_list, ')'),
-        seq($.kw_xmlparse, '(', $.document_or_content, $.a_expr, optional($.xml_whitespace_option), ')'),
-        seq($.kw_xmlpi, '(', $.kw_name, $.ColLabel, ')'),
-        seq($.kw_xmlpi, '(', $.kw_name, $.ColLabel, ',', $.a_expr, ')'),
-        seq($.kw_xmlroot, '(', $.a_expr, ',', $.xml_root_version, optional($.opt_xml_root_standalone), ')'),
-        seq($.kw_xmlserialize, '(', $.document_or_content, $.a_expr, $.kw_as, $.SimpleTypename, optional($.xml_indent_option), ')'),
-        seq($.kw_json_object, '(', $.func_arg_list, ')'),
-        seq($.kw_json_object, '(', $.json_name_and_value_list, optional($.json_object_constructor_null_clause_opt), optional($.json_key_uniqueness_constraint_opt), optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json_object, '(', optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json_array, '(', $.json_value_expr_list, optional($.json_array_constructor_null_clause_opt), optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json_array, '(', $.select_no_parens, optional($.json_format_clause_opt), optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json_array, '(', optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json, '(', $.json_value_expr, optional($.json_key_uniqueness_constraint_opt), ')'),
-        seq($.kw_json_scalar, '(', $.a_expr, ')'),
-        seq($.kw_json_serialize, '(', $.json_value_expr, optional($.json_returning_clause_opt), ')'),
-        seq($.kw_merge_action, '(', ')'),
-        seq($.kw_json_query, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_returning_clause_opt), optional($.json_wrapper_behavior), optional($.json_quotes_clause_opt), optional($.json_behavior_clause_opt), ')'),
-        seq($.kw_json_exists, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_on_error_clause_opt), ')'),
-        seq($.kw_json_value, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_returning_clause_opt), optional($.json_behavior_clause_opt), ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_cast, '(', $.a_expr, $.kw_as, $.Typename, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_extract, '(', $.extract_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_normalize, '(', $.a_expr, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_normalize, '(', $.a_expr, ',', $.unicode_normal_form, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_overlay, '(', $.overlay_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_overlay, '(', optional($.func_arg_list_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_position, '(', $.position_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_substring, '(', $.substr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_substring, '(', optional($.func_arg_list_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_treat, '(', $.a_expr, $.kw_as, $.Typename, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_trim, '(', $.kw_both, $.trim_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_trim, '(', $.kw_leading, $.trim_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_trim, '(', $.kw_trailing, $.trim_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_trim, '(', $.trim_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_nullif, '(', $.a_expr, ',', $.a_expr, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_coalesce, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_greatest, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_least, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlconcat, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.xml_attributes, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlelement, '(', $.kw_name, $.ColLabel, ',', $.xml_attributes, ',', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlexists, '(', $.c_expr, $.xmlexists_argument, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlforest, '(', $.xml_attribute_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlparse, '(', $.document_or_content, $.a_expr, optional($.xml_whitespace_option), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlpi, '(', $.kw_name, $.ColLabel, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlpi, '(', $.kw_name, $.ColLabel, ',', $.a_expr, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlroot, '(', $.a_expr, ',', $.xml_root_version, optional($.opt_xml_root_standalone), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_xmlserialize, '(', $.document_or_content, $.a_expr, $.kw_as, $.SimpleTypename, optional($.xml_indent_option), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_object, '(', $.func_arg_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_object, '(', $.json_name_and_value_list, optional($.json_object_constructor_null_clause_opt), optional($.json_key_uniqueness_constraint_opt), optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_object, '(', optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_array, '(', $.json_value_expr_list, optional($.json_array_constructor_null_clause_opt), optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_array, '(', $.select_no_parens, optional($.json_format_clause_opt), optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_array, '(', optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json, '(', $.json_value_expr, optional($.json_key_uniqueness_constraint_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_scalar, '(', $.a_expr, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_serialize, '(', $.json_value_expr, optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_merge_action, '(', ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_query, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_returning_clause_opt), optional($.json_wrapper_behavior), optional($.json_quotes_clause_opt), optional($.json_behavior_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_exists, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_on_error_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_value, '(', $.json_value_expr, ',', $.a_expr, optional($.json_passing_clause_opt), optional($.json_returning_clause_opt), optional($.json_behavior_clause_opt), ')')))
       ),
     xml_root_version: $ => choice(
         seq($.kw_version, $.a_expr),
-        seq($.kw_version, $.kw_no, $.kw_value)
+        prec.left(11, prec.dynamic(11, seq($.kw_version, $.kw_no, $.kw_value)))
       ),
     opt_xml_root_standalone: $ => choice(
         seq(',', $.kw_standalone, $.kw_yes),
         seq(',', $.kw_standalone, $.kw_no),
-        seq(',', $.kw_standalone, $.kw_no, $.kw_value)
+        prec.left(11, prec.dynamic(11, seq(',', $.kw_standalone, $.kw_no, $.kw_value)))
       ),
-    xml_attributes: $ => seq($.kw_xmlattributes, '(', $.xml_attribute_list, ')'),
+    xml_attributes: $ => prec.left(20, prec.dynamic(20, seq($.kw_xmlattributes, '(', $.xml_attribute_list, ')'))),
     xml_attribute_list: $ => choice(
         $.xml_attribute_el,
         seq($.xml_attribute_list, ',', $.xml_attribute_el)
@@ -2876,10 +2865,10 @@ module.exports = grammar({
       ),
     xml_passing_mech: $ => choice(
         seq($.kw_by, $.kw_ref),
-        seq($.kw_by, $.kw_value)
+        prec.left(11, prec.dynamic(11, seq($.kw_by, $.kw_value)))
       ),
-    within_group_clause: $ => seq($.kw_within, $.kw_group, '(', $.sort_clause, ')'),
-    filter_clause: $ => seq($.kw_filter, '(', $.kw_where, $.a_expr, ')'),
+    within_group_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_within, $.kw_group, '(', $.sort_clause, ')'))),
+    filter_clause: $ => prec.left(20, prec.dynamic(20, seq($.kw_filter, '(', $.kw_where, $.a_expr, ')'))),
     window_clause: $ => seq($.kw_window, $.window_definition_list),
     window_definition_list: $ => choice(
         $.window_definition,
@@ -2890,24 +2879,24 @@ module.exports = grammar({
         seq($.kw_over, $.window_specification),
         seq($.kw_over, $.ColId)
       ),
-    window_specification: $ => seq('(', optional($.opt_existing_window_name), optional($.opt_partition_clause), optional($.opt_sort_clause), optional($.opt_frame_clause), ')'),
+    window_specification: $ => prec.left(20, prec.dynamic(20, seq('(', optional($.opt_existing_window_name), optional($.opt_partition_clause), optional($.opt_sort_clause), optional($.opt_frame_clause), ')'))),
     opt_existing_window_name: $ => $.ColId,
-    opt_partition_clause: $ => seq($.kw_partition, $.kw_by, $.expr_list),
+    opt_partition_clause: $ => prec.left(11, prec.dynamic(11, seq($.kw_partition, $.kw_by, $.expr_list))),
     opt_frame_clause: $ => choice(
-        seq($.kw_range, $.frame_extent, optional($.opt_window_exclusion_clause)),
-        seq($.kw_rows, $.frame_extent, optional($.opt_window_exclusion_clause)),
-        seq($.kw_groups, $.frame_extent, optional($.opt_window_exclusion_clause))
+        prec.left(11, prec.dynamic(11, seq($.kw_range, $.frame_extent, optional($.opt_window_exclusion_clause)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_rows, $.frame_extent, optional($.opt_window_exclusion_clause)))),
+        prec.left(11, prec.dynamic(11, seq($.kw_groups, $.frame_extent, optional($.opt_window_exclusion_clause))))
       ),
     frame_extent: $ => choice(
         $.frame_bound,
-        seq($.kw_between, $.frame_bound, $.kw_and, $.frame_bound)
+        prec.left(8, prec.dynamic(8, seq($.kw_between, $.frame_bound, $.kw_and, $.frame_bound)))
       ),
     frame_bound: $ => choice(
-        seq($.kw_unbounded, $.kw_preceding),
-        seq($.kw_unbounded, $.kw_following),
+        prec.left(10, prec.dynamic(10, seq($.kw_unbounded, $.kw_preceding))),
+        prec.left(10, prec.dynamic(10, seq($.kw_unbounded, $.kw_following))),
         seq($.kw_current, $.kw_row),
-        seq($.a_expr, $.kw_preceding),
-        seq($.a_expr, $.kw_following)
+        prec.left(11, prec.dynamic(11, seq($.a_expr, $.kw_preceding))),
+        prec.left(11, prec.dynamic(11, seq($.a_expr, $.kw_following)))
       ),
     opt_window_exclusion_clause: $ => choice(
         seq($.kw_exclude, $.kw_current, $.kw_row),
@@ -2916,15 +2905,15 @@ module.exports = grammar({
         seq($.kw_exclude, $.kw_no, $.kw_others)
       ),
     row: $ => choice(
-        seq($.kw_row, '(', $.expr_list, ')'),
-        seq($.kw_row, '(', ')'),
-        seq('(', $.expr_list, ',', $.a_expr, ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_row, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_row, '(', ')'))),
+        prec.left(20, prec.dynamic(20, seq('(', $.expr_list, ',', $.a_expr, ')')))
       ),
     explicit_row: $ => choice(
-        seq($.kw_row, '(', $.expr_list, ')'),
-        seq($.kw_row, '(', ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_row, '(', $.expr_list, ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_row, '(', ')')))
       ),
-    implicit_row: $ => seq('(', $.expr_list, ',', $.a_expr, ')'),
+    implicit_row: $ => prec.left(20, prec.dynamic(20, seq('(', $.expr_list, ',', $.a_expr, ')'))),
     sub_type: $ => choice(
         $.kw_any,
         $.kw_some,
@@ -2935,34 +2924,34 @@ module.exports = grammar({
         $.MathOp
       ),
     MathOp: $ => choice(
-        '+',
-        '-',
-        '*',
-        '/',
-        '%',
-        '^',
-        '<',
-        '>',
-        '=',
-        '<=',
-        '>=',
-        '<>'
+        prec.left(13, prec.dynamic(13, '+')),
+        prec.left(13, prec.dynamic(13, '-')),
+        prec.left(14, prec.dynamic(14, '*')),
+        prec.left(14, prec.dynamic(14, '/')),
+        prec.left(14, prec.dynamic(14, '%')),
+        prec.left(15, prec.dynamic(15, '^')),
+        prec.left(7, prec.dynamic(7, '<')),
+        prec.left(7, prec.dynamic(7, '>')),
+        prec.left(7, prec.dynamic(7, '=')),
+        prec.left(7, prec.dynamic(7, '<=')),
+        prec.left(7, prec.dynamic(7, '>=')),
+        prec.left(7, prec.dynamic(7, '<>'))
       ),
     qual_Op: $ => choice(
         $.operator,
-        seq($.kw_operator, '(', $.any_operator, ')')
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, '(', $.any_operator, ')')))
       ),
     qual_all_Op: $ => choice(
         $.all_Op,
-        seq($.kw_operator, '(', $.any_operator, ')')
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, '(', $.any_operator, ')')))
       ),
     subquery_Op: $ => choice(
         $.all_Op,
-        seq($.kw_operator, '(', $.any_operator, ')'),
-        $.kw_like,
-        seq($.kw_not, $.kw_like),
-        $.kw_ilike,
-        seq($.kw_not, $.kw_ilike)
+        prec.left(12, prec.dynamic(12, seq($.kw_operator, '(', $.any_operator, ')'))),
+        prec.left(8, prec.dynamic(8, $.kw_like)),
+        prec.left(8, prec.dynamic(8, seq($.kw_not, $.kw_like))),
+        prec.left(8, prec.dynamic(8, $.kw_ilike)),
+        prec.left(8, prec.dynamic(8, seq($.kw_not, $.kw_ilike)))
       ),
     expr_list: $ => choice(
         $.a_expr,
@@ -2983,9 +2972,9 @@ module.exports = grammar({
         seq($.type_list, ',', $.Typename)
       ),
     array_expr: $ => choice(
-        seq('[', $.expr_list, ']'),
-        seq('[', $.array_expr_list, ']'),
-        seq('[', ']')
+        prec.left(19, prec.dynamic(19, seq('[', $.expr_list, ']'))),
+        prec.left(19, prec.dynamic(19, seq('[', $.array_expr_list, ']'))),
+        prec.left(19, prec.dynamic(19, seq('[', ']')))
       ),
     array_expr_list: $ => choice(
         $.array_expr,
@@ -2993,7 +2982,7 @@ module.exports = grammar({
       ),
     extract_list: $ => seq($.extract_arg, $.kw_from, $.a_expr),
     extract_arg: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.kw_year,
         $.kw_month,
         $.kw_day,
@@ -3012,13 +3001,13 @@ module.exports = grammar({
         seq($.a_expr, $.kw_placing, $.a_expr, $.kw_from, $.a_expr, $.kw_for, $.a_expr),
         seq($.a_expr, $.kw_placing, $.a_expr, $.kw_from, $.a_expr)
       ),
-    position_list: $ => seq($.b_expr, $.kw_in, $.b_expr),
+    position_list: $ => prec.left(8, prec.dynamic(8, seq($.b_expr, $.kw_in, $.b_expr))),
     substr_list: $ => choice(
         seq($.a_expr, $.kw_from, $.a_expr, $.kw_for, $.a_expr),
         seq($.a_expr, $.kw_for, $.a_expr, $.kw_from, $.a_expr),
         seq($.a_expr, $.kw_from, $.a_expr),
         seq($.a_expr, $.kw_for, $.a_expr),
-        seq($.a_expr, $.kw_similar, $.a_expr, $.kw_escape, $.a_expr)
+        prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_similar, $.a_expr, $.kw_escape, $.a_expr)))
       ),
     trim_list: $ => choice(
         seq($.a_expr, $.kw_from, $.expr_list),
@@ -3038,10 +3027,10 @@ module.exports = grammar({
         seq($.ColId, $.indirection)
       ),
     indirection_el: $ => choice(
-        seq('.', $.attr_name),
-        seq('.', '*'),
-        seq('[', $.a_expr, ']'),
-        seq('[', optional($.opt_slice_bound), ':', optional($.opt_slice_bound), ']')
+        prec.left(22, prec.dynamic(22, seq('.', $.attr_name))),
+        prec.left(22, prec.dynamic(22, seq('.', '*'))),
+        prec.left(19, prec.dynamic(19, seq('[', $.a_expr, ']'))),
+        prec.left(19, prec.dynamic(19, seq('[', optional($.opt_slice_bound), ':', optional($.opt_slice_bound), ']')))
       ),
     opt_slice_bound: $ => $.a_expr,
     indirection: $ => choice(
@@ -3057,14 +3046,14 @@ module.exports = grammar({
       ),
     json_argument: $ => seq($.json_value_expr, $.kw_as, $.ColLabel),
     json_wrapper_behavior: $ => choice(
-        seq($.kw_without, $.kw_wrapper),
-        seq($.kw_without, $.kw_array, $.kw_wrapper),
-        seq($.kw_with, $.kw_wrapper),
-        seq($.kw_with, $.kw_array, $.kw_wrapper),
-        seq($.kw_with, $.kw_conditional, $.kw_array, $.kw_wrapper),
-        seq($.kw_with, $.kw_unconditional, $.kw_array, $.kw_wrapper),
-        seq($.kw_with, $.kw_conditional, $.kw_wrapper),
-        seq($.kw_with, $.kw_unconditional, $.kw_wrapper)
+        prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_array, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_array, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_conditional, $.kw_array, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_unconditional, $.kw_array, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_conditional, $.kw_wrapper))),
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_unconditional, $.kw_wrapper)))
       ),
     json_behavior: $ => choice(
         seq($.kw_default, $.a_expr),
@@ -3077,7 +3066,7 @@ module.exports = grammar({
         $.kw_false,
         $.kw_unknown,
         seq($.kw_empty, $.kw_array),
-        seq($.kw_empty, $.kw_object),
+        prec.left(11, prec.dynamic(11, seq($.kw_empty, $.kw_object))),
         $.kw_empty
       ),
     json_behavior_clause_opt: $ => choice(
@@ -3093,31 +3082,31 @@ module.exports = grammar({
       ),
     json_format_clause_opt: $ => $.json_format_clause,
     json_quotes_clause_opt: $ => choice(
-        seq($.kw_keep, $.kw_quotes, $.kw_on, $.kw_scalar, $.kw_string),
+        prec.left(11, prec.dynamic(11, seq($.kw_keep, $.kw_quotes, $.kw_on, $.kw_scalar, $.kw_string))),
         seq($.kw_keep, $.kw_quotes),
-        seq($.kw_omit, $.kw_quotes, $.kw_on, $.kw_scalar, $.kw_string),
+        prec.left(11, prec.dynamic(11, seq($.kw_omit, $.kw_quotes, $.kw_on, $.kw_scalar, $.kw_string))),
         seq($.kw_omit, $.kw_quotes)
       ),
     json_returning_clause_opt: $ => seq($.kw_returning, $.Typename, optional($.json_format_clause_opt)),
     json_predicate_type_constraint: $ => choice(
-        $.kw_json,
-        seq($.kw_json, $.kw_value),
+        prec.left(10, prec.dynamic(10, $.kw_json)),
+        prec.left(11, prec.dynamic(11, seq($.kw_json, $.kw_value))),
         seq($.kw_json, $.kw_array),
-        seq($.kw_json, $.kw_object),
-        seq($.kw_json, $.kw_scalar)
+        prec.left(11, prec.dynamic(11, seq($.kw_json, $.kw_object))),
+        prec.left(11, prec.dynamic(11, seq($.kw_json, $.kw_scalar)))
       ),
     json_key_uniqueness_constraint_opt: $ => choice(
-        seq($.kw_with, $.kw_unique, $.kw_keys),
-        seq($.kw_with, $.kw_unique),
-        seq($.kw_without, $.kw_unique, $.kw_keys),
-        seq($.kw_without, $.kw_unique)
+        prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_unique, $.kw_keys))),
+        prec.left(10, prec.dynamic(10, seq($.kw_with, $.kw_unique))),
+        prec.left(11, prec.dynamic(11, seq($.kw_without, $.kw_unique, $.kw_keys))),
+        prec.left(10, prec.dynamic(10, seq($.kw_without, $.kw_unique)))
       ),
     json_name_and_value_list: $ => choice(
         $.json_name_and_value,
         seq($.json_name_and_value_list, ',', $.json_name_and_value)
       ),
     json_name_and_value: $ => choice(
-        seq($.c_expr, $.kw_value, $.json_value_expr),
+        prec.left(11, prec.dynamic(11, seq($.c_expr, $.kw_value, $.json_value_expr))),
         seq($.a_expr, ':', $.json_value_expr)
       ),
     json_object_constructor_null_clause_opt: $ => choice(
@@ -3133,8 +3122,8 @@ module.exports = grammar({
         seq($.json_value_expr_list, ',', $.json_value_expr)
       ),
     json_aggregate_func: $ => choice(
-        seq($.kw_json_objectagg, '(', $.json_name_and_value, optional($.json_object_constructor_null_clause_opt), optional($.json_key_uniqueness_constraint_opt), optional($.json_returning_clause_opt), ')'),
-        seq($.kw_json_arrayagg, '(', $.json_value_expr, optional($.json_array_aggregate_order_by_clause_opt), optional($.json_array_constructor_null_clause_opt), optional($.json_returning_clause_opt), ')')
+        prec.left(20, prec.dynamic(20, seq($.kw_json_objectagg, '(', $.json_name_and_value, optional($.json_object_constructor_null_clause_opt), optional($.json_key_uniqueness_constraint_opt), optional($.json_returning_clause_opt), ')'))),
+        prec.left(20, prec.dynamic(20, seq($.kw_json_arrayagg, '(', $.json_value_expr, optional($.json_array_aggregate_order_by_clause_opt), optional($.json_array_constructor_null_clause_opt), optional($.json_returning_clause_opt), ')')))
       ),
     json_array_aggregate_order_by_clause_opt: $ => seq($.kw_order, $.kw_by, $.sortby_list),
     opt_target_list: $ => $.target_list,
@@ -3146,7 +3135,7 @@ module.exports = grammar({
         seq($.a_expr, $.kw_as, $.ColLabel),
         seq($.a_expr, $.BareColLabel),
         $.a_expr,
-        '*'
+        prec.left(14, prec.dynamic(14, '*'))
       ),
     qualified_name_list: $ => choice(
         $.qualified_name,
@@ -3174,10 +3163,10 @@ module.exports = grammar({
         $.bit_string_literal,
         $.hex_string_literal,
         seq($.func_name, $.Sconst),
-        seq($.func_name, '(', $.func_arg_list, optional($.opt_sort_clause), ')', $.Sconst),
+        prec.left(20, prec.dynamic(20, seq($.func_name, '(', $.func_arg_list, optional($.opt_sort_clause), ')', $.Sconst))),
         seq($.ConstTypename, $.Sconst),
         seq($.ConstInterval, $.Sconst, optional($.opt_interval)),
-        seq($.ConstInterval, '(', $.Iconst, ')', $.Sconst),
+        prec.left(20, prec.dynamic(20, seq($.ConstInterval, '(', $.Iconst, ')', $.Sconst))),
         $.kw_true,
         $.kw_false,
         $.kw_null
@@ -3186,8 +3175,8 @@ module.exports = grammar({
     Sconst: $ => $.string_literal,
     SignedIconst: $ => choice(
         $.Iconst,
-        seq('+', $.Iconst),
-        seq('-', $.Iconst)
+        prec.left(13, prec.dynamic(13, seq('+', $.Iconst))),
+        prec.left(13, prec.dynamic(13, seq('-', $.Iconst)))
       ),
     RoleId: $ => $.RoleSpec,
     RoleSpec: $ => choice(
@@ -3208,33 +3197,33 @@ module.exports = grammar({
       ),
     plassign_equals: $ => choice(
         ':=',
-        '='
+        prec.left(7, prec.dynamic(7, '='))
       ),
     ColId: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.unreserved_keyword,
         $.col_name_keyword
       ),
     type_function_name: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.unreserved_keyword,
         $.type_func_name_keyword
       ),
     NonReservedWord: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.unreserved_keyword,
         $.col_name_keyword,
         $.type_func_name_keyword
       ),
     ColLabel: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.unreserved_keyword,
         $.col_name_keyword,
         $.type_func_name_keyword,
         $.reserved_keyword
       ),
     BareColLabel: $ => choice(
-        $.identifier,
+        prec.left(11, prec.dynamic(11, $.identifier)),
         $.bare_label_keyword
       ),
     bare_label_keyword: $ => choice(
@@ -3253,14 +3242,14 @@ module.exports = grammar({
         $.kw_always,
         $.kw_analyse,
         $.kw_analyze,
-        $.kw_and,
+        prec.left(4, prec.dynamic(4, $.kw_and)),
         $.kw_any,
         $.kw_asc,
         $.kw_asensitive,
         $.kw_assertion,
         $.kw_assignment,
         $.kw_asymmetric,
-        $.kw_at,
+        prec.left(16, prec.dynamic(16, $.kw_at)),
         $.kw_atomic,
         $.kw_attach,
         $.kw_attribute,
@@ -3268,7 +3257,7 @@ module.exports = grammar({
         $.kw_backward,
         $.kw_before,
         $.kw_begin,
-        $.kw_between,
+        prec.left(8, prec.dynamic(8, $.kw_between)),
         $.kw_bigint,
         $.kw_binary,
         $.kw_bit,
@@ -3292,7 +3281,7 @@ module.exports = grammar({
         $.kw_close,
         $.kw_cluster,
         $.kw_coalesce,
-        $.kw_collate,
+        prec.left(17, prec.dynamic(17, $.kw_collate)),
         $.kw_collation,
         $.kw_column,
         $.kw_columns,
@@ -3313,9 +3302,9 @@ module.exports = grammar({
         $.kw_conversion,
         $.kw_copy,
         $.kw_cost,
-        $.kw_cross,
+        prec.left(23, prec.dynamic(23, $.kw_cross)),
         $.kw_csv,
-        $.kw_cube,
+        prec.left(11, prec.dynamic(11, $.kw_cube)),
         $.kw_current,
         $.kw_current_catalog,
         $.kw_current_date,
@@ -3363,7 +3352,7 @@ module.exports = grammar({
         $.kw_enforced,
         $.kw_enum,
         $.kw_error,
-        $.kw_escape,
+        prec.left(9, prec.dynamic(9, $.kw_escape)),
         $.kw_event,
         $.kw_exclude,
         $.kw_excluding,
@@ -3380,13 +3369,13 @@ module.exports = grammar({
         $.kw_finalize,
         $.kw_first,
         $.kw_float,
-        $.kw_following,
+        prec.left(11, prec.dynamic(11, $.kw_following)),
         $.kw_force,
         $.kw_foreign,
         $.kw_format,
         $.kw_forward,
         $.kw_freeze,
-        $.kw_full,
+        prec.left(23, prec.dynamic(23, $.kw_full)),
         $.kw_function,
         $.kw_functions,
         $.kw_generated,
@@ -3394,18 +3383,18 @@ module.exports = grammar({
         $.kw_granted,
         $.kw_greatest,
         $.kw_grouping,
-        $.kw_groups,
+        prec.left(11, prec.dynamic(11, $.kw_groups)),
         $.kw_handler,
         $.kw_header,
         $.kw_hold,
         $.kw_identity,
         $.kw_if,
-        $.kw_ilike,
+        prec.left(8, prec.dynamic(8, $.kw_ilike)),
         $.kw_immediate,
         $.kw_immutable,
         $.kw_implicit,
         $.kw_import,
-        $.kw_in,
+        prec.left(8, prec.dynamic(8, $.kw_in)),
         $.kw_include,
         $.kw_including,
         $.kw_increment,
@@ -3416,7 +3405,7 @@ module.exports = grammar({
         $.kw_inherits,
         $.kw_initially,
         $.kw_inline,
-        $.kw_inner,
+        prec.left(23, prec.dynamic(23, $.kw_inner)),
         $.kw_inout,
         $.kw_input,
         $.kw_insensitive,
@@ -3426,9 +3415,9 @@ module.exports = grammar({
         $.kw_integer,
         $.kw_interval,
         $.kw_invoker,
-        $.kw_is,
+        prec.left(6, prec.dynamic(6, $.kw_is)),
         $.kw_isolation,
-        $.kw_join,
+        prec.left(23, prec.dynamic(23, $.kw_join)),
         $.kw_json,
         $.kw_json_array,
         $.kw_json_arrayagg,
@@ -3442,7 +3431,7 @@ module.exports = grammar({
         $.kw_json_value,
         $.kw_keep,
         $.kw_key,
-        $.kw_keys,
+        prec.left(11, prec.dynamic(11, $.kw_keys)),
         $.kw_label,
         $.kw_language,
         $.kw_large,
@@ -3451,9 +3440,9 @@ module.exports = grammar({
         $.kw_leading,
         $.kw_leakproof,
         $.kw_least,
-        $.kw_left,
+        prec.left(23, prec.dynamic(23, $.kw_left)),
         $.kw_level,
-        $.kw_like,
+        prec.left(8, prec.dynamic(8, $.kw_like)),
         $.kw_listen,
         $.kw_load,
         $.kw_local,
@@ -3477,9 +3466,9 @@ module.exports = grammar({
         $.kw_name,
         $.kw_names,
         $.kw_national,
-        $.kw_natural,
+        prec.left(23, prec.dynamic(23, $.kw_natural)),
         $.kw_nchar,
-        $.kw_nested,
+        prec.left(10, prec.dynamic(10, $.kw_nested)),
         $.kw_new,
         $.kw_next,
         $.kw_nfc,
@@ -3490,7 +3479,7 @@ module.exports = grammar({
         $.kw_none,
         $.kw_normalize,
         $.kw_normalized,
-        $.kw_not,
+        prec.right(5, prec.dynamic(5, $.kw_not)),
         $.kw_nothing,
         $.kw_notify,
         $.kw_nowait,
@@ -3498,7 +3487,7 @@ module.exports = grammar({
         $.kw_nullif,
         $.kw_nulls,
         $.kw_numeric,
-        $.kw_object,
+        prec.left(11, prec.dynamic(11, $.kw_object)),
         $.kw_objects,
         $.kw_of,
         $.kw_off,
@@ -3506,10 +3495,10 @@ module.exports = grammar({
         $.kw_old,
         $.kw_omit,
         $.kw_only,
-        $.kw_operator,
+        prec.left(12, prec.dynamic(12, $.kw_operator)),
         $.kw_option,
         $.kw_options,
-        $.kw_or,
+        prec.left(3, prec.dynamic(3, $.kw_or)),
         $.kw_ordinality,
         $.kw_others,
         $.kw_out,
@@ -3522,17 +3511,17 @@ module.exports = grammar({
         $.kw_parameter,
         $.kw_parser,
         $.kw_partial,
-        $.kw_partition,
+        prec.left(11, prec.dynamic(11, $.kw_partition)),
         $.kw_passing,
         $.kw_password,
-        $.kw_path,
+        prec.left(11, prec.dynamic(11, $.kw_path)),
         $.kw_period,
         $.kw_placing,
         $.kw_plan,
         $.kw_plans,
         $.kw_policy,
         $.kw_position,
-        $.kw_preceding,
+        prec.left(11, prec.dynamic(11, $.kw_preceding)),
         $.kw_prepare,
         $.kw_prepared,
         $.kw_preserve,
@@ -3546,7 +3535,7 @@ module.exports = grammar({
         $.kw_publication,
         $.kw_quote,
         $.kw_quotes,
-        $.kw_range,
+        prec.left(11, prec.dynamic(11, $.kw_range)),
         $.kw_read,
         $.kw_real,
         $.kw_reassign,
@@ -3568,17 +3557,17 @@ module.exports = grammar({
         $.kw_return,
         $.kw_returns,
         $.kw_revoke,
-        $.kw_right,
+        prec.left(23, prec.dynamic(23, $.kw_right)),
         $.kw_role,
         $.kw_rollback,
-        $.kw_rollup,
+        prec.left(11, prec.dynamic(11, $.kw_rollup)),
         $.kw_routine,
         $.kw_routines,
         $.kw_row,
-        $.kw_rows,
+        prec.left(11, prec.dynamic(11, $.kw_rows)),
         $.kw_rule,
         $.kw_savepoint,
-        $.kw_scalar,
+        prec.left(11, prec.dynamic(11, $.kw_scalar)),
         $.kw_schema,
         $.kw_schemas,
         $.kw_scroll,
@@ -3591,12 +3580,12 @@ module.exports = grammar({
         $.kw_server,
         $.kw_session,
         $.kw_session_user,
-        $.kw_set,
+        prec.left(11, prec.dynamic(11, $.kw_set)),
         $.kw_setof,
         $.kw_sets,
         $.kw_share,
         $.kw_show,
-        $.kw_similar,
+        prec.left(8, prec.dynamic(8, $.kw_similar)),
         $.kw_simple,
         $.kw_skip,
         $.kw_smallint,
@@ -3648,7 +3637,7 @@ module.exports = grammar({
         $.kw_type,
         $.kw_types,
         $.kw_uescape,
-        $.kw_unbounded,
+        prec.left(10, prec.dynamic(10, $.kw_unbounded)),
         $.kw_uncommitted,
         $.kw_unconditional,
         $.kw_unencrypted,
@@ -3664,7 +3653,7 @@ module.exports = grammar({
         $.kw_valid,
         $.kw_validate,
         $.kw_validator,
-        $.kw_value,
+        prec.left(11, prec.dynamic(11, $.kw_value)),
         $.kw_values,
         $.kw_varchar,
         $.kw_variadic,

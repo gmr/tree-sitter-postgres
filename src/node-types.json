@@ -9258,6 +9258,10 @@
           "named": true
         },
         {
+          "type": "a_expr_prec",
+          "named": true
+        },
+        {
           "type": "any_name",
           "named": true
         },
@@ -9431,6 +9435,57 @@
         },
         {
           "type": "unicode_normal_form",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "a_expr_prec",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Typename",
+          "named": true
+        },
+        {
+          "type": "a_expr_prec",
+          "named": true
+        },
+        {
+          "type": "any_name",
+          "named": true
+        },
+        {
+          "type": "c_expr",
+          "named": true
+        },
+        {
+          "type": "kw_and",
+          "named": true
+        },
+        {
+          "type": "kw_at",
+          "named": true
+        },
+        {
+          "type": "kw_collate",
+          "named": true
+        },
+        {
+          "type": "kw_local",
+          "named": true
+        },
+        {
+          "type": "kw_not",
+          "named": true
+        },
+        {
+          "type": "kw_or",
           "named": true
         }
       ]
@@ -10486,6 +10541,10 @@
           "named": true
         },
         {
+          "type": "b_expr_prec",
+          "named": true
+        },
+        {
           "type": "c_expr",
           "named": true
         },
@@ -10511,6 +10570,29 @@
         },
         {
           "type": "qual_Op",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "b_expr_prec",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Typename",
+          "named": true
+        },
+        {
+          "type": "b_expr_prec",
+          "named": true
+        },
+        {
+          "type": "c_expr",
           "named": true
         }
       ]

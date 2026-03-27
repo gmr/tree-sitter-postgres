@@ -1,34 +1,6 @@
 [
   [
-    "qual_Op",
-    "unreserved_keyword"
-  ],
-  [
-    "relation_expr_opt_alias",
-    "relation_expr_opt_alias"
-  ],
-  [
     "utility_option_name",
-    "unreserved_keyword"
-  ],
-  [
-    "select_with_parens",
-    "c_expr"
-  ],
-  [
-    "a_expr",
-    "a_expr"
-  ],
-  [
-    "simple_select",
-    "simple_select"
-  ],
-  [
-    "cube_clause",
-    "unreserved_keyword"
-  ],
-  [
-    "rollup_clause",
     "unreserved_keyword"
   ],
   [
@@ -36,24 +8,16 @@
     "col_name_keyword"
   ],
   [
-    "json_predicate_type_constraint",
-    "json_predicate_type_constraint"
+    "simple_select",
+    "simple_select"
+  ],
+  [
+    "a_expr",
+    "a_expr"
   ],
   [
     "target_el",
     "target_el"
-  ],
-  [
-    "b_expr",
-    "b_expr"
-  ],
-  [
-    "opt_frame_clause",
-    "unreserved_keyword"
-  ],
-  [
-    "joined_table",
-    "joined_table"
   ],
   [
     "ConstDatetime",
@@ -68,39 +32,7 @@
     "unreserved_keyword"
   ],
   [
-    "a_expr",
-    "bare_label_keyword"
-  ],
-  [
-    "json_key_uniqueness_constraint_opt",
-    "json_key_uniqueness_constraint_opt"
-  ],
-  [
-    "frame_extent",
-    "col_name_keyword"
-  ],
-  [
-    "frame_bound",
-    "unreserved_keyword"
-  ],
-  [
-    "qual_all_Op",
-    "unreserved_keyword"
-  ],
-  [
     "func_table",
     "func_table"
-  ],
-  [
-    "table_ref",
-    "joined_table"
-  ],
-  [
-    "json_table_column_definition",
-    "unreserved_keyword"
-  ],
-  [
-    "SelectStmt",
-    "select_with_parens"
   ]
 ]

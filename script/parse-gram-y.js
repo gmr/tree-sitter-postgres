@@ -107,10 +107,34 @@ function stripCActions(text) {
 }
 
 /**
+ * Extract token names and single-char literals from a precedence line.
+ * ALL_CAPS identifiers are stored as-is (e.g. "UNION").
+ * Single-quoted chars are stored with quotes (e.g. "'+'").
+ */
+function extractPrecTokens(text, tokens) {
+  // Strip block comments
+  text = text.replace(/\/\*.*?\*\//g, '');
+  // Match identifiers (starting with uppercase) and single-quoted characters.
+  // Most tokens are ALL_CAPS but a few like "Op" are mixed-case.
+  const re = /\b([A-Z]\w*)\b|'([^']*)'/g;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    if (match[1]) {
+      tokens.push(match[1]);
+    } else if (match[2]) {
+      tokens.push("'" + match[2] + "'");
+    }
+  }
+}
+
+/**
  * Parse precedence declarations from the Bison declarations section.
  * Returns an array of:
  *   { type: 'left'|'right'|'nonassoc', tokens: string[], level: number }
  * Level 1 = lowest precedence, increasing upward.
+ *
+ * Tokens are either ALL_CAPS names (e.g. "UNION") or quoted single-char
+ * literals (e.g. "'+'"). Handles continuation lines that follow a directive.
  */
 function parsePrecedence(declarationsText) {
   const rules = [];
@@ -121,20 +145,33 @@ function parsePrecedence(declarationsText) {
   text = text.replace(/%union\s*\{[\s\S]*?\n\}/m, '');
 
   const lines = text.split('\n');
-  for (const line of lines) {
-    const m = line.match(/^\s*%(left|right|nonassoc)\s+(.+)/);
-    if (!m) continue;
+  let currentType = null;
+  let currentTokens = null;
 
-    const type = m[1];
-    // Extract token names — filter out single-quoted chars like '<' '>'
-    const tokensPart = m[2].replace(/'[^']*'/g, '').replace(/\/\*.*?\*\//g, '');
-    const tokens = tokensPart.match(/\b[A-Z][A-Z0-9_]*\b/g) || [];
-
-    if (tokens.length > 0) {
-      rules.push({ type, tokens, level });
+  function flushLevel() {
+    if (currentTokens && currentTokens.length > 0) {
+      rules.push({ type: currentType, tokens: currentTokens, level });
+      level++;
     }
-    level++;
+    currentType = null;
+    currentTokens = null;
   }
+
+  for (const line of lines) {
+    const m = line.match(/^\s*%(left|right|nonassoc)\s+(.*)/);
+    if (m) {
+      flushLevel();
+      currentType = m[1];
+      currentTokens = [];
+      extractPrecTokens(m[2], currentTokens);
+    } else if (currentType && /^\s+\S/.test(line) && !/^\s*%/.test(line)) {
+      // Continuation line (indented, no new % directive)
+      extractPrecTokens(line, currentTokens);
+    } else {
+      flushLevel();
+    }
+  }
+  flushLevel();
 
   return rules;
 }
@@ -225,10 +262,12 @@ function tokenizeRules(text) {
       while (j < len && /\w/.test(text[j])) j++;
       const directive = text.slice(i + 1, j);
       if (directive === 'prec') {
-        // Skip whitespace and the following precedence token name
+        // Capture the precedence token name
         while (j < len && /\s/.test(text[j])) j++;
+        const nameStart = j;
         while (j < len && /\w/.test(text[j])) j++;
-        tokens.push({ type: 'PREC' });
+        const precToken = text.slice(nameStart, j);
+        tokens.push({ type: 'PREC', value: precToken });
       }
       // Other % directives in the rules section are unusual; skip
       i = j;
@@ -340,7 +379,8 @@ function parseRuleTokens(tokens) {
       }
 
       if (tok.type === 'PREC') {
-        // Strip precedence annotations
+        // Keep precedence annotation in the alternative for codegen
+        currentAlt.push(tok);
         i++;
         continue;
       }
