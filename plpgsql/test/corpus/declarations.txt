@@ -1,0 +1,257 @@
+==================
+Variable with default
+==================
+
+DECLARE
+  x integer := 0;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))
+          (decl_defval
+            (sql_expression)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Constant declaration
+==================
+
+DECLARE
+  pi CONSTANT numeric := 3.14;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (kw_constant)
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))
+          (decl_defval
+            (sql_expression)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Not null declaration
+==================
+
+DECLARE
+  x integer NOT NULL := 1;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))
+          (kw_not)
+          (kw_null)
+          (decl_defval
+            (sql_expression)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Rowtype declaration
+==================
+
+DECLARE
+  rec my_table%ROWTYPE;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))
+              (kw_rowtype))))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Type reference declaration
+==================
+
+DECLARE
+  x my_table.col%TYPE;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier))
+                (any_identifier
+                  (identifier)))
+              (kw_type))))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Alias declaration
+==================
+
+DECLARE
+  x ALIAS FOR old_name;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (kw_alias)
+          (kw_for)
+          (any_identifier
+            (identifier)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Multiple declarations
+==================
+
+DECLARE
+  a integer;
+  b text;
+  c boolean := true;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))))
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))))
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))
+          (decl_defval
+            (sql_expression)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))

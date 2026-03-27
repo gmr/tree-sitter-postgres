@@ -1,0 +1,8 @@
+name: Regenerate
+on:
+  pull_request:
+
+jobs:
+  regenerate:
+    if: github.actor == 'dependabot[bot]'
+    uses: tree-sitter/workflows/.github/workflows/regenerate.yml@main

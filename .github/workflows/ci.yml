@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - postgres/**
+      - plpgsql/**
+      - bindings/**
+      - script/**
+      - Cargo.toml
+      - package.json
+      - pyproject.toml
+      - Package.swift
+      - binding.gyp
+      - go.mod
+  pull_request:
+    paths:
+      - postgres/**
+      - plpgsql/**
+      - bindings/**
+      - script/**
+      - Cargo.toml
+      - package.json
+      - pyproject.toml
+      - Package.swift
+      - binding.gyp
+      - go.mod
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: tree-sitter/setup-action/cli@v2
+      - name: Run corpus tests
+        run: tree-sitter test

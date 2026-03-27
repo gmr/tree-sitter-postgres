@@ -1,0 +1,4488 @@
+{
+  "name": "plpgsql",
+  "word": "identifier",
+  "rules": {
+    "source_file": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "comp_options"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "pl_block"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ";"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "comp_options": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "SYMBOL",
+        "name": "comp_option"
+      }
+    },
+    "comp_option": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "#"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_option"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_dump"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "#"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_print_strict_params"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "option_value"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "#"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_variable_conflict"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_error"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "#"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_variable_conflict"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_use_variable"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "#"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_variable_conflict"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_use_column"
+            }
+          ]
+        }
+      ]
+    },
+    "option_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unreserved_keyword"
+        }
+      ]
+    },
+    "pl_block": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "block_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "decl_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_begin"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "exception_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_end"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "end_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "block_label": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "<<"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "STRING",
+          "value": ">>"
+        }
+      ]
+    },
+    "end_label": {
+      "type": "SYMBOL",
+      "name": "any_identifier"
+    },
+    "decl_sect": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_declare"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "decl_stmt"
+          }
+        }
+      ]
+    },
+    "decl_stmt": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "decl_statement"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_declare"
+        }
+      ]
+    },
+    "decl_statement": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "decl_varname"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_alias"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_for"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "any_identifier"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "decl_varname"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_constant"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "decl_datatype"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "decl_collate"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_not"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_null"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "decl_defval"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "decl_varname"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_scrollable"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_cursor"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "decl_cursor_args"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_is"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_for"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        }
+      ]
+    },
+    "decl_varname": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unreserved_keyword"
+        }
+      ]
+    },
+    "decl_datatype": {
+      "type": "SYMBOL",
+      "name": "type_name"
+    },
+    "type_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "dotted_name"
+            },
+            {
+              "type": "STRING",
+              "value": "%"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_type"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "dotted_name"
+            },
+            {
+              "type": "STRING",
+              "value": "%"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_rowtype"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "dotted_name"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "("
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "integer_literal"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SEQ",
+                          "members": [
+                            {
+                              "type": "STRING",
+                              "value": ","
+                            },
+                            {
+                              "type": "SYMBOL",
+                              "name": "integer_literal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "STRING",
+                      "value": ")"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "["
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "integer_literal"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "]"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dotted_name": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "SYMBOL",
+                "name": "any_identifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "decl_collate": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_collate"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dotted_name"
+        }
+      ]
+    },
+    "decl_defval": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "="
+            },
+            {
+              "type": "STRING",
+              "value": ":="
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        }
+      ]
+    },
+    "opt_scrollable": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_no"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_scroll"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_scroll"
+        }
+      ]
+    },
+    "decl_cursor_args": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "decl_cursor_arg"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ","
+              },
+              {
+                "type": "SYMBOL",
+                "name": "decl_cursor_arg"
+              }
+            ]
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
+    },
+    "decl_cursor_arg": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "decl_varname"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "decl_datatype"
+        }
+      ]
+    },
+    "proc_sect": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "SYMBOL",
+        "name": "proc_stmt"
+      }
+    },
+    "proc_stmt": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "pl_block"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_assign"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_if"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_case"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_loop"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_while"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_for"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_foreach_a"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_exit"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_return"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_raise"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_assert"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_execsql"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_dynexecute"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_perform"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_call"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_getdiag"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_open"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_fetch"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_move"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_close"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_null"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_commit"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "stmt_rollback"
+        }
+      ]
+    },
+    "stmt_assign": {
+      "type": "PREC_DYNAMIC",
+      "value": 10,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "sql_expression"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ":="
+              },
+              {
+                "type": "STRING",
+                "value": "="
+              }
+            ]
+          },
+          {
+            "type": "SYMBOL",
+            "name": "sql_expression"
+          },
+          {
+            "type": "STRING",
+            "value": ";"
+          }
+        ]
+      }
+    },
+    "stmt_if": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_if"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_then"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "elsif_clause"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "else_clause"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_end"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_if"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "elsif_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_elsif"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_then"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "else_clause": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_else"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "stmt_case": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_case"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "case_when"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_else"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "proc_sect"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_end"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_case"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "case_when": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_when"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_then"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "stmt_loop": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "loop_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "loop_body"
+        }
+      ]
+    },
+    "stmt_while": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "loop_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_while"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "loop_body"
+        }
+      ]
+    },
+    "stmt_for": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "loop_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_for"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "for_variable"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_in"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "for_integer_range"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "for_query"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "for_cursor"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "for_dynamic"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "loop_body"
+        }
+      ]
+    },
+    "for_variable": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ","
+              },
+              {
+                "type": "SYMBOL",
+                "name": "any_identifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "for_integer_range": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_reverse"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ".."
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_by"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        }
+      ]
+    },
+    "for_query": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        }
+      ]
+    },
+    "for_cursor": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "("
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "sql_expression"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "STRING",
+                  "value": ")"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        }
+      ]
+    },
+    "for_dynamic": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_execute"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_using"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "sql_expression"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        }
+      ]
+    },
+    "stmt_foreach_a": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "loop_label"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_foreach"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "for_variable"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_slice"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "integer_literal"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_in"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_array"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "loop_body"
+        }
+      ]
+    },
+    "loop_label": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "<<"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "STRING",
+          "value": ">>"
+        }
+      ]
+    },
+    "loop_body": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_end"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "any_identifier"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_exit": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_exit"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_continue"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "any_identifier"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_when"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_return": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_return"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_return"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_next"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_return"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_query"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_return"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_query"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_execute"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_using"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "sql_expression"
+                    },
+                    {
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "sql_expression"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        }
+      ]
+    },
+    "stmt_raise": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_raise"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "raise_level"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "string_literal"
+                    },
+                    {
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "sql_expression"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "any_identifier"
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_sqlstate"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "string_literal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_using"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "raise_option"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "raise_option"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "raise_level": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_exception"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_warning"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_notice"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_info"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_log"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_debug"
+        }
+      ]
+    },
+    "raise_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_message"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_detail"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_hint"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_errcode"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_column"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_constraint"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_datatype"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_table"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_schema"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "="
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        }
+      ]
+    },
+    "stmt_assert": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_assert"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ","
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_dynexecute": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_execute"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_into"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_strict"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "into_target"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_using"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "sql_expression"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "sql_expression"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_perform": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_perform"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_call": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_call"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_do"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_getdiag": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_get"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_current"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_stacked"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_diagnostics"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "getdiag_list_item"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ","
+              },
+              {
+                "type": "SYMBOL",
+                "name": "getdiag_list_item"
+              }
+            ]
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "getdiag_list_item": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "="
+            },
+            {
+              "type": "STRING",
+              "value": ":="
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "getdiag_item"
+        }
+      ]
+    },
+    "getdiag_item": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_row_count"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_routine_oid"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_context"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_detail"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_hint"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_context"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_column_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_constraint_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_datatype_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_message_text"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_table_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_schema_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_returned_sqlstate"
+        }
+      ]
+    },
+    "stmt_open": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_open"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "opt_scrollable"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_for"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SEQ",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "kw_execute"
+                            },
+                            {
+                              "type": "SYMBOL",
+                              "name": "sql_expression"
+                            },
+                            {
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "SEQ",
+                                  "members": [
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "kw_using"
+                                    },
+                                    {
+                                      "type": "SYMBOL",
+                                      "name": "sql_expression"
+                                    },
+                                    {
+                                      "type": "REPEAT",
+                                      "content": {
+                                        "type": "SEQ",
+                                        "members": [
+                                          {
+                                            "type": "STRING",
+                                            "value": ","
+                                          },
+                                          {
+                                            "type": "SYMBOL",
+                                            "name": "sql_expression"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "BLANK"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "sql_expression"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "("
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "sql_expression"
+                    },
+                    {
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "sql_expression"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "STRING",
+                      "value": ")"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_fetch": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_fetch"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "fetch_direction"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_from"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_into"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "into_target"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_move": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_move"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "fetch_direction"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "fetch_direction": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_next"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_prior"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_first"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_last"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_absolute"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_relative"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "sql_expression"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_forward"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_backward"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_forward"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "integer_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_all"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_backward"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "integer_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_all"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "stmt_close": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_close"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_null": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_null"
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_commit": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_commit"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "opt_transaction_chain"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "stmt_rollback": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_rollback"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "opt_transaction_chain"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "opt_transaction_chain": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_and"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_chain"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_and"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_no"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_chain"
+            }
+          ]
+        }
+      ]
+    },
+    "stmt_execsql": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "sql_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_into"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "kw_strict"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "into_target"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
+    },
+    "into_target": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ","
+              },
+              {
+                "type": "SYMBOL",
+                "name": "any_identifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "exception_sect": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_exception"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "proc_exception"
+          }
+        }
+      ]
+    },
+    "proc_exception": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_when"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "proc_conditions"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_then"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "proc_sect"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "proc_conditions": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "proc_condition"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "kw_or"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "proc_condition"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "proc_condition": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "kw_sqlstate"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "string_literal"
+            }
+          ]
+        }
+      ]
+    },
+    "sql_expression": {
+      "type": "SYMBOL",
+      "name": "_sql_body"
+    },
+    "any_identifier": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unreserved_keyword"
+        }
+      ]
+    },
+    "reserved_keyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_all"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_begin"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_by"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_case"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_declare"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_else"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_end"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_execute"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_for"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_foreach"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_from"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_if"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_in"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_into"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_loop"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_not"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_null"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_or"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_strict"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_then"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_to"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_using"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_when"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_while"
+        }
+      ]
+    },
+    "unreserved_keyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "kw_absolute"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_alias"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_and"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_array"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_assert"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_backward"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_call"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_chain"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_close"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_collate"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_column"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_column_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_commit"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_constant"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_constraint"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_constraint_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_continue"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_current"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_cursor"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_datatype"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_debug"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_default"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_detail"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_diagnostics"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_do"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_dump"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_elsif"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_errcode"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_error"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_exception"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_exit"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_fetch"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_first"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_forward"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_get"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_hint"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_import"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_info"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_insert"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_is"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_last"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_log"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_merge"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_message"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_message_text"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_move"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_next"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_no"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_notice"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_open"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_option"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_perform"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_context"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_datatype_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_context"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_detail"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_exception_hint"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_pg_routine_oid"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_print_strict_params"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_prior"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_query"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_raise"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_relative"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_return"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_returned_sqlstate"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_reverse"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_rollback"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_row_count"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_rowtype"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_schema"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_schema_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_scroll"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_slice"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_sqlstate"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_stacked"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_table"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_table_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_type"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_use_column"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_use_variable"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_variable_conflict"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_warning"
+        }
+      ]
+    },
+    "kw_all": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][lL][lL]"
+        }
+      }
+    },
+    "kw_begin": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[bB][eE][gG][iI][nN]"
+        }
+      }
+    },
+    "kw_by": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[bB][yY]"
+        }
+      }
+    },
+    "kw_case": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][aA][sS][eE]"
+        }
+      }
+    },
+    "kw_declare": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][eE][cC][lL][aA][rR][eE]"
+        }
+      }
+    },
+    "kw_else": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][lL][sS][eE]"
+        }
+      }
+    },
+    "kw_end": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][nN][dD]"
+        }
+      }
+    },
+    "kw_execute": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][xX][eE][cC][uU][tT][eE]"
+        }
+      }
+    },
+    "kw_for": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][oO][rR]"
+        }
+      }
+    },
+    "kw_foreach": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][oO][rR][eE][aA][cC][hH]"
+        }
+      }
+    },
+    "kw_from": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][rR][oO][mM]"
+        }
+      }
+    },
+    "kw_if": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][fF]"
+        }
+      }
+    },
+    "kw_in": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][nN]"
+        }
+      }
+    },
+    "kw_into": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][nN][tT][oO]"
+        }
+      }
+    },
+    "kw_loop": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[lL][oO][oO][pP]"
+        }
+      }
+    },
+    "kw_not": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[nN][oO][tT]"
+        }
+      }
+    },
+    "kw_null": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[nN][uU][lL][lL]"
+        }
+      }
+    },
+    "kw_or": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[oO][rR]"
+        }
+      }
+    },
+    "kw_strict": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][tT][rR][iI][cC][tT]"
+        }
+      }
+    },
+    "kw_then": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[tT][hH][eE][nN]"
+        }
+      }
+    },
+    "kw_to": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[tT][oO]"
+        }
+      }
+    },
+    "kw_using": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[uU][sS][iI][nN][gG]"
+        }
+      }
+    },
+    "kw_when": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[wW][hH][eE][nN]"
+        }
+      }
+    },
+    "kw_while": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[wW][hH][iI][lL][eE]"
+        }
+      }
+    },
+    "kw_absolute": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][bB][sS][oO][lL][uU][tT][eE]"
+        }
+      }
+    },
+    "kw_alias": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][lL][iI][aA][sS]"
+        }
+      }
+    },
+    "kw_and": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][nN][dD]"
+        }
+      }
+    },
+    "kw_array": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][rR][rR][aA][yY]"
+        }
+      }
+    },
+    "kw_assert": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[aA][sS][sS][eE][rR][tT]"
+        }
+      }
+    },
+    "kw_backward": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[bB][aA][cC][kK][wW][aA][rR][dD]"
+        }
+      }
+    },
+    "kw_call": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][aA][lL][lL]"
+        }
+      }
+    },
+    "kw_chain": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][hH][aA][iI][nN]"
+        }
+      }
+    },
+    "kw_close": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][lL][oO][sS][eE]"
+        }
+      }
+    },
+    "kw_collate": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][lL][lL][aA][tT][eE]"
+        }
+      }
+    },
+    "kw_column": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][lL][uU][mM][nN]"
+        }
+      }
+    },
+    "kw_column_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][lL][uU][mM][nN]_[nN][aA][mM][eE]"
+        }
+      }
+    },
+    "kw_commit": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][mM][mM][iI][tT]"
+        }
+      }
+    },
+    "kw_constant": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][nN][sS][tT][aA][nN][tT]"
+        }
+      }
+    },
+    "kw_constraint": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][nN][sS][tT][rR][aA][iI][nN][tT]"
+        }
+      }
+    },
+    "kw_constraint_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][nN][sS][tT][rR][aA][iI][nN][tT]_[nN][aA][mM][eE]"
+        }
+      }
+    },
+    "kw_continue": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][oO][nN][tT][iI][nN][uU][eE]"
+        }
+      }
+    },
+    "kw_current": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][uU][rR][rR][eE][nN][tT]"
+        }
+      }
+    },
+    "kw_cursor": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[cC][uU][rR][sS][oO][rR]"
+        }
+      }
+    },
+    "kw_datatype": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][aA][tT][aA][tT][yY][pP][eE]"
+        }
+      }
+    },
+    "kw_debug": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][eE][bB][uU][gG]"
+        }
+      }
+    },
+    "kw_default": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][eE][fF][aA][uU][lL][tT]"
+        }
+      }
+    },
+    "kw_detail": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][eE][tT][aA][iI][lL]"
+        }
+      }
+    },
+    "kw_diagnostics": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][iI][aA][gG][nN][oO][sS][tT][iI][cC][sS]"
+        }
+      }
+    },
+    "kw_do": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][oO]"
+        }
+      }
+    },
+    "kw_dump": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[dD][uU][mM][pP]"
+        }
+      }
+    },
+    "kw_elsif": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[eE][lL][sS][eE][iI][fF]"
+            },
+            {
+              "type": "PATTERN",
+              "value": "[eE][lL][sS][iI][fF]"
+            }
+          ]
+        }
+      }
+    },
+    "kw_errcode": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][rR][rR][cC][oO][dD][eE]"
+        }
+      }
+    },
+    "kw_error": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][rR][rR][oO][rR]"
+        }
+      }
+    },
+    "kw_exception": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][xX][cC][eE][pP][tT][iI][oO][nN]"
+        }
+      }
+    },
+    "kw_exit": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][xX][iI][tT]"
+        }
+      }
+    },
+    "kw_fetch": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][eE][tT][cC][hH]"
+        }
+      }
+    },
+    "kw_first": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][iI][rR][sS][tT]"
+        }
+      }
+    },
+    "kw_forward": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[fF][oO][rR][wW][aA][rR][dD]"
+        }
+      }
+    },
+    "kw_get": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[gG][eE][tT]"
+        }
+      }
+    },
+    "kw_hint": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[hH][iI][nN][tT]"
+        }
+      }
+    },
+    "kw_import": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][mM][pP][oO][rR][tT]"
+        }
+      }
+    },
+    "kw_info": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][nN][fF][oO]"
+        }
+      }
+    },
+    "kw_insert": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][nN][sS][eE][rR][tT]"
+        }
+      }
+    },
+    "kw_is": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[iI][sS]"
+        }
+      }
+    },
+    "kw_last": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[lL][aA][sS][tT]"
+        }
+      }
+    },
+    "kw_log": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[lL][oO][gG]"
+        }
+      }
+    },
+    "kw_merge": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[mM][eE][rR][gG][eE]"
+        }
+      }
+    },
+    "kw_message": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[mM][eE][sS][sS][aA][gG][eE]"
+        }
+      }
+    },
+    "kw_message_text": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[mM][eE][sS][sS][aA][gG][eE]_[tT][eE][xX][tT]"
+        }
+      }
+    },
+    "kw_move": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[mM][oO][vV][eE]"
+        }
+      }
+    },
+    "kw_next": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[nN][eE][xX][tT]"
+        }
+      }
+    },
+    "kw_no": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[nN][oO]"
+        }
+      }
+    },
+    "kw_notice": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[nN][oO][tT][iI][cC][eE]"
+        }
+      }
+    },
+    "kw_open": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[oO][pP][eE][nN]"
+        }
+      }
+    },
+    "kw_option": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[oO][pP][tT][iI][oO][nN]"
+        }
+      }
+    },
+    "kw_perform": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][eE][rR][fF][oO][rR][mM]"
+        }
+      }
+    },
+    "kw_pg_context": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[cC][oO][nN][tT][eE][xX][tT]"
+        }
+      }
+    },
+    "kw_pg_datatype_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[dD][aA][tT][aA][tT][yY][pP][eE]_[nN][aA][mM][eE]"
+        }
+      }
+    },
+    "kw_pg_exception_context": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[eE][xX][cC][eE][pP][tT][iI][oO][nN]_[cC][oO][nN][tT][eE][xX][tT]"
+        }
+      }
+    },
+    "kw_pg_exception_detail": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[eE][xX][cC][eE][pP][tT][iI][oO][nN]_[dD][eE][tT][aA][iI][lL]"
+        }
+      }
+    },
+    "kw_pg_exception_hint": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[eE][xX][cC][eE][pP][tT][iI][oO][nN]_[hH][iI][nN][tT]"
+        }
+      }
+    },
+    "kw_pg_routine_oid": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][gG]_[rR][oO][uU][tT][iI][nN][eE]_[oO][iI][dD]"
+        }
+      }
+    },
+    "kw_print_strict_params": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][rR][iI][nN][tT]_[sS][tT][rR][iI][cC][tT]_[pP][aA][rR][aA][mM][sS]"
+        }
+      }
+    },
+    "kw_prior": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[pP][rR][iI][oO][rR]"
+        }
+      }
+    },
+    "kw_query": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[qQ][uU][eE][rR][yY]"
+        }
+      }
+    },
+    "kw_raise": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][aA][iI][sS][eE]"
+        }
+      }
+    },
+    "kw_relative": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][eE][lL][aA][tT][iI][vV][eE]"
+        }
+      }
+    },
+    "kw_return": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][eE][tT][uU][rR][nN]"
+        }
+      }
+    },
+    "kw_returned_sqlstate": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][eE][tT][uU][rR][nN][eE][dD]_[sS][qQ][lL][sS][tT][aA][tT][eE]"
+        }
+      }
+    },
+    "kw_reverse": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][eE][vV][eE][rR][sS][eE]"
+        }
+      }
+    },
+    "kw_rollback": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][oO][lL][lL][bB][aA][cC][kK]"
+        }
+      }
+    },
+    "kw_row_count": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][oO][wW]_[cC][oO][uU][nN][tT]"
+        }
+      }
+    },
+    "kw_rowtype": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[rR][oO][wW][tT][yY][pP][eE]"
+        }
+      }
+    },
+    "kw_schema": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][cC][hH][eE][mM][aA]"
+        }
+      }
+    },
+    "kw_schema_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][cC][hH][eE][mM][aA]_[nN][aA][mM][eE]"
+        }
+      }
+    },
+    "kw_scroll": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][cC][rR][oO][lL][lL]"
+        }
+      }
+    },
+    "kw_slice": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][lL][iI][cC][eE]"
+        }
+      }
+    },
+    "kw_sqlstate": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][qQ][lL][sS][tT][aA][tT][eE]"
+        }
+      }
+    },
+    "kw_stacked": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][tT][aA][cC][kK][eE][dD]"
+        }
+      }
+    },
+    "kw_table": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[tT][aA][bB][lL][eE]"
+        }
+      }
+    },
+    "kw_table_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[tT][aA][bB][lL][eE]_[nN][aA][mM][eE]"
+        }
+      }
+    },
+    "kw_type": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[tT][yY][pP][eE]"
+        }
+      }
+    },
+    "kw_use_column": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[uU][sS][eE]_[cC][oO][lL][uU][mM][nN]"
+        }
+      }
+    },
+    "kw_use_variable": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[uU][sS][eE]_[vV][aA][rR][iI][aA][bB][lL][eE]"
+        }
+      }
+    },
+    "kw_variable_conflict": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[vV][aA][rR][iI][aA][bB][lL][eE]_[cC][oO][nN][fF][lL][iI][cC][tT]"
+        }
+      }
+    },
+    "kw_warning": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[wW][aA][rR][nN][iI][nN][gG]"
+        }
+      }
+    },
+    "identifier": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 0,
+        "content": {
+          "type": "PATTERN",
+          "value": "[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*"
+        }
+      }
+    },
+    "integer_literal": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "[0-9](_?[0-9])*"
+      }
+    },
+    "string_literal": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "'([^']|'')*'"
+      }
+    },
+    "comment": {
+      "type": "TOKEN",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "--[^\\r\\n]*"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"
+          }
+        ]
+      }
+    }
+  },
+  "extras": [
+    {
+      "type": "PATTERN",
+      "value": "\\s+"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "comment"
+    }
+  ],
+  "conflicts": [
+    [
+      "raise_level",
+      "unreserved_keyword"
+    ],
+    [
+      "decl_statement",
+      "unreserved_keyword"
+    ]
+  ],
+  "precedences": [],
+  "externals": [
+    {
+      "type": "SYMBOL",
+      "name": "_sql_body"
+    }
+  ],
+  "inline": [],
+  "supertypes": []
+}

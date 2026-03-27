@@ -1,0 +1,26 @@
+[package]
+name = "tree-sitter-postgres"
+description = "Postgres grammar for tree-sitter"
+version = "0.0.1"
+license = "BSD-3-Clause"
+readme = "README.md"
+keywords = ["incremental", "parsing", "tree-sitter", "postgres"]
+categories = ["parsing", "text-editors"]
+repository = "https://github.com/gmr/tree-sitter-postgres"
+edition = "2024"
+autoexamples = false
+
+build = "bindings/rust/build.rs"
+include = ["bindings/rust/*", "postgres/grammar.js", "postgres/queries/*", "postgres/src/*", "plpgsql/grammar.js", "plpgsql/queries/*", "plpgsql/src/*"]
+
+[lib]
+path = "bindings/rust/lib.rs"
+
+[dependencies]
+tree-sitter-language = "0.1"
+
+[build-dependencies]
+cc = "1.0.87"
+
+[dev-dependencies]
+tree-sitter = "0.23"

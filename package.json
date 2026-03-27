@@ -1,0 +1,72 @@
+{
+  "name": "tree-sitter-postgres",
+  "version": "0.1.0",
+  "description": "PostgreSQL grammar for tree-sitter, generated from Postgres source",
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "keywords": [
+    "parser",
+    "tree-sitter",
+    "postgres",
+    "postgresql",
+    "sql"
+  ],
+  "files": [
+    "postgres/grammar.js",
+    "postgres/queries/*",
+    "postgres/src/**",
+    "plpgsql/grammar.js",
+    "plpgsql/queries/*",
+    "plpgsql/src/**",
+    "binding.gyp",
+    "bindings/node/*",
+    "prebuilds/**",
+    "*.wasm"
+  ],
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "node-addon-api": "^8.0.0",
+    "node-gyp-build": "^4.8.1"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.1"
+  },
+  "peerDependenciesMeta": {
+    "tree-sitter": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "prebuildify": "^6.0.1",
+    "tree-sitter-cli": "^0.26.7"
+  },
+  "scripts": {
+    "install": "node-gyp-build",
+    "generate": "node script/generate-grammar.js",
+    "generate:plpgsql": "node script/generate-plpgsql-grammar.js",
+    "prestart": "tree-sitter build --wasm",
+    "start": "tree-sitter playground",
+    "test": "node --test bindings/node/*_test.js"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.sql",
+      "path": "postgres",
+      "file-types": [
+        "sql",
+        "psql",
+        "pgsql"
+      ],
+      "highlights": "postgres/queries/highlights.scm",
+      "injection-regex": "^(sql|postgres|postgresql)$"
+    },
+    {
+      "scope": "source.plpgsql",
+      "path": "plpgsql",
+      "file-types": [],
+      "highlights": "plpgsql/queries/highlights.scm",
+      "injections": "plpgsql/queries/injections.scm",
+      "injection-regex": "^plpgsql$"
+    }
+  ]
+}

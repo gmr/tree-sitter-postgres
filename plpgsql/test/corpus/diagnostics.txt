@@ -1,0 +1,112 @@
+==================
+Get current diagnostics
+==================
+
+BEGIN
+  GET CURRENT DIAGNOSTICS cnt := ROW_COUNT;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_getdiag
+          (kw_get)
+          (kw_current)
+          (kw_diagnostics)
+          (getdiag_list_item
+            (any_identifier
+              (identifier))
+            (getdiag_item
+              (kw_row_count))))))
+    (kw_end)))
+
+==================
+Get stacked diagnostics
+==================
+
+BEGIN
+  NULL;
+EXCEPTION WHEN OTHERS THEN
+  GET STACKED DIAGNOSTICS msg = MESSAGE_TEXT, detail = PG_EXCEPTION_DETAIL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_getdiag
+              (kw_get)
+              (kw_stacked)
+              (kw_diagnostics)
+              (getdiag_list_item
+                (any_identifier
+                  (identifier))
+                (getdiag_item
+                  (kw_message_text)))
+              (getdiag_list_item
+                (any_identifier
+                  (unreserved_keyword
+                    (kw_detail)))
+                (getdiag_item
+                  (kw_pg_exception_detail))))))))
+    (kw_end)))
+
+==================
+Assert with message
+==================
+
+BEGIN
+  ASSERT x > 0, 'x must be positive';
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_assert
+          (kw_assert)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Assert simple
+==================
+
+BEGIN
+  ASSERT found;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_assert
+          (kw_assert)
+          (sql_expression))))
+    (kw_end)))

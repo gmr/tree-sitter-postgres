@@ -1,0 +1,232 @@
+==================
+Multiple exception handlers
+==================
+
+BEGIN
+  NULL;
+EXCEPTION
+  WHEN division_by_zero THEN
+    NULL;
+  WHEN unique_violation THEN
+    NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_null
+              (kw_null)))))
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_null
+              (kw_null))))))
+    (kw_end)))
+
+==================
+Exception with OR conditions
+==================
+
+BEGIN
+  NULL;
+EXCEPTION
+  WHEN division_by_zero OR unique_violation THEN
+    NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier)))
+          (kw_or)
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_null
+              (kw_null))))))
+    (kw_end)))
+
+==================
+Exception with SQLSTATE
+==================
+
+BEGIN
+  NULL;
+EXCEPTION
+  WHEN SQLSTATE '23505' THEN
+    NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (kw_sqlstate)
+            (string_literal)))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_null
+              (kw_null))))))
+    (kw_end)))
+
+==================
+Raise with USING option
+==================
+
+BEGIN
+  RAISE EXCEPTION 'error' USING ERRCODE = '22000';
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_raise
+          (kw_raise)
+          (raise_level
+            (kw_exception))
+          (string_literal)
+          (kw_using)
+          (raise_option
+            (kw_errcode)
+            (sql_expression)))))
+    (kw_end)))
+
+==================
+Raise SQLSTATE
+==================
+
+BEGIN
+  RAISE SQLSTATE '22000';
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_raise
+          (kw_raise)
+          (kw_sqlstate)
+          (string_literal))))
+    (kw_end)))
+
+==================
+Raise with no arguments (re-raise)
+==================
+
+BEGIN
+  NULL;
+EXCEPTION WHEN OTHERS THEN
+  RAISE;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (exception_sect
+      (kw_exception)
+      (proc_exception
+        (kw_when)
+        (proc_conditions
+          (proc_condition
+            (any_identifier
+              (identifier))))
+        (kw_then)
+        (proc_sect
+          (proc_stmt
+            (stmt_raise
+              (kw_raise))))))
+    (kw_end)))
+
+==================
+Transaction with chain
+==================
+
+BEGIN
+  COMMIT AND CHAIN;
+  ROLLBACK AND NO CHAIN;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_commit
+          (kw_commit)
+          (opt_transaction_chain
+            (kw_and)
+            (kw_chain))))
+      (proc_stmt
+        (stmt_rollback
+          (kw_rollback)
+          (opt_transaction_chain
+            (kw_and)
+            (kw_no)
+            (kw_chain)))))
+    (kw_end)))

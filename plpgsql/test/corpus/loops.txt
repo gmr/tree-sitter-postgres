@@ -1,0 +1,181 @@
+==================
+For query loop
+==================
+
+BEGIN
+  FOR rec IN SELECT id FROM t LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_for
+          (kw_for)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (for_query
+            (sql_expression)
+            (kw_loop))
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+For dynamic loop
+==================
+
+BEGIN
+  FOR rec IN EXECUTE 'SELECT 1' LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_for
+          (kw_for)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (for_dynamic
+            (kw_execute)
+            (sql_expression)
+            (kw_loop))
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+For reverse integer loop with BY
+==================
+
+BEGIN
+  FOR i IN REVERSE 10..1 BY 2 LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_for
+          (kw_for)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (for_integer_range
+            (kw_reverse)
+            (sql_expression)
+            (sql_expression)
+            (kw_by)
+            (sql_expression)
+            (kw_loop))
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+Foreach array loop
+==================
+
+BEGIN
+  FOREACH x IN ARRAY arr LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_foreach_a
+          (kw_foreach)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (kw_array)
+          (sql_expression)
+          (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+Foreach with slice
+==================
+
+BEGIN
+  FOREACH x SLICE 1 IN ARRAY arr LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_foreach_a
+          (kw_foreach)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_slice)
+          (integer_literal)
+          (kw_in)
+          (kw_array)
+          (sql_expression)
+          (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
