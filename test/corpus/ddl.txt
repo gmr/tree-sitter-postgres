@@ -1,0 +1,87 @@
+====================
+CREATE TABLE
+====================
+
+CREATE TABLE foo (id int, name text);
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (CreateStmt
+        (kw_create)
+        (kw_table)
+        (qualified_name
+          (ColId
+            (identifier)))
+        (OptTableElementList
+          (TableElementList
+            (TableElementList
+              (TableElement
+                (columnDef
+                  (ColId
+                    (identifier))
+                  (Typename
+                    (SimpleTypename
+                      (Numeric
+                        (kw_int)))))))
+            (TableElement
+              (columnDef
+                (ColId
+                  (unreserved_keyword
+                    (kw_name)))
+                (Typename
+                  (SimpleTypename
+                    (GenericType
+                      (type_function_name
+                        (unreserved_keyword
+                          (kw_text))))))))))))))
+
+====================
+DROP TABLE
+====================
+
+DROP TABLE foo;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (DropStmt
+        (kw_drop)
+        (object_type_any_name
+          (kw_table))
+        (any_name_list
+          (any_name
+            (ColId
+              (identifier))))))))
+
+====================
+CREATE INDEX
+====================
+
+CREATE INDEX idx ON foo (name);
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (IndexStmt
+        (kw_create)
+        (kw_index)
+        (opt_single_name
+          (ColId
+            (identifier)))
+        (kw_on)
+        (relation_expr
+          (qualified_name
+            (ColId
+              (identifier))))
+        (index_params
+          (index_elem
+            (ColId
+              (unreserved_keyword
+                (kw_name)))))))))

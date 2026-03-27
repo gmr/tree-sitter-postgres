@@ -1,0 +1,187 @@
+====================
+Arithmetic precedence
+====================
+
+SELECT 1 + 2 * 3;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr_prec
+                        (c_expr
+                          (AexprConst
+                            (Iconst
+                              (integer_literal)))))
+                      (a_expr_prec
+                        (a_expr_prec
+                          (c_expr
+                            (AexprConst
+                              (Iconst
+                                (integer_literal)))))
+                        (a_expr_prec
+                          (c_expr
+                            (AexprConst
+                              (Iconst
+                                (integer_literal)))))))))))))))))
+
+====================
+Unary minus
+====================
+
+SELECT -1;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr_prec
+                        (c_expr
+                          (AexprConst
+                            (Iconst
+                              (integer_literal))))))))))))))))
+
+====================
+Boolean operators
+====================
+
+SELECT a AND b OR c;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr_prec
+                        (a_expr_prec
+                          (c_expr
+                            (columnref
+                              (ColId
+                                (identifier)))))
+                        (kw_and)
+                        (a_expr_prec
+                          (c_expr
+                            (columnref
+                              (ColId
+                                (identifier))))))
+                      (kw_or)
+                      (a_expr_prec
+                        (c_expr
+                          (columnref
+                            (ColId
+                              (identifier))))))))))))))))
+
+====================
+Comparison
+====================
+
+SELECT a > 1;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr_prec
+                        (c_expr
+                          (columnref
+                            (ColId
+                              (identifier)))))
+                      (a_expr_prec
+                        (c_expr
+                          (AexprConst
+                            (Iconst
+                              (integer_literal))))))))))))))))
+
+====================
+Typecast
+====================
+
+SELECT a::int;
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr_prec
+                        (c_expr
+                          (columnref
+                            (ColId
+                              (identifier)))))
+                      (Typename
+                        (SimpleTypename
+                          (Numeric
+                            (kw_int)))))))))))))))
+
+====================
+String literal
+====================
+
+SELECT 'hello';
+
+---
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (string_literal)))))))))))))))
