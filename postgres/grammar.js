@@ -26,20 +26,15 @@ module.exports = grammar({
   // these as ambiguities. Conflict pairs are stored in script/known-conflicts.json
   // and regenerated into this file automatically via script/harvest-conflicts.sh.
   conflicts: $ => [
-    [$.utility_option_name, $.unreserved_keyword],
-    [$.ConstDatetime, $.col_name_keyword],
-    [$.simple_select, $.simple_select],
-    [$.a_expr, $.a_expr],
-    [$.target_el, $.target_el],
-    [$.ConstDatetime, $.ConstDatetime],
-    [$.table_ref, $.table_ref],
-    [$.OptTempTableName, $.unreserved_keyword],
-    [$.func_table, $.func_table],
+
   ],
 
   rules: {
     // Top-level entry: a file is zero or more semicolon-terminated statements.
-    source_file: $ => repeat(seq(optional($.toplevel_stmt), ';')),
+    source_file: $ => seq(
+      repeat(seq(optional($.toplevel_stmt), ';')),
+      optional($.toplevel_stmt)
+    ),
 
     toplevel_stmt: $ => choice(
         $.stmt,
@@ -2920,7 +2915,7 @@ module.exports = grammar({
         $.kw_all
       ),
     all_Op: $ => choice(
-        $.operator,
+        prec.left(12, prec.dynamic(12, $.operator)),
         $.MathOp
       ),
     MathOp: $ => choice(
@@ -2938,7 +2933,7 @@ module.exports = grammar({
         prec.left(7, prec.dynamic(7, '<>'))
       ),
     qual_Op: $ => choice(
-        $.operator,
+        prec.left(12, prec.dynamic(12, $.operator)),
         prec.left(12, prec.dynamic(12, seq($.kw_operator, '(', $.any_operator, ')')))
       ),
     qual_all_Op: $ => choice(

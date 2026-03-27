@@ -203,7 +203,7 @@ function collectTerminals(declarationsText) {
     }
 
     if (inDirective) {
-      const matches = line.match(/\b[A-Z][A-Z0-9_]*\b/g) || [];
+      const matches = line.match(/\b[A-Z]\w*\b/g) || [];
       matches.forEach(m => terminals.add(m));
     }
   }
@@ -300,7 +300,7 @@ function tokenizeRules(text) {
 
       // Check if it's a rule definition: word followed by ':' (but not '::')
       let k = j;
-      while (k < len && text[k] === ' ' || text[k] === '\t') k++;
+      while (k < len && (text[k] === ' ' || text[k] === '\t')) k++;
       if (text[k] === ':' && text[k + 1] !== ':') {
         tokens.push({ type: 'RULE_NAME', value: word });
         i = k + 1;

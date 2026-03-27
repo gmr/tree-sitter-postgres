@@ -633,7 +633,10 @@ ${knownConflicts.map(([a, b]) => `    [$.${a}, $.${b}],`).join('\n')}
   // Override parse_toplevel to remove mode-token alternatives and map to
   // a cleaner source_file entry.
   lines.push(`    // Top-level entry: a file is zero or more semicolon-terminated statements.
-    source_file: $ => repeat(seq(optional($.toplevel_stmt), ';')),
+    source_file: $ => seq(
+      repeat(seq(optional($.toplevel_stmt), ';')),
+      optional($.toplevel_stmt)
+    ),
 
 `);
 
