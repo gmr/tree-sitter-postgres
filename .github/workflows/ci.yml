@@ -31,16 +31,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate-and-test:
-    # Generate the parser once on a fast runner, then run corpus tests.
-    # The postgres grammar produces an ~90MB parser.c — too slow/large
-    # for the standard parser-test-action which generates per-platform.
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: tree-sitter/setup-action/cli@v2
-      - name: Generate parser
-        run: tree-sitter generate postgres/grammar.js
       - name: Run corpus tests
         run: tree-sitter test
