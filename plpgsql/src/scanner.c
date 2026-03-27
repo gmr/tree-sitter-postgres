@@ -19,9 +19,9 @@ enum TokenType {
 };
 
 void *tree_sitter_plpgsql_external_scanner_create(void) { return NULL; }
-void tree_sitter_plpgsql_external_scanner_destroy(void *payload) {}
-unsigned tree_sitter_plpgsql_external_scanner_serialize(void *payload, char *buffer) { return 0; }
-void tree_sitter_plpgsql_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {}
+void tree_sitter_plpgsql_external_scanner_destroy(void *payload) { (void)payload; }
+unsigned tree_sitter_plpgsql_external_scanner_serialize(void *payload, char *buffer) { (void)payload; (void)buffer; return 0; }
+void tree_sitter_plpgsql_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) { (void)payload; (void)buffer; (void)length; }
 
 static void skip_whitespace(TSLexer *lexer) {
   while (lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
@@ -30,18 +30,10 @@ static void skip_whitespace(TSLexer *lexer) {
   }
 }
 
-/* Case-insensitive keyword check. Reads ahead without advancing. */
-static bool check_keyword(TSLexer *lexer, const char *kw) {
-  /* The lexer is positioned at the first char already confirmed. */
-  /* We just return true — caller already matched. */
-  (void)lexer;
-  (void)kw;
-  return true;
-}
-
 bool tree_sitter_plpgsql_external_scanner_scan(
   void *payload, TSLexer *lexer, const bool *valid_symbols
 ) {
+  (void)payload;
   if (!valid_symbols[SQL_BODY]) return false;
 
   skip_whitespace(lexer);
@@ -53,8 +45,6 @@ bool tree_sitter_plpgsql_external_scanner_scan(
 
   int depth = 0;
   bool has_content = false;
-  bool has_non_ident = false;  /* true if we've seen operators, literals, etc. */
-  int ident_count = 0;  /* number of identifiers consumed */
 
   while (lexer->lookahead != 0) {
     /* At depth 0, semicolon terminates */
@@ -73,7 +63,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         return false;
       }
       /* Single < — part of SQL operator, continue */
-      has_non_ident = true;
+
       has_content = true;
       continue;
     }
@@ -279,7 +269,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         return false;
       }
 
-      ident_count++;
+
       has_content = true;
       continue;
     }
@@ -290,7 +280,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
              lexer->lookahead == '$' || lexer->lookahead >= 0x80) {
         lexer->advance(lexer, false);
       }
-      ident_count++;
+
       has_content = true;
       continue;
     }
@@ -300,13 +290,12 @@ bool tree_sitter_plpgsql_external_scanner_scan(
              lexer->lookahead == '$') {
         lexer->advance(lexer, false);
       }
-      has_non_ident = true;
+
       has_content = true;
       continue;
     }
 
     /* Everything else (operators, digits, etc.) — just consume */
-    has_non_ident = true;
     lexer->advance(lexer, false);
     has_content = true;
   }
