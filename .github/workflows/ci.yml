@@ -31,19 +31,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  generate-and-test:
+    # Generate the parser once on a fast runner, then run corpus tests.
+    # The postgres grammar produces an ~90MB parser.c — too slow/large
+    # for the standard parser-test-action which generates per-platform.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: tree-sitter/setup-action/cli@v2
-      - uses: tree-sitter/parser-test-action@v3
-        with:
-          test-rust: true
-          test-node: true
-          test-python: true
-          test-go: true
-          test-swift: ${{ runner.os == 'macOS' }}
+      - name: Generate parser
+        run: tree-sitter generate
+      - name: Run corpus tests
+        run: tree-sitter test
