@@ -3,18 +3,12 @@ on:
   push:
     branches: [main]
     paths:
-      - grammar.js
-      - src/**
-      - test/**
-      - bindings/**
-      - binding.gyp
+      - postgres/**
+      - script/**
   pull_request:
     paths:
-      - grammar.js
-      - src/**
-      - test/**
-      - bindings/**
-      - binding.gyp
+      - postgres/**
+      - script/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

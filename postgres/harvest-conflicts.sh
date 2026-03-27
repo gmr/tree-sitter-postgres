@@ -9,8 +9,11 @@
 
 set -uo pipefail
 
-TS="./node_modules/.bin/tree-sitter"
-CONFLICTS_FILE="script/known-conflicts.json"
+# This script must be run from the postgres/ grammar directory.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+TS="$REPO_ROOT/node_modules/.bin/tree-sitter"
+CONFLICTS_FILE="$SCRIPT_DIR/known-conflicts.json"
 POSTGRES_DIR="${1:-$HOME/Source/gmr/postgres}"
 MAX_ITERATIONS=300
 CONFLICT_COUNT=0
@@ -76,7 +79,7 @@ JSEOF
   CONFLICT_COUNT=$((CONFLICT_COUNT + 1))
 
   # Regenerate grammar.js from source with the updated conflict list
-  node script/generate-grammar.js "$POSTGRES_DIR" > /dev/null
+  node "$REPO_ROOT/script/generate-grammar.js" "$POSTGRES_DIR" > /dev/null
 
 done
 

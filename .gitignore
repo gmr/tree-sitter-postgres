@@ -2,8 +2,8 @@ node_modules/
 build/
 .build/
 target/
-src/parser.c
-src/tree_sitter/
+**/src/parser.c
+**/src/tree_sitter/
 *.so
 *.dylib
 *.dll

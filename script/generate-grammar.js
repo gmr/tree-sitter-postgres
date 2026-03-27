@@ -16,7 +16,7 @@
  *   src/backend/parser/gram.y       — Bison grammar rules
  *
  * Output:
- *   grammar.js  (in the project root)
+ *   postgres/grammar.js
  */
 
 const path = require('path');
@@ -34,8 +34,9 @@ const projectRoot = path.join(__dirname, '..');
 
 const kwlistPath      = path.join(postgresDir, 'src/include/parser/kwlist.h');
 const gramYPath       = path.join(postgresDir, 'src/backend/parser/gram.y');
-const conflictsPath   = path.join(__dirname, 'known-conflicts.json');
-const outputPath      = path.join(projectRoot, 'grammar.js');
+const postgresGrammarDir = path.join(projectRoot, 'postgres');
+const conflictsPath   = path.join(postgresGrammarDir, 'known-conflicts.json');
+const outputPath      = path.join(postgresGrammarDir, 'grammar.js');
 
 // ─── Validate inputs ──────────────────────────────────────────────────────────
 
@@ -81,4 +82,4 @@ console.log(`  Wrote ${outputPath}`);
 console.log(`  ${ruleCount} grammar rules emitted`);
 console.log(`  ${lineCount} lines, ${Math.round(byteCount / 1024)} KB`);
 console.log('');
-console.log('Next step: run `tree-sitter generate` to build the parser.');
+console.log('Next step: cd postgres && tree-sitter generate');
