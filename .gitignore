@@ -39,3 +39,7 @@ dist/
 # Generated sources
 **/src/parser.c
 **/src/tree_sitter/
+
+# Symlinks and generated dirs at root (real files are in postgres/)
+/test
+/src/

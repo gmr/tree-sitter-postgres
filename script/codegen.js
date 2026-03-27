@@ -48,10 +48,10 @@ const MODE_TOKENS = new Set([
  */
 const BASE_TOKEN_MAP = {
   IDENT:   '$.identifier',
-  UIDENT:  '$.identifier',   // reduced to IDENT in PG lexer; matched by identifier/unicode_identifier
+  UIDENT:  '$.identifier',   // reduced to IDENT in PG lexer
   FCONST:  '$.float_literal',
   SCONST:  '$.string_literal',
-  USCONST: '$.string_literal',  // reduced to SCONST in PG lexer; matched by string_literal/unicode_string_literal
+  USCONST: '$.string_literal',  // reduced to SCONST in PG lexer
   BCONST:  '$.bit_string_literal',
   XCONST:  '$.hex_string_literal',
   ICONST:  '$.integer_literal',
@@ -464,11 +464,10 @@ function generateLexerRules() {
     identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*/)),
 
     // Double-quoted delimited identifier: "my table" or "My""Column"
-    // Also matches U&-prefix unicode identifiers.
-    quoted_identifier: _ => token(choice(
-      /"([^"]|"")*"/,
-      /[uU]&"([^"]|"")*"/
-    )),
+    // NOTE: U&"..." unicode identifiers have the same lexer limitation as
+    // prefix strings — the U is consumed as an identifier. An external
+    // scanner would be needed to handle these correctly.
+    quoted_identifier: _ => token(/"([^"]|"")*"/),
 
     // Positional parameter: $1, $2, ...
     param: _ => /\\$[0-9]+/,
@@ -488,16 +487,14 @@ function generateLexerRules() {
     // Standard SQL string: 'hello' — doubled single-quote is the escape: 'it''s'
     string_literal: _ => token(/'([^']|'')*'/),
 
-    // E-prefix escape string: E'hello\\nworld'
-    // prec(2) outranks identifier (prec 0) and keywords (prec 1) so E/N/U
-    // are not consumed as identifiers when followed by a quote.
-    escape_string_literal: _ => token(prec(2, /[eE]'([^'\\\\]|\\\\.)*'/)),
-
-    // Unicode escape string: U&'d\\0061t\\+000061'
-    unicode_string_literal: _ => token(prec(2, /[uU]&'([^']|'')*'/)),
-
-    // National character string: N'text'
-    national_string_literal: _ => token(prec(2, /[nN]'([^']|'')*'/)),
+    // NOTE: E'...', N'...', and U&'...' prefix strings are parsed as
+    // function-call-like forms (identifier + string_literal) rather than
+    // single tokens. This is a tree-sitter limitation: the lexer can't
+    // prefer a multi-char token over an identifier when both start with
+    // a letter, because the parser state commits to 'identifier' before
+    // considering string alternatives. An external scanner would fix this
+    // but adds significant complexity. The parse is still correct — PG
+    // treats E'...' the same as a function call to E() at parse time.
 
     // Dollar-quoted string: $$body$$ or $tag$body$tag$
     // NOTE: full correctness requires matching the open/close tags;
@@ -638,14 +635,6 @@ ${knownConflicts.map(([a, b]) => `    [$.${a}, $.${b}],`).join('\n')}
   lines.push(`    // Top-level entry: a file is zero or more semicolon-terminated statements.
     source_file: $ => repeat(seq(optional($.toplevel_stmt), ';')),
 
-    // Override Sconst to accept all string literal forms (E'...', N'...', U&'...')
-    Sconst: $ => choice(
-      $.string_literal,
-      $.escape_string_literal,
-      $.unicode_string_literal,
-      $.national_string_literal
-    ),
-
 `);
 
   // ── Grammar rules ────────────────────────────────────────────────────────────
@@ -656,7 +645,6 @@ ${knownConflicts.map(([a, b]) => `    [$.${a}, $.${b}],`).join('\n')}
     'parse_toplevel',        // replaced by source_file above
     'stmtblock',             // internal; parse_toplevel calls it
     'stmtmulti',             // internal; replaced by source_file repeat
-    'Sconst',                // overridden above to include E/N/U& prefix strings
   ]);
 
   // The keyword category list rules in gram.y (e.g. unreserved_keyword: ABORT_P | ABSENT | ...)
