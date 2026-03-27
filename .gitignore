@@ -42,6 +42,3 @@ dist/
 /test
 /src/
 
-# Generated plpgsql sources
-plpgsql/src/parser.c
-plpgsql/src/tree_sitter/
