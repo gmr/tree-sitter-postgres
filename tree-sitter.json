@@ -1,0 +1,15 @@
+{
+  "grammars": [
+    {
+      "name": "postgres",
+      "path": "postgres",
+      "scope": "source.sql",
+      "file-types": [
+        "sql",
+        "psql",
+        "pgsql"
+      ],
+      "injection-regex": "^(sql|postgres|postgresql)$"
+    }
+  ]
+}
