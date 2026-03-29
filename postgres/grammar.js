@@ -1076,8 +1076,8 @@ module.exports = grammar({
       ),
     event_trigger_when_item: $ => prec.left(8, prec.dynamic(8, seq($.ColId, $.kw_in, '(', $.event_trigger_value_list, ')'))),
     event_trigger_value_list: $ => choice(
-        $.string_literal,
-        seq($.event_trigger_value_list, ',', $.string_literal)
+        choice($.string_literal, $.dollar_quoted_string),
+        seq($.event_trigger_value_list, ',', choice($.string_literal, $.dollar_quoted_string))
       ),
     AlterEventTrigStmt: $ => seq($.kw_alter, $.kw_event, $.kw_trigger, $.name, $.enable_trigger),
     enable_trigger: $ => choice(
@@ -2646,11 +2646,7 @@ module.exports = grammar({
         prec.left(15, prec.dynamic(15, seq($.a_expr_prec, '^', $.a_expr_prec))),
         prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '<', $.a_expr_prec))),
         prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '>', $.a_expr_prec))),
-        prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '=', $.a_expr_prec))),
-        prec.left(4, prec.dynamic(4, seq($.a_expr_prec, $.kw_and, $.a_expr_prec))),
-        prec.left(3, prec.dynamic(3, seq($.a_expr_prec, $.kw_or, $.a_expr_prec))),
-        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr_prec))),
-        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr_prec)))
+        prec.left(7, prec.dynamic(7, seq($.a_expr_prec, '=', $.a_expr_prec)))
       ),
     a_expr: $ => choice(
         alias($.a_expr_prec, $.a_expr),
@@ -2660,6 +2656,10 @@ module.exports = grammar({
         prec.left(7, prec.dynamic(7, seq($.a_expr, '<>', $.a_expr))),
         prec.left(12, prec.dynamic(12, seq($.a_expr, $.qual_Op, $.a_expr))),
         prec.left(12, prec.dynamic(12, seq($.qual_Op, $.a_expr))),
+        prec.left(4, prec.dynamic(4, seq($.a_expr, $.kw_and, $.a_expr))),
+        prec.left(3, prec.dynamic(3, seq($.a_expr, $.kw_or, $.a_expr))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr))),
+        prec.right(5, prec.dynamic(5, seq($.kw_not, $.a_expr))),
         prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_like, $.a_expr))),
         prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_like, $.a_expr, $.kw_escape, $.a_expr))),
         prec.left(8, prec.dynamic(8, seq($.a_expr, $.kw_not, $.kw_like, $.a_expr))),
@@ -3175,7 +3175,7 @@ module.exports = grammar({
         $.kw_null
       ),
     Iconst: $ => $.integer_literal,
-    Sconst: $ => $.string_literal,
+    Sconst: $ => choice($.string_literal, $.dollar_quoted_string),
     SignedIconst: $ => choice(
         $.Iconst,
         prec.left(13, prec.dynamic(13, seq('+', $.Iconst))),

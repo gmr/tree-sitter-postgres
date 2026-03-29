@@ -1,30 +1,48 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "postgres",
   "word": "identifier",
   "rules": {
     "source_file": {
-      "type": "REPEAT",
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "CHOICE",
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "toplevel_stmt"
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "toplevel_stmt"
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
               },
               {
-                "type": "BLANK"
+                "type": "STRING",
+                "value": ";"
               }
             ]
-          },
-          {
-            "type": "STRING",
-            "value": ";"
           }
-        ]
-      }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "toplevel_stmt"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
     },
     "toplevel_stmt": {
       "type": "CHOICE",
@@ -15232,8 +15250,17 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "string_literal"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "string_literal"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "dollar_quoted_string"
+            }
+          ]
         },
         {
           "type": "SEQ",
@@ -15247,8 +15274,17 @@
               "value": ","
             },
             {
-              "type": "SYMBOL",
-              "name": "string_literal"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "string_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "dollar_quoted_string"
+                }
+              ]
             }
           ]
         }
@@ -41804,98 +41840,6 @@
               ]
             }
           }
-        },
-        {
-          "type": "PREC_LEFT",
-          "value": 4,
-          "content": {
-            "type": "PREC_DYNAMIC",
-            "value": 4,
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_and"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type": "PREC_LEFT",
-          "value": 3,
-          "content": {
-            "type": "PREC_DYNAMIC",
-            "value": 3,
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_or"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type": "PREC_RIGHT",
-          "value": 5,
-          "content": {
-            "type": "PREC_DYNAMIC",
-            "value": 5,
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_not"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "type": "PREC_RIGHT",
-          "value": 5,
-          "content": {
-            "type": "PREC_DYNAMIC",
-            "value": 5,
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_not"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                }
-              ]
-            }
-          }
         }
       ]
     },
@@ -42056,6 +42000,98 @@
                 {
                   "type": "SYMBOL",
                   "name": "qual_Op"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 4,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 4,
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_and"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 3,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 3,
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_or"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "PREC_RIGHT",
+          "value": 5,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 5,
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_not"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "PREC_RIGHT",
+          "value": 5,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 5,
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_not"
                 },
                 {
                   "type": "SYMBOL",
@@ -47607,8 +47643,16 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "operator"
+          "type": "PREC_LEFT",
+          "value": 12,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 12,
+            "content": {
+              "type": "SYMBOL",
+              "name": "operator"
+            }
+          }
         },
         {
           "type": "SYMBOL",
@@ -47769,8 +47813,16 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "operator"
+          "type": "PREC_LEFT",
+          "value": 12,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 12,
+            "content": {
+              "type": "SYMBOL",
+              "name": "operator"
+            }
+          }
         },
         {
           "type": "PREC_LEFT",
@@ -50295,8 +50347,17 @@
       "name": "integer_literal"
     },
     "Sconst": {
-      "type": "SYMBOL",
-      "name": "string_literal"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "string_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dollar_quoted_string"
+        }
+      ]
     },
     "SignedIconst": {
       "type": "CHOICE",
@@ -60232,7 +60293,7 @@
           },
           {
             "type": "PATTERN",
-            "value": "\\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)? "
+            "value": "\\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)?"
           },
           {
             "type": "PATTERN",
@@ -60246,13 +60307,6 @@
       "content": {
         "type": "PATTERN",
         "value": "'([^']|'')*'"
-      }
-    },
-    "escape_string_literal": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PATTERN",
-        "value": "[eE]'([^'\\\\]|\\\\.)*'"
       }
     },
     "dollar_quoted_string": {
@@ -60274,13 +60328,6 @@
       "content": {
         "type": "PATTERN",
         "value": "[xX]'[0-9a-fA-F]*'"
-      }
-    },
-    "national_string_literal": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PATTERN",
-        "value": "[nN]'([^']|'')*'"
       }
     },
     "operator": {
@@ -60358,5 +60405,6 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
