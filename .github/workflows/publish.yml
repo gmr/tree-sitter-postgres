@@ -12,10 +12,66 @@ env:
   TREE_SITTER_ABI_VERSION: 15
 
 jobs:
+  # ── GitHub Release (inlined — reusable workflow lacks lfs: true) ─────────────
+
   release:
-    uses: tree-sitter/workflows/.github/workflows/release.yml@main
-    with:
-      generate: true
+    name: Build release artifacts
+    runs-on: ubuntu-latest
+    env:
+      REPO_NAME: ${{ github.event.repository.name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+      - name: Set up tree-sitter CLI
+        uses: tree-sitter/setup-action/cli@v2
+      - name: Install dependencies
+        run: |-
+          if jq -e "$JQ_SCRIPT" package.json >/dev/null; then
+            npm i --ignore-scripts --omit peer --omit optional
+          fi
+        env:
+          JQ_SCRIPT: >-
+            .dependencies + .devDependencies |
+            with_entries(select(
+            (.key | startswith("tree-sitter-"))
+            and (.key != "tree-sitter-cli")
+            )) | length > 0
+      - name: Build Wasm binaries
+        shell: bash
+        run: |-
+          while read -r grammar_dir; do
+            tree-sitter build --wasm "$grammar_dir"
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Create source code tarball
+        run: |
+          git ls-files > "$RUNNER_TEMP/files"
+          while read -r src_dir; do
+            printf '%s\n' >> "$RUNNER_TEMP/files" \
+              "$src_dir"/parser.c "$src_dir"/grammar.json \
+              "$src_dir"/node-types.json "$src_dir"/tree_sitter/*
+          done < <(jq -r "$JQ_SCRIPT" tree-sitter.json)
+          tar cvzf "$REPO_NAME.tar.gz" -T <(sort -u "$RUNNER_TEMP/files")
+        env:
+          JQ_SCRIPT: >-
+            .grammars[] |
+            if (.path? // ".") == "."
+            then "src"
+            else "\(.path)/src"
+            end
+      - name: Generate attestations
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            *.wasm
+            ${{ env.REPO_NAME }}.tar.gz
+      - name: Create GitHub release
+        run: |-
+          gh release create "$GITHUB_REF_NAME" *.wasm "$REPO_NAME.tar.gz" \
+            -n "**NOTE:** Download \`$REPO_NAME.tar.gz\` for the *complete* source code."
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   # ── crates.io (trusted publishing via OIDC) ──────────────────────────────────
 
@@ -31,17 +87,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Set up tree-sitter CLI
-        uses: tree-sitter/setup-action/cli@v2
-      - name: Regenerate parser
-        run: |
-          while read -r grammar_dir; do
-            pushd "$grammar_dir"
-            tree-sitter generate
-            popd > /dev/null
-          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
       - name: Publish to crates.io
         run: cargo publish
 
@@ -54,20 +103,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - name: Set up tree-sitter CLI
-        uses: tree-sitter/setup-action/cli@v2
-      - name: Regenerate parser
-        shell: bash
-        run: |
-          while read -r grammar_dir; do
-            pushd "$grammar_dir"
-            tree-sitter generate
-            popd > /dev/null
-          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
       - name: Install build tools
         run: pip install --upgrade pip build setuptools wheel
       - name: Build sources
@@ -94,17 +135,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Set up tree-sitter CLI
-        uses: tree-sitter/setup-action/cli@v2
-      - name: Regenerate parser
-        shell: bash
-        run: |
-          while read -r grammar_dir; do
-            grammar_dir="${grammar_dir%$'\r'}"
-            pushd "$grammar_dir"
-            tree-sitter generate
-            popd > /dev/null
-          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+        with:
+          lfs: true
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.4
         with:
@@ -149,6 +181,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Set up NodeJS
         uses: actions/setup-node@v6
         with:
@@ -156,13 +190,6 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm i --omit peer --omit optional
-      - name: Regenerate parser
-        run: |
-          while read -r grammar_dir; do
-            pushd "$grammar_dir"
-            npm x -- tree-sitter generate
-            popd > /dev/null
-          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
       - name: Build Wasm binaries
         run: |-
           while read -r grammar_dir; do
@@ -190,6 +217,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Set up NodeJS
         uses: actions/setup-node@v6
         with:
@@ -197,15 +226,6 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm i --omit peer --omit optional
-      - name: Regenerate parser
-        shell: bash
-        run: |
-          while read -r grammar_dir; do
-            grammar_dir="${grammar_dir%$'\r'}"
-            pushd "$grammar_dir"
-            npm x -- tree-sitter generate
-            popd > /dev/null
-          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
       - name: Build binary
         run: npm x -- prebuildify -t 20.19.5
       - name: Upload binaries
@@ -228,6 +248,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
       - name: Set up NodeJS
         uses: actions/setup-node@v6
         with:
