@@ -34,7 +34,7 @@ just build-wasm
 This project auto-generates a tree-sitter grammar from PostgreSQL's own Bison grammar (`gram.y`) and keyword list (`kwlist.h`). There are two separate grammars:
 
 - **postgres/** — Auto-generated SQL grammar. **Do not hand-edit `postgres/grammar.js`**; it is produced by the generation pipeline.
-- **plpgsql/** — Hand-written PL/pgSQL grammar with an external scanner (`plpgsql/src/scanner.c`) for dollar-quoting and context-sensitive keywords. SQL fragments are delegated to the postgres parser via language injection (`plpgsql/queries/injections.scm`).
+- **plpgsql/** — Auto-generated PL/pgSQL grammar (from `pl_gram.y`) with an external scanner (`plpgsql/src/scanner.c`) for dollar-quoting and context-sensitive keywords. SQL fragments are delegated to the postgres parser via language injection (`plpgsql/queries/injections.scm`).
 
 ### Generation Pipeline
 
