@@ -20,16 +20,16 @@ cd postgres && npx tree-sitter generate && npx tree-sitter test
 
 ## Regenerating from PostgreSQL source
 
-The grammar is generated from a local PostgreSQL checkout:
+The grammar is generated from a local PostgreSQL checkout. Set `PG_SOURCE_DIR` to point at your PostgreSQL source tree:
 
 ```bash
-# Default: ~/Source/gmr/postgres
-node script/generate-grammar.js
+export PG_SOURCE_DIR=/path/to/postgres
 
-# Or specify the path
-node script/generate-grammar.js /path/to/postgres
+# Using just (recommended)
+just generate
 
-# Then build the parser
+# Or run the script directly
+node script/generate-grammar.js "$PG_SOURCE_DIR"
 cd postgres && npx tree-sitter generate
 ```
 

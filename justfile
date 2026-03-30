@@ -12,7 +12,7 @@ test:
     {{ts}} test
 
 # Generate the postgres grammar from PostgreSQL source
-generate-postgres pg_dir="$HOME/Source/gmr/postgres":
+generate-postgres pg_dir=env("PG_SOURCE_DIR"):
     node script/generate-grammar.js {{pg_dir}}
     {{ts}} generate postgres/grammar.js
 
@@ -21,10 +21,10 @@ generate-plpgsql:
     cd plpgsql && {{ts}} generate
 
 # Generate both grammars
-generate pg_dir="$HOME/Source/gmr/postgres": (generate-postgres pg_dir) generate-plpgsql
+generate pg_dir=env("PG_SOURCE_DIR"): (generate-postgres pg_dir) generate-plpgsql
 
 # Harvest GLR conflicts for the postgres grammar
-harvest-conflicts pg_dir="$HOME/Source/gmr/postgres":
+harvest-conflicts pg_dir=env("PG_SOURCE_DIR"):
     bash postgres/harvest-conflicts.sh {{pg_dir}}
 
 # Build WebAssembly
