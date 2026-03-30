@@ -6763,57 +6763,6 @@
     }
   },
   {
-    "type": "PLpgSQL_Expr",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "from_clause",
-          "named": true
-        },
-        {
-          "type": "group_clause",
-          "named": true
-        },
-        {
-          "type": "having_clause",
-          "named": true
-        },
-        {
-          "type": "opt_distinct_clause",
-          "named": true
-        },
-        {
-          "type": "opt_for_locking_clause",
-          "named": true
-        },
-        {
-          "type": "opt_select_limit",
-          "named": true
-        },
-        {
-          "type": "opt_sort_clause",
-          "named": true
-        },
-        {
-          "type": "opt_target_list",
-          "named": true
-        },
-        {
-          "type": "where_clause",
-          "named": true
-        },
-        {
-          "type": "window_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "PartitionBoundSpec",
     "named": true,
     "fields": {},
@@ -7921,6 +7870,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "dollar_quoted_string",
+          "named": true
+        },
         {
           "type": "string_literal",
           "named": true
@@ -9465,10 +9418,6 @@
           "named": true
         },
         {
-          "type": "kw_and",
-          "named": true
-        },
-        {
           "type": "kw_at",
           "named": true
         },
@@ -9478,14 +9427,6 @@
         },
         {
           "type": "kw_local",
-          "named": true
-        },
-        {
-          "type": "kw_not",
-          "named": true
-        },
-        {
-          "type": "kw_or",
           "named": true
         }
       ]
@@ -14334,6 +14275,10 @@
       "required": true,
       "types": [
         {
+          "type": "dollar_quoted_string",
+          "named": true
+        },
+        {
           "type": "event_trigger_value_list",
           "named": true
         },
@@ -18909,25 +18854,6 @@
     }
   },
   {
-    "type": "opt_distinct_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "distinct_clause",
-          "named": true
-        },
-        {
-          "type": "opt_all_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "opt_drop_behavior",
     "named": true,
     "fields": {},
@@ -20664,30 +20590,6 @@
       "types": [
         {
           "type": "kw_path",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "plassign_equals",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "plassign_target",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "ColId",
-          "named": true
-        },
-        {
-          "type": "param",
           "named": true
         }
       ]
@@ -22538,6 +22440,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -26048,6 +25951,11 @@
   },
   {
     "type": "comment",
+    "named": true,
+    "extra": true
+  },
+  {
+    "type": "dollar_quoted_string",
     "named": true
   },
   {

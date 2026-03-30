@@ -81,20 +81,22 @@ SELECT a AND b OR c;
                 (target_el
                   (a_expr
                     (a_expr
-                      (a_expr_prec
-                        (a_expr_prec
-                          (c_expr
-                            (columnref
-                              (ColId
-                                (identifier)))))
-                        (kw_and)
-                        (a_expr_prec
+                      (a_expr
+                        (a_expr
                           (c_expr
                             (columnref
                               (ColId
                                 (identifier))))))
-                      (kw_or)
-                      (a_expr_prec
+                      (kw_and)
+                      (a_expr
+                        (a_expr
+                          (c_expr
+                            (columnref
+                              (ColId
+                                (identifier)))))))
+                    (kw_or)
+                    (a_expr
+                      (a_expr
                         (c_expr
                           (columnref
                             (ColId

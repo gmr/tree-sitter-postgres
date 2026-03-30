@@ -8,29 +8,244 @@ permissions:
   id-token: write
   attestations: write
 
+env:
+  TREE_SITTER_ABI_VERSION: 15
+
 jobs:
   release:
     uses: tree-sitter/workflows/.github/workflows/release.yml@main
     with:
       generate: true
 
-  npm:
-    uses: tree-sitter/workflows/.github/workflows/package-npm.yml@main
-    with:
-      generate: true
-    secrets:
-      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+  # ── crates.io (trusted publishing via OIDC) ──────────────────────────────────
 
   crates:
-    uses: tree-sitter/workflows/.github/workflows/package-crates.yml@main
-    with:
-      generate: true
-    secrets:
-      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+    name: Publish Rust package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: crates
+      url: https://crates.io/crates/tree-sitter-postgres
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Set up tree-sitter CLI
+        uses: tree-sitter/setup-action/cli@v2
+      - name: Regenerate parser
+        run: |
+          while read -r grammar_dir; do
+            pushd "$grammar_dir"
+            tree-sitter generate
+            popd > /dev/null
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Publish to crates.io
+        run: cargo publish
+
+  # ── PyPI (trusted publishing via OIDC) ────────────────────────────────────────
+
+  build_sdist:
+    name: Build source dist
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Set up tree-sitter CLI
+        uses: tree-sitter/setup-action/cli@v2
+      - name: Regenerate parser
+        shell: bash
+        run: |
+          while read -r grammar_dir; do
+            pushd "$grammar_dir"
+            tree-sitter generate
+            popd > /dev/null
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Install build tools
+        run: pip install --upgrade pip build setuptools wheel
+      - name: Build sources
+        run: python -mbuild -n -s
+      - name: Upload sources
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-sources
+          path: dist/*.tar.gz
+          retention-days: 2
+
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2025
+          - windows-11-arm
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-15
+          - macos-15-intel
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up tree-sitter CLI
+        uses: tree-sitter/setup-action/cli@v2
+      - name: Regenerate parser
+        shell: bash
+        run: |
+          while read -r grammar_dir; do
+            grammar_dir="${grammar_dir%$'\r'}"
+            pushd "$grammar_dir"
+            tree-sitter generate
+            popd > /dev/null
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4
+        with:
+          output-dir: dist
+        env:
+          CIBW_ARCHS: native
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*.whl
+          name: dist-wheels-${{ matrix.os }}
+          retention-days: 2
 
   pypi:
-    uses: tree-sitter/workflows/.github/workflows/package-pypi.yml@main
-    with:
-      generate: true
-    secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+    name: Publish Python package
+    needs: [build_sdist, build_wheels]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/project/tree-sitter-postgres/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: dist-*
+          merge-multiple: true
+      - name: Check build artifacts
+        run: ls -l dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  # ── npm (trusted publishing via OIDC provenance) ──────────────────────────────
+
+  build_wasm:
+    name: Build Wasm binaries
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up NodeJS
+        uses: actions/setup-node@v6
+        with:
+          cache: npm
+          node-version: "22"
+      - name: Install dependencies
+        run: npm i --omit peer --omit optional
+      - name: Regenerate parser
+        run: |
+          while read -r grammar_dir; do
+            pushd "$grammar_dir"
+            npm x -- tree-sitter generate
+            popd > /dev/null
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Build Wasm binaries
+        run: |-
+          while read -r grammar_dir; do
+            npm x -- tree-sitter build --wasm "$grammar_dir"
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Upload binaries
+        uses: actions/upload-artifact@v7
+        with:
+          path: "*.wasm"
+          name: prebuilds-wasm
+          retention-days: 2
+
+  build_node:
+    name: Build NodeJS binaries on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2025
+          - windows-11-arm
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-15
+          - macos-15-intel
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up NodeJS
+        uses: actions/setup-node@v6
+        with:
+          cache: npm
+          node-version: "22"
+      - name: Install dependencies
+        run: npm i --omit peer --omit optional
+      - name: Regenerate parser
+        shell: bash
+        run: |
+          while read -r grammar_dir; do
+            grammar_dir="${grammar_dir%$'\r'}"
+            pushd "$grammar_dir"
+            npm x -- tree-sitter generate
+            popd > /dev/null
+          done < <(jq -r '.grammars[].path // "."' tree-sitter.json)
+      - name: Build binary
+        run: npm x -- prebuildify -t 20.19.5
+      - name: Upload binaries
+        uses: actions/upload-artifact@v7
+        with:
+          path: prebuilds/**
+          name: prebuilds-${{ matrix.os }}
+          retention-days: 2
+
+  npm:
+    name: Publish NodeJS package
+    needs: [build_wasm, build_node]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/tree-sitter-postgres
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set up NodeJS
+        uses: actions/setup-node@v6
+        with:
+          cache: npm
+          node-version: "22"
+          registry-url: https://registry.npmjs.org/
+      - name: Download binaries
+        uses: actions/download-artifact@v8
+        with:
+          path: prebuilds
+          pattern: prebuilds-*
+          merge-multiple: true
+      - name: Check binaries
+        run: tree prebuilds
+      - name: Move Wasm binaries to root
+        continue-on-error: true
+        run: mv -v prebuilds/*.wasm .
+      - name: Publish to npm
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

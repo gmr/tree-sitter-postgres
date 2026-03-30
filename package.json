@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-postgres",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "PostgreSQL grammar for tree-sitter, generated from Postgres source",
   "main": "bindings/node",
   "types": "bindings/node",
@@ -29,7 +29,7 @@
     "node-gyp-build": "^4.8.1"
   },
   "peerDependencies": {
-    "tree-sitter": "^0.21.1"
+    "tree-sitter": ">=0.25.0"
   },
   "peerDependenciesMeta": {
     "tree-sitter": {

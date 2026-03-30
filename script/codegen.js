@@ -50,8 +50,8 @@ const BASE_TOKEN_MAP = {
   IDENT:   '$.identifier',
   UIDENT:  '$.identifier',   // reduced to IDENT in PG lexer
   FCONST:  '$.float_literal',
-  SCONST:  '$.string_literal',
-  USCONST: '$.string_literal',  // reduced to SCONST in PG lexer
+  SCONST:  'choice($.string_literal, $.dollar_quoted_string)',
+  USCONST: 'choice($.string_literal, $.dollar_quoted_string)',  // reduced to SCONST in PG lexer
   BCONST:  '$.bit_string_literal',
   XCONST:  '$.hex_string_literal',
   ICONST:  '$.integer_literal',
@@ -325,27 +325,33 @@ function generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, prec
     const precInfo = determinePrecedence(alt, precMap, terminals);
 
     // A "prec-resolvable" alternative must be a simple binary/unary pattern
-    // with a LITERAL operator (single-char like +, -, *, etc.) or specific
-    // boolean keywords (AND, OR, NOT). Complex keyword operators (IS, LIKE,
-    // ILIKE, etc.) have multiple alternatives starting the same way and
-    // create multi-way conflicts that need GLR.
+    // with a LITERAL operator (single-char like +, -, *, etc.). These go into
+    // the self-referential _prec rule for static precedence resolution.
+    //
+    // AND, OR, and NOT are kept in the main (complex) rule so they reference
+    // $.a_expr instead of $.a_expr_prec. This allows IS/ISNULL/NOTNULL results
+    // (which are a_expr, not a_expr_prec) to participate as operands of boolean
+    // operators. Without this, `a IS NULL AND b = 1` cannot parse because the
+    // IS result can't be consumed by a_expr_prec's AND rule.
+    //
+    // Complex keyword operators (IS, LIKE, ILIKE, etc.) have multiple
+    // alternatives starting the same way and create multi-way conflicts
+    // that need GLR.
     let isCleanOp = false;
     if (precInfo && syntaxTokens.length >= 2 && syntaxTokens.length <= 3) {
       // Binary: self OP self (where OP is a literal or operator token)
       if (syntaxTokens.length === 3
           && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
           && syntaxTokens[2].type === 'SYMBOL' && syntaxTokens[2].value === name
-          && (syntaxTokens[1].type === 'LITERAL'
-              || (syntaxTokens[1].type === 'SYMBOL'
-                  && (syntaxTokens[1].value === 'AND' || syntaxTokens[1].value === 'OR')))) {
+          && syntaxTokens[1].type === 'LITERAL') {
         isCleanOp = true;
       }
       // Binary postfix: self OP arg (like TYPECAST Typename, COLLATE any_name)
       // These have unique operator tokens that don't create multi-way conflicts.
       // The operator must have declared precedence and not be a complex keyword
-      // that starts multiple alternatives (like IS, IN, LIKE, etc.)
+      // that starts multiple alternatives (like IS, IN, LIKE, AND, OR, etc.)
       const complexKw = new Set(['IS', 'ISNULL', 'NOTNULL', 'IN_P', 'LIKE', 'ILIKE',
-        'SIMILAR', 'BETWEEN', 'NOT', 'NOT_LA']);
+        'SIMILAR', 'BETWEEN', 'NOT', 'NOT_LA', 'AND', 'OR']);
       if (syntaxTokens.length === 3
           && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
           && syntaxTokens[1].type === 'SYMBOL' && !complexKw.has(syntaxTokens[1].value)
@@ -357,13 +363,6 @@ function generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, prec
       if (syntaxTokens.length === 2
           && syntaxTokens[0].type === 'LITERAL'
           && syntaxTokens[1].type === 'SYMBOL' && syntaxTokens[1].value === name) {
-        isCleanOp = true;
-      }
-      // Boolean unary: NOT self
-      if (syntaxTokens.length === 2
-          && syntaxTokens[1].type === 'SYMBOL' && syntaxTokens[1].value === name
-          && syntaxTokens[0].type === 'SYMBOL'
-          && (syntaxTokens[0].value === 'NOT' || syntaxTokens[0].value === 'NOT_LA')) {
         isCleanOp = true;
       }
     }
