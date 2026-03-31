@@ -91,8 +91,9 @@ jobs:
           lfs: true
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Authenticate with crates.io
+      - name: Get crates.io token via trusted publishing
         uses: rust-lang/crates-io-auth-action@v1
+        id: auth
       - name: Publish to crates.io
         run: cargo publish
 
