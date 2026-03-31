@@ -261,6 +261,8 @@ jobs:
           cache: npm
           node-version: "22"
           registry-url: https://registry.npmjs.org/
+      - name: Install npm with trusted publishing support
+        run: npm install -g npm@latest
       - name: Download binaries
         uses: actions/download-artifact@v8
         with:
@@ -273,6 +275,4 @@ jobs:
         continue-on-error: true
         run: mv -v prebuilds/*.wasm .
       - name: Publish to npm
-        run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish
