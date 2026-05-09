@@ -12,7 +12,6 @@
 #include "tree_sitter/parser.h"
 
 #include <string.h>
-#include <ctype.h>
 
 enum TokenType {
   SQL_BODY,
@@ -28,6 +27,35 @@ static void skip_whitespace(TSLexer *lexer) {
          lexer->lookahead == '\n' || lexer->lookahead == '\r') {
     lexer->advance(lexer, true);
   }
+}
+
+/*
+ * Keep the scanner self-contained for WebAssembly builds.
+ *
+ * Zed loads tree-sitter grammars as Wasm modules. If this scanner calls
+ * libc ctype helpers like isalpha/isalnum/tolower, the compiled Wasm can
+ * contain imports named "isalpha", "isalnum", or "tolower". Zed's grammar
+ * runtime does not provide those imports, causing errors like:
+ *
+ *   Failed to instantiate Wasm module: invalid import 'isalnum'
+ *
+ * For delimiter keyword detection we only need ASCII PL/pgSQL keywords, so
+ * small local helpers are sufficient and avoid external libc imports.
+ */
+static bool is_ascii_alpha(int c) {
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+static bool is_ascii_digit(int c) {
+  return c >= '0' && c <= '9';
+}
+
+static bool is_ascii_alnum(int c) {
+  return is_ascii_alpha(c) || is_ascii_digit(c);
+}
+
+static char ascii_tolower(int c) {
+  return (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : (char)c;
 }
 
 bool tree_sitter_plpgsql_external_scanner_scan(
@@ -196,13 +224,13 @@ bool tree_sitter_plpgsql_external_scanner_scan(
 
     /* At depth 0, check for PL/pgSQL delimiter keywords.
      * We mark the position before checking, and if it's a delimiter, we stop. */
-    if (depth == 0 && isalpha(lexer->lookahead)) {
+    if (depth == 0 && is_ascii_alpha(lexer->lookahead)) {
       lexer->mark_end(lexer);
       /* Read the identifier */
       char word[32];
       int len = 0;
-      while (isalnum(lexer->lookahead) || lexer->lookahead == '_') {
-        if (len < 30) word[len++] = tolower(lexer->lookahead);
+      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_') {
+        if (len < 30) word[len++] = ascii_tolower(lexer->lookahead);
         lexer->advance(lexer, false);
       }
       word[len] = '\0';
@@ -276,7 +304,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
 
     /* Identifiers starting with underscore or non-ASCII */
     if (depth == 0 && (lexer->lookahead == '_' || (lexer->lookahead >= 0x80))) {
-      while (isalnum(lexer->lookahead) || lexer->lookahead == '_' ||
+      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_' ||
              lexer->lookahead == '$' || lexer->lookahead >= 0x80) {
         lexer->advance(lexer, false);
       }
@@ -285,8 +313,8 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       continue;
     }
     /* Inside parens, consume identifiers without keyword checking */
-    if (depth > 0 && (isalpha(lexer->lookahead) || lexer->lookahead == '_')) {
-      while (isalnum(lexer->lookahead) || lexer->lookahead == '_' ||
+    if (depth > 0 && (is_ascii_alpha(lexer->lookahead) || lexer->lookahead == '_')) {
+      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_' ||
              lexer->lookahead == '$') {
         lexer->advance(lexer, false);
       }
