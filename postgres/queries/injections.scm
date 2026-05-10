@@ -5,8 +5,11 @@
 ;
 ; The createfunc_opt_list is left-recursive, so the LANGUAGE and AS items
 ; may be at varying nesting depths depending on how many options appear.
-; Patterns cover depths 1-6 (2-7 createfunc_opt_items) in both orderings,
+; Patterns cover 2..7 createfunc_opt_items in both orderings,
 ; which handles all practical CREATE FUNCTION statements.
+;
+; GENERATED FILE — DO NOT EDIT MANUALLY.
+; Regenerate with: node script/generate-injections.js
 
 ; ============================================================
 ; PL/pgSQL injection
@@ -26,7 +29,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -44,7 +47,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -63,7 +66,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -82,7 +85,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -102,7 +105,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -122,7 +125,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -143,7 +146,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -164,7 +167,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -186,7 +189,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -208,7 +211,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -231,7 +234,7 @@
         (func_as
           (Sconst
             (dollar_quoted_string) @injection.content))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 
@@ -254,7 +257,7 @@
         (NonReservedWord_or_Sconst
           (NonReservedWord
             (identifier) @_lang))))))
- (#eq? @_lang "plpgsql")
+ (#match? @_lang "(?i)^plpgsql$")
  (#set! injection.language "plpgsql")
  (#set! injection.include-children))
 

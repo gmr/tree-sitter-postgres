@@ -16,12 +16,16 @@ generate-postgres pg_dir=env("PG_SOURCE_DIR"):
     node script/generate-grammar.js {{pg_dir}}
     {{ts}} generate postgres/grammar.js
 
+# Generate postgres language injection queries
+generate-injections:
+    node script/generate-injections.js
+
 # Generate the plpgsql parser
 generate-plpgsql:
     cd plpgsql && {{ts}} generate
 
 # Generate both grammars
-generate pg_dir=env("PG_SOURCE_DIR"): (generate-postgres pg_dir) generate-plpgsql
+generate pg_dir=env("PG_SOURCE_DIR"): (generate-postgres pg_dir) generate-injections generate-plpgsql
 
 # Harvest GLR conflicts for the postgres grammar
 harvest-conflicts pg_dir=env("PG_SOURCE_DIR"):
