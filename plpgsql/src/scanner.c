@@ -74,6 +74,18 @@ bool tree_sitter_plpgsql_external_scanner_scan(
   int depth = 0;
   bool has_content = false;
 
+  /*
+   * Track whether the next token at depth 0 is expected to be a value.
+   * `null` is a PL/pgSQL delimiter only as a fresh statement (`NULL;`), but
+   * inside an expression — after IS, IS NOT, =, <>, !=, IN, AND, OR, LIKE,
+   * BETWEEN, NOT, AS, or a binary operator — `NULL` is the SQL literal and
+   * must be consumed as part of `sql_expression`. We default to `false` so
+   * a bare leading `NULL` still falls through to the kw_null token (which
+   * `stmt_null` consumes); the flag flips to `true` only after the scanner
+   * has seen something that requires a value next.
+   */
+  bool expecting_value = false;
+
   while (lexer->lookahead != 0) {
     /* At depth 0, semicolon terminates */
     if (depth == 0 && lexer->lookahead == ';') break;
@@ -141,6 +153,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       depth++;
       lexer->advance(lexer, false);
       has_content = true;
+      expecting_value = true;
       continue;
     }
     if (lexer->lookahead == ')' || lexer->lookahead == ']') {
@@ -148,6 +161,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         depth--;
         lexer->advance(lexer, false);
         has_content = true;
+        expecting_value = false;
         continue;
       }
       /* Unbalanced close — stop */
@@ -167,6 +181,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         }
       }
       has_content = true;
+      expecting_value = false;
       continue;
     }
 
@@ -175,6 +190,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       /* Just consume the $ and let it be part of the expression */
       lexer->advance(lexer, false);
       has_content = true;
+      expecting_value = false;
       continue;
     }
 
@@ -234,6 +250,19 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         lexer->advance(lexer, false);
       }
       word[len] = '\0';
+
+      /* `null` is a PL/pgSQL delimiter only as a bare NULL statement.
+       * Inside an expression — after IS, IS NOT, =, <>, !=, IN, AND, OR,
+       * NOT, LIKE, etc., or any binary operator — NULL is the SQL literal
+       * and must be consumed as part of the expression. We approximate
+       * "inside an expression" with the `expecting_value` flag, which is
+       * set by operators, opening parens, comma, and value-expecting
+       * keywords like IS/NOT/AND/OR/IN/LIKE/BETWEEN. */
+      if (strcmp(word, "null") == 0 && expecting_value) {
+        has_content = true;
+        expecting_value = false;
+        continue;
+      }
 
       /* Check if this word is a PL/pgSQL structural delimiter.
        * These are keywords that, in context, indicate the end of a SQL
@@ -297,6 +326,17 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         return false;
       }
 
+      /* Non-delimiter word: update expecting_value based on whether the
+       * word naturally precedes a value (binary operators, IS, NOT, etc.) */
+      if (strcmp(word, "is") == 0 || strcmp(word, "not") == 0 ||
+          strcmp(word, "and") == 0 || strcmp(word, "or") == 0 ||
+          strcmp(word, "in") == 0 || strcmp(word, "like") == 0 ||
+          strcmp(word, "ilike") == 0 || strcmp(word, "between") == 0 ||
+          strcmp(word, "similar") == 0 || strcmp(word, "as") == 0) {
+        expecting_value = true;
+      } else {
+        expecting_value = false;
+      }
 
       has_content = true;
       continue;
@@ -310,6 +350,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       }
 
       has_content = true;
+      expecting_value = false;
       continue;
     }
     /* Inside parens, consume identifiers without keyword checking */
@@ -324,8 +365,20 @@ bool tree_sitter_plpgsql_external_scanner_scan(
     }
 
     /* Everything else (operators, digits, etc.) — just consume */
+    int c = lexer->lookahead;
     lexer->advance(lexer, false);
     has_content = true;
+    if (depth == 0) {
+      if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' ||
+          c == '<' || c == '>' || c == '=' || c == '~' || c == '!' ||
+          c == '@' || c == '#' || c == '^' || c == '&' || c == '|' ||
+          c == '?' || c == ',') {
+        expecting_value = true;
+      } else if (c >= '0' && c <= '9') {
+        expecting_value = false;
+      }
+      /* '.' and other punctuation: leave expecting_value unchanged */
+    }
   }
 
   if (has_content) {
