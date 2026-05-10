@@ -16,6 +16,7 @@ let package = Package(
             path: ".",
             sources: [
                 "postgres/src/parser.c",
+                "postgres/src/scanner.c",
                 "plpgsql/src/parser.c",
                 "plpgsql/src/scanner.c",
             ],

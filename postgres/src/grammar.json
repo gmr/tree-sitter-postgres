@@ -60309,13 +60309,6 @@
         "value": "'([^']|'')*'"
       }
     },
-    "dollar_quoted_string": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PATTERN",
-        "value": "\\$[a-zA-Z_0-9]*\\$[\\s\\S]*?\\$[a-zA-Z_0-9]*\\$"
-      }
-    },
     "bit_string_literal": {
       "type": "TOKEN",
       "content": {
@@ -60403,7 +60396,12 @@
     ]
   ],
   "precedences": [],
-  "externals": [],
+  "externals": [
+    {
+      "type": "SYMBOL",
+      "name": "dollar_quoted_string"
+    }
+  ],
   "inline": [],
   "supertypes": [],
   "reserved": {}

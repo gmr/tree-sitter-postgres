@@ -21,6 +21,13 @@ module.exports = grammar({
   // Keywords (prec 1) outrank identifiers (prec 0) on the same text.
   word: $ => $.identifier,
 
+  // External tokens — implemented in postgres/src/scanner.c.
+  // dollar_quoted_string must match opening and closing tags exactly,
+  // which a tree-sitter regex token cannot enforce.
+  externals: $ => [
+    $.dollar_quoted_string,
+  ],
+
   // Conflicts: PostgreSQL's grammar has many shift/reduce conflicts that
   // Bison resolves via precedence rules. Tree-sitter (GLR) will handle
   // these as ambiguities. Conflict pairs are stored in script/known-conflicts.json
@@ -4734,9 +4741,11 @@ module.exports = grammar({
     // treats E'...' the same as a function call to E() at parse time.
 
     // Dollar-quoted string: $$body$$ or $tag$body$tag$
-    // NOTE: full correctness requires matching the open/close tags;
-    // this regex accepts any dollar-quoted form and is good enough for highlighting.
-    dollar_quoted_string: _ => token(/\$[a-zA-Z_0-9]*\$[\s\S]*?\$[a-zA-Z_0-9]*\$/),
+    // Handled by the external scanner (postgres/src/scanner.c) so the
+    // open/close tags must match exactly. A pure regex cannot enforce that
+    // because tree-sitter compiles tokens into a DFA that ignores non-greedy
+    // `*?`, which previously caused over-capture across multiple quoted
+    // strings in a single file.
 
     // Bit string: B'0101'
     bit_string_literal: _ => token(/[bB]'[01]*'/),

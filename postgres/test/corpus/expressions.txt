@@ -187,3 +187,86 @@ SELECT 'hello';
                         (AexprConst
                           (Sconst
                             (string_literal)))))))))))))))
+
+================================================================================
+Dollar-quoted string
+================================================================================
+
+SELECT $$hello$$;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (dollar_quoted_string)))))))))))))))
+
+================================================================================
+Tagged dollar-quoted string
+================================================================================
+
+SELECT $tag$body with $$ nested$tag$;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (dollar_quoted_string)))))))))))))))
+
+================================================================================
+Multiple dollar-quoted strings on one line
+================================================================================
+
+SELECT $a$first$a$, $b$second$b$;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_list
+                  (target_el
+                    (a_expr
+                      (a_expr
+                        (c_expr
+                          (AexprConst
+                            (Sconst
+                              (dollar_quoted_string))))))))
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (dollar_quoted_string)))))))))))))))

@@ -8,10 +8,14 @@ fn main() {
     #[cfg(target_env = "msvc")]
     c_config.flag("-utf-8");
 
-    // postgres parser
+    // postgres parser + external scanner (dollar-quoted strings)
     let parser_path = pg_src.join("parser.c");
     c_config.file(&parser_path);
     println!("cargo:rerun-if-changed={}", parser_path.to_str().unwrap());
+
+    let pg_scanner = pg_src.join("scanner.c");
+    c_config.file(&pg_scanner);
+    println!("cargo:rerun-if-changed={}", pg_scanner.to_str().unwrap());
 
     // plpgsql parser + external scanner
     let plpgsql_parser = plpgsql_src.join("parser.c");

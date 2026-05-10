@@ -2,6 +2,7 @@ package tree_sitter_postgres
 
 // #cgo CFLAGS: -std=c11 -fPIC
 // #include "../../postgres/src/parser.c"
+// #include "../../postgres/src/scanner.c"
 // #include "../../plpgsql/src/parser.c"
 // #include "../../plpgsql/src/scanner.c"
 import "C"

@@ -36,6 +36,7 @@ setup(
             sources=[
                 "bindings/python/tree_sitter_postgres/binding.c",
                 "postgres/src/parser.c",
+                "postgres/src/scanner.c",
                 "plpgsql/src/parser.c",
                 "plpgsql/src/scanner.c",
             ],
