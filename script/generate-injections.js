@@ -100,27 +100,12 @@ function buildBlock(n, deeper, langItem, tail) {
   // Deepest item lives inside the innermost cfol (level n+2).
   lines.push(deepestItem(n + 2));
 
-  // The deepest cfol closes immediately after its only matched child.
-  // The next n-2 cfol levels close without adding siblings (we don't
-  // constrain the un-mentioned options in those middle levels).
-  // The outermost cfol (level 2) gets the rightmost item as a sibling.
-  // Closing pattern:
-  //   - innermost cfol close: append ')' to deepest item
-  //   - intermediate cfol closes: append ')' n-2 times to the same line
-  //   - then rightmost item under outermost cfol
-  //   - finally close outermost cfol + opt_createfunc_opt_list + CreateFunctionStmt
-  // Because tree-sitter queries are whitespace-tolerant, we close the
-  // n-1 inner cfols on the rightmost-item line for compactness.
+  // Close the n-1 inner cfols by appending ')'.repeat(n-1) to the
+  // deepest-item line, then push the rightmost item at indent 3 (a sibling
+  // child of the outermost cfol), then append ')))' to close the outermost
+  // cfol + opt_createfunc_opt_list + CreateFunctionStmt.
   const innerCloses = ')'.repeat(n - 1);
-  // Replace the trailing ')' of deepest item alone — actually simpler to
-  // emit the closes as standalone characters appended to subsequent lines.
-  // We emit: deepest item already ends with ')'. Then the rightmost item,
-  // then ')))' to close outer cfol + opt_createfunc_opt_list + CreateFunctionStmt.
-  // Inner cfol closes go on the line just before the rightmost item.
   lines[lines.length - 1] += innerCloses;
-  // Rightmost item is a sibling of the second-deepest cfol — i.e. another
-  // child of the outermost cfol — so it lives at indent (outer + 1) = 3,
-  // independent of n.
   lines.push(rightmostItem(3));
   lines[lines.length - 1] += ')))';
 
