@@ -102,9 +102,13 @@ bool tree_sitter_plpgsql_external_scanner_scan(
         }
         return false;
       }
-      /* Single < — part of SQL operator, continue */
-
+      /* Single < — part of a SQL comparison operator. The catch-all branch
+       * at the bottom of the loop would set expecting_value=true for '<',
+       * but this earlier branch consumes the char and `continue`s, so it
+       * must update the flag itself or `IF x < NULL THEN` would truncate
+       * at NULL (the next token wouldn't be recognized as a value). */
       has_content = true;
+      expecting_value = true;
       continue;
     }
 

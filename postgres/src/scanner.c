@@ -29,10 +29,19 @@ void tree_sitter_postgres_external_scanner_deserialize(void *payload, const char
 /*
  * Self-contained ASCII helpers so the compiled Wasm does not import libc
  * functions like isalnum/tolower that Zed's grammar runtime cannot resolve.
+ *
+ * Dollar-quote tags follow PostgreSQL identifier rules: the first character
+ * must be a letter (ASCII or non-ASCII via UTF-8 lead bytes >= 0x80) or an
+ * underscore; subsequent characters may also be digits. Tags must not contain
+ * a dollar sign. See sql-syntax-lexical.html in the PostgreSQL docs.
  */
-static bool is_tag_char(int c) {
+static bool is_tag_start_char(int c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-         (c >= '0' && c <= '9') || c == '_';
+         c == '_' || c >= 0x80;
+}
+
+static bool is_tag_char(int c) {
+  return is_tag_start_char(c) || (c >= '0' && c <= '9');
 }
 
 static void skip_whitespace(TSLexer *lexer) {
@@ -54,13 +63,17 @@ bool tree_sitter_postgres_external_scanner_scan(
 
   lexer->advance(lexer, false);
 
-  /* PostgreSQL caps identifier length at NAMEDATALEN-1 = 63. */
+  /* PostgreSQL caps identifier length at NAMEDATALEN-1 = 63.
+   * Empty tag ($$...$$) is valid; a non-empty tag must start with a letter
+   * or underscore (not a digit). */
   char tag[64];
   int tag_len = 0;
-  while (is_tag_char(lexer->lookahead)) {
-    if (tag_len >= 63) return false;
-    tag[tag_len++] = (char)lexer->lookahead;
-    lexer->advance(lexer, false);
+  if (is_tag_start_char(lexer->lookahead)) {
+    do {
+      if (tag_len >= 63) return false;
+      tag[tag_len++] = (char)lexer->lookahead;
+      lexer->advance(lexer, false);
+    } while (is_tag_char(lexer->lookahead));
   }
 
   if (lexer->lookahead != '$') return false;

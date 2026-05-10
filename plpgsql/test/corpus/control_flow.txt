@@ -343,3 +343,32 @@ END
           (kw_end)
           (kw_if))))
     (kw_end)))
+
+==================
+If with single less-than against NULL
+==================
+
+BEGIN
+  IF x < NULL THEN
+    NULL;
+  END IF;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_if))))
+    (kw_end)))
