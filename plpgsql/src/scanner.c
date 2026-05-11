@@ -202,6 +202,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
     if (lexer->lookahead == '-') {
       lexer->advance(lexer, false);
       if (lexer->lookahead == '-') {
+        if (!has_content) return false;
         /* Line comment — consume to end of line */
         while (lexer->lookahead != 0 && lexer->lookahead != '\n') {
           lexer->advance(lexer, false);
@@ -215,6 +216,7 @@ bool tree_sitter_plpgsql_external_scanner_scan(
     if (lexer->lookahead == '/') {
       lexer->advance(lexer, false);
       if (lexer->lookahead == '*') {
+        if (!has_content) return false;
         /* Block comment */
         lexer->advance(lexer, false);
         int comment_depth = 1;

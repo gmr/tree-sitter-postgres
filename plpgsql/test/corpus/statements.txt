@@ -186,3 +186,93 @@ END
         (stmt_rollback
           (kw_rollback))))
     (kw_end)))
+
+==================
+Comments before statements
+==================
+
+BEGIN
+  -- leading line comment
+  IF x THEN
+    NULL;
+  END IF;
+  /* leading block comment */
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (comment)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_if)))
+      (comment)
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+Comments after statements
+==================
+
+BEGIN
+  RETURN 1; -- trailing line comment
+  RETURN 2; /* trailing block comment */
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression)))
+      (comment)
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression))))
+    (comment)
+    (kw_end)))
+
+==================
+Comments inside SQL expressions
+==================
+
+BEGIN
+  RETURN 1 /* inside block comment */ + 2;
+  RETURN 1 -- inside line comment
+    + 2;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression)))
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression))))
+    (kw_end)))
