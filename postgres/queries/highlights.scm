@@ -27,11 +27,59 @@
 
 ; ── Types ─────────────────────────────────────────────────────────────────────
 
-(Typename
-  (SimpleTypename) @type.builtin)
+[
+  (Numeric)
+  (Bit)
+  (ConstBit)
+  (Character)
+  (ConstCharacter)
+  (ConstDatetime)
+  (ConstInterval)
+  (JsonType)
+] @type.builtin
 
-(GenericType
-  (type_function_name) @type)
+; User-defined, extension, and schema-qualified types all arrive through
+; GenericType. Examples: TEAM_ROLE, main.USER_ROLE, citext, vector.
+; Capture the leaf identifier instead of the whole GenericType so child
+; identifier captures do not override the type highlight in editors.
+(Typename
+  (SimpleTypename
+    (GenericType
+      (type_function_name
+        (identifier) @type) .)))
+
+(Typename
+  (SimpleTypename
+    (GenericType
+      (type_function_name
+        (identifier) @type)
+      (opt_type_modifiers))))
+
+(Typename
+  (SimpleTypename
+    (GenericType
+      (attrs
+        (attr_name
+          (ColLabel
+            (identifier) @type))))))
+
+; Type names being defined by CREATE TYPE. For schema-qualified names, capture
+; the final segment as the type and leave the schema as a normal identifier.
+(DefineStmt
+  (kw_create)
+  (kw_type)
+  (any_name
+    (attrs
+      (attr_name
+        (ColLabel
+          (identifier) @type)))))
+
+(DefineStmt
+  (kw_create)
+  (kw_type)
+  (any_name
+    (ColId
+      (identifier) @type) .))
 
 ; ── Functions ─────────────────────────────────────────────────────────────────
 
@@ -207,6 +255,16 @@
   (kw_json)
   (kw_xml)
 ] @type.builtin
+
+; PostgreSQL has many built-in types and aliases that are not lexer keywords.
+; They parse as identifiers inside a GenericType, so they cannot be matched as
+; kw_* nodes.
+((Typename
+  (SimpleTypename
+    (GenericType
+      (type_function_name
+        (identifier) @type.builtin))))
+  (#match? @type.builtin "(?i)^(bigserial|bool|inet|jsonb|timestamptz|uuid|void)$"))
 
 ; ── Constraint / DDL keywords ─────────────────────────────────────────────────
 
