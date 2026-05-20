@@ -1443,7 +1443,12 @@ module.exports = grammar({
         seq($.index_params, ',', $.index_elem)
       ),
     index_elem_options: $ => choice(
-        seq($.opt_collate, $.opt_qualified_name, $.opt_asc_desc, $.opt_nulls_order),
+        choice(
+        seq($.opt_collate, optional($.opt_qualified_name), optional($.opt_asc_desc), optional($.opt_nulls_order)),
+        seq($.opt_qualified_name, optional($.opt_asc_desc), optional($.opt_nulls_order)),
+        seq($.opt_asc_desc, optional($.opt_nulls_order)),
+        $.opt_nulls_order
+      ),
         seq(optional($.opt_collate), $.any_name, $.reloptions, optional($.opt_asc_desc), optional($.opt_nulls_order))
       ),
     index_elem: $ => choice(
@@ -3199,7 +3204,18 @@ module.exports = grammar({
         $.RoleSpec,
         seq($.role_list, ',', $.RoleSpec)
       ),
-    PLpgSQL_Expr: $ => seq($.opt_distinct_clause, $.opt_target_list, $.from_clause, $.where_clause, $.group_clause, $.having_clause, $.window_clause, $.opt_sort_clause, $.opt_select_limit, $.opt_for_locking_clause),
+    PLpgSQL_Expr: $ => choice(
+        seq($.opt_distinct_clause, optional($.opt_target_list), optional($.from_clause), optional($.where_clause), optional($.group_clause), optional($.having_clause), optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.opt_target_list, optional($.from_clause), optional($.where_clause), optional($.group_clause), optional($.having_clause), optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.from_clause, optional($.where_clause), optional($.group_clause), optional($.having_clause), optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.where_clause, optional($.group_clause), optional($.having_clause), optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.group_clause, optional($.having_clause), optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.having_clause, optional($.window_clause), optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.window_clause, optional($.opt_sort_clause), optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.opt_sort_clause, optional($.opt_select_limit), optional($.opt_for_locking_clause)),
+        seq($.opt_select_limit, optional($.opt_for_locking_clause)),
+        $.opt_for_locking_clause
+      ),
     PLAssignStmt: $ => seq($.plassign_target, optional($.opt_indirection), $.plassign_equals, optional($.PLpgSQL_Expr)),
     plassign_target: $ => choice(
         $.ColId,

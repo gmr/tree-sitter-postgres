@@ -178,6 +178,57 @@ function resolveLiteral(value) {
 // ─── Alternative → expression ────────────────────────────────────────────────
 
 /**
+ * True when a token is a non-terminal reference whose rule can be empty in the
+ * original Bison grammar. These are emitted as non-empty rule definitions and
+ * made optional at call sites.
+ */
+function isOptionalNonTerminal(tok, terminals, kwTokenMap, optionalRules) {
+  if (!optionalRules) return false;
+  if (tok.type !== 'SYMBOL') return false;
+  if (terminals.has(tok.value)) return false;
+  if (kwTokenMap.has(tok.value)) return false;
+  if (LOOKAHEAD_TOKEN_MAP[tok.value]) return false;
+  if (OPERATOR_TOKEN_MAP[tok.value]) return false;
+  if (BASE_TOKEN_MAP[tok.value]) return false;
+  return optionalRules.has(tok.value);
+}
+
+/**
+ * Convert an ordered sequence of optional-only references into a non-empty
+ * ordered choice.
+ *
+ * Bison can write:
+ *
+ *   opt_a opt_b opt_c
+ *
+ * and let any subset, including the empty subset, match. In tree-sitter we
+ * cannot emit a rule branch that matches empty. The parent rule is already
+ * wrapped with optional(...) at its call sites, so this helper emits every
+ * non-empty suffix-starting shape while preserving order:
+ *
+ *   choice(
+ *     seq(opt_a, optional(opt_b), optional(opt_c)),
+ *     seq(opt_b, optional(opt_c)),
+ *     opt_c
+ *   )
+ */
+function nonEmptyOrderedOptionalChoice(parts) {
+  const alternatives = [];
+
+  for (let start = 0; start < parts.length; start++) {
+    const seqParts = [];
+    for (let i = start; i < parts.length; i++) {
+      seqParts.push(i === start ? parts[i] : `optional(${parts[i]})`);
+    }
+    alternatives.push(seqParts.length === 1 ? seqParts[0] : `seq(${seqParts.join(', ')})`);
+  }
+
+  return alternatives.length === 1
+    ? alternatives[0]
+    : `choice(\n        ${alternatives.join(',\n        ')}\n      )`;
+}
+
+/**
  * Convert one alternative (array of tokens) to a tree-sitter expression.
  * Returns null if the alternative should be dropped (e.g. all mode tokens).
  *
@@ -192,19 +243,11 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap) {
   const precInfo = precMap ? determinePrecedence(alt, precMap, terminals) : null;
 
   // Check if wrapping every optional element would make this entire
-  // alternative match empty. If so, we must NOT wrap any element —
-  // the containing rule is already in optionalRules (via propagation)
-  // and will be wrapped at its call sites instead.
-  const allCanBeEmpty = syntaxAlt.every(tok => {
-    if (tok.type === 'LITERAL') return false;
-    if (tok.type !== 'SYMBOL') return false;
-    if (terminals.has(tok.value)) return false;
-    if (kwTokenMap.has(tok.value)) return false;
-    if (LOOKAHEAD_TOKEN_MAP[tok.value]) return false;
-    if (OPERATOR_TOKEN_MAP[tok.value]) return false;
-    if (BASE_TOKEN_MAP[tok.value]) return false;
-    return optionalRules.has(tok.value);
-  });
+  // alternative match empty. Such alternatives need special handling below:
+  // emit all non-empty ordered forms here, and rely on the containing rule
+  // being wrapped with optional(...) at call sites for the empty form.
+  const allCanBeEmpty = syntaxAlt.length > 0
+    && syntaxAlt.every(tok => isOptionalNonTerminal(tok, terminals, kwTokenMap, optionalRules));
 
   const parts = [];
 
@@ -220,11 +263,8 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap) {
       }
       // Wrap non-terminal references to optional rules with optional()
       // EXCEPTION: skip wrapping when ALL elements are optional —
-      // wrapping them all would make the seq/alternative match empty.
-      if (optionalRules && !allCanBeEmpty
-          && !terminals.has(tok.value) && !LOOKAHEAD_TOKEN_MAP[tok.value]
-          && !MODE_TOKENS.has(tok.value) && !OPERATOR_TOKEN_MAP[tok.value]
-          && !BASE_TOKEN_MAP[tok.value] && optionalRules.has(tok.value)) {
+      // those are expanded after the loop as a non-empty ordered choice.
+      if (!allCanBeEmpty && isOptionalNonTerminal(tok, terminals, kwTokenMap, optionalRules)) {
         expr = `optional(${expr})`;
       }
     }
@@ -233,7 +273,8 @@ function altToExpr(alt, terminals, kwTokenMap, optionalRules, precMap) {
 
   if (parts.length === 0) return null;
   let expr;
-  if (parts.length === 1) expr = parts[0];
+  if (allCanBeEmpty) expr = nonEmptyOrderedOptionalChoice(parts);
+  else if (parts.length === 1) expr = parts[0];
   else expr = `seq(${parts.join(', ')})`;
 
   // Wrap with precedence if applicable.
@@ -722,4 +763,10 @@ ${knownConflicts.map(([a, b]) => `    [$.${a}, $.${b}],`).join('\n')}
   return { content, ruleCount };
 }
 
-module.exports = { generateGrammarJs };
+module.exports = {
+  generateGrammarJs,
+  _test: {
+    altToExpr,
+    nonEmptyOrderedOptionalChoice,
+  },
+};
