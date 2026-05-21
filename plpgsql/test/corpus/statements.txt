@@ -380,3 +380,22 @@ END
         (stmt_execsql
           (sql_expression))))
     (kw_end)))
+
+==================
+Static SQL with bitshift operator
+==================
+
+BEGIN
+  SELECT a << 1;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))

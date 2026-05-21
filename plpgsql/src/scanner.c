@@ -430,7 +430,7 @@ static bool scan_sql(TSLexer *lexer, ScanMode mode, const bool *valid_symbols) {
       continue;
     }
 
-    if (depth == 0 && lexer->lookahead == '<') {
+    if (depth == 0 && !has_content && lexer->lookahead == '<') {
       lexer->mark_end(lexer);
       lexer->advance(lexer, false);
       if (lexer->lookahead == '<') {
@@ -625,7 +625,7 @@ static bool scan_assignment_or_statement(TSLexer *lexer, const bool *valid_symbo
       continue;
     }
 
-    if (depth == 0 && lexer->lookahead == '<') {
+    if (depth == 0 && !has_content && lexer->lookahead == '<') {
       lexer->mark_end(lexer);
       lexer->advance(lexer, false);
       if (lexer->lookahead == '<') {
