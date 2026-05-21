@@ -41,7 +41,6 @@ END
           (any_identifier
             (identifier))
           (kw_for)
-          (kw_execute)
           (sql_expression))))
     (kw_end)))
 
@@ -140,4 +139,79 @@ END
           (kw_close)
           (any_identifier
             (identifier)))))
+    (kw_end)))
+
+==================
+Open cursor for execute with using
+==================
+
+BEGIN
+  OPEN curs FOR EXECUTE 'SELECT $1' USING x, y;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_open
+          (kw_open)
+          (any_identifier
+            (identifier))
+          (kw_for)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Open bound cursor with arguments
+==================
+
+BEGIN
+  OPEN curs (x, y);
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_open
+          (kw_open)
+          (any_identifier
+            (identifier))
+          (sql_expression)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Fetch absolute from cursor
+==================
+
+BEGIN
+  FETCH ABSOLUTE 3 FROM curs INTO x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_fetch
+          (kw_fetch)
+          (fetch_direction
+            (kw_absolute)
+            (sql_expression))
+          (kw_from)
+          (any_identifier
+            (identifier))
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier))))))
     (kw_end)))

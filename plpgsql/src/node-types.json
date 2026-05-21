@@ -1127,11 +1127,6 @@
     }
   },
   {
-    "type": "sql_expression",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "stmt_assert",
     "named": true,
     "fields": {},
@@ -1301,21 +1296,9 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
-        {
-          "type": "into_target",
-          "named": true
-        },
-        {
-          "type": "kw_into",
-          "named": true
-        },
-        {
-          "type": "kw_strict",
-          "named": true
-        },
         {
           "type": "sql_expression",
           "named": true
@@ -2657,6 +2640,10 @@
   },
   {
     "type": "kw_while",
+    "named": true
+  },
+  {
+    "type": "sql_expression",
     "named": true
   },
   {

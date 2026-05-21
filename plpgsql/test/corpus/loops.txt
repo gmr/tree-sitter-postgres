@@ -56,8 +56,7 @@ END
             (any_identifier
               (identifier)))
           (kw_in)
-          (for_dynamic
-            (kw_execute)
+          (for_query
             (sql_expression)
             (kw_loop))
           (loop_body
@@ -93,7 +92,6 @@ END
               (identifier)))
           (kw_in)
           (for_integer_range
-            (kw_reverse)
             (sql_expression)
             (sql_expression)
             (kw_by)
@@ -171,6 +169,41 @@ END
           (kw_array)
           (sql_expression)
           (kw_loop)
+          (loop_body
+            (proc_sect
+              (proc_stmt
+                (stmt_null
+                  (kw_null))))
+            (kw_end)
+            (kw_loop)))))
+    (kw_end)))
+
+==================
+For dynamic loop with using
+==================
+
+BEGIN
+  FOR rec IN EXECUTE 'SELECT $1' USING x LOOP
+    NULL;
+  END LOOP;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_for
+          (kw_for)
+          (for_variable
+            (any_identifier
+              (identifier)))
+          (kw_in)
+          (for_query
+            (sql_expression)
+            (kw_loop))
           (loop_body
             (proc_sect
               (proc_stmt

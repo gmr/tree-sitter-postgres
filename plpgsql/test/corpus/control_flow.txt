@@ -372,3 +372,61 @@ END
           (kw_end)
           (kw_if))))
     (kw_end)))
+
+==================
+If with complex IS NULL condition
+==================
+
+BEGIN
+  IF x IS NULL OR length(x) = 0 THEN
+    NULL;
+  END IF;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_if))))
+    (kw_end)))
+
+==================
+If with complex IS NOT NULL condition
+==================
+
+BEGIN
+  IF x IS NOT NULL AND x > 0 THEN
+    NULL;
+  END IF;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_if
+          (kw_if)
+          (sql_expression)
+          (kw_then)
+          (proc_sect
+            (proc_stmt
+              (stmt_null
+                (kw_null))))
+          (kw_end)
+          (kw_if))))
+    (kw_end)))

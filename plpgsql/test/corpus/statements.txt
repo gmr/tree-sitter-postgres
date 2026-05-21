@@ -276,3 +276,107 @@ END
           (kw_return)
           (sql_expression))))
     (kw_end)))
+
+==================
+Static INSERT INTO statement
+==================
+
+BEGIN
+  INSERT INTO main.tasks (kind)
+  VALUES ('x');
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Static SELECT INTO FROM statement
+==================
+
+BEGIN
+  SELECT * INTO q
+  FROM main.tasks
+  WHERE id = 1;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Static INSERT RETURNING INTO statement
+==================
+
+BEGIN
+  INSERT INTO main.tasks (kind)
+  VALUES ('x')
+  RETURNING * INTO q;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Static UPDATE RETURNING INTO statement
+==================
+
+BEGIN
+  UPDATE main.tasks SET kind = 'x'
+  WHERE id = 1
+  RETURNING * INTO q;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Static DELETE RETURNING INTO statement
+==================
+
+BEGIN
+  DELETE FROM main.tasks
+  WHERE id = 1
+  RETURNING * INTO q;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_execsql
+          (sql_expression))))
+    (kw_end)))

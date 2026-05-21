@@ -22,7 +22,22 @@ module.exports = grammar({
   word: $ => $.identifier,
 
   externals: $ => [
-    $._sql_body,
+    $._sql_statement,
+    $._sql_until_semicolon,
+    $._sql_until_then,
+    $._sql_until_when,
+    $._sql_until_loop,
+    $._sql_until_assignment,
+    $._sql_until_range,
+    $._sql_until_by_or_loop,
+    $._sql_until_into_using_or_semicolon,
+    $._sql_until_using_or_semicolon,
+    $._sql_until_using_or_loop,
+    $._sql_until_comma_or_semicolon,
+    $._sql_until_comma_using_or_semicolon,
+    $._sql_until_comma_or_loop,
+    $._sql_until_comma_or_rparen,
+    $._sql_until_from_or_into,
   ],
 
   conflicts: $ => [
@@ -104,7 +119,7 @@ module.exports = grammar({
         $.kw_cursor,
         optional($.decl_cursor_args),
         choice($.kw_is, $.kw_for),
-        $.sql_expression,
+        $._sql_semicolon_expr,
         ';'
       )
     ),
@@ -139,7 +154,7 @@ module.exports = grammar({
 
     decl_defval: $ => seq(
       choice('=', ':='),
-      $.sql_expression
+      $._sql_semicolon_expr
     ),
 
     opt_scrollable: $ => choice(
@@ -190,15 +205,15 @@ module.exports = grammar({
     // The target is consumed by the external scanner (it stops at := and =).
     // We use prec.dynamic to prefer assignments over exec SQL.
     stmt_assign: $ => prec.dynamic(10, seq(
-      $.sql_expression,
+      $._sql_assignment_expr,
       choice(':=', '='),
-      $.sql_expression,
+      $._sql_semicolon_expr,
       ';'
     )),
 
     // ── IF/ELSIF/ELSE ─────────────────────────────────────────────────────────
     stmt_if: $ => seq(
-      $.kw_if, $.sql_expression, $.kw_then,
+      $.kw_if, $._sql_then_expr, $.kw_then,
       optional($.proc_sect),
       repeat($.elsif_clause),
       optional($.else_clause),
@@ -206,7 +221,7 @@ module.exports = grammar({
     ),
 
     elsif_clause: $ => seq(
-      $.kw_elsif, $.sql_expression, $.kw_then,
+      $.kw_elsif, $._sql_then_expr, $.kw_then,
       optional($.proc_sect)
     ),
 
@@ -218,14 +233,14 @@ module.exports = grammar({
     // ── CASE ──────────────────────────────────────────────────────────────────
     stmt_case: $ => seq(
       $.kw_case,
-      optional($.sql_expression),
+      optional($._sql_when_expr),
       repeat1($.case_when),
       optional(seq($.kw_else, optional($.proc_sect))),
       $.kw_end, $.kw_case, ';'
     ),
 
     case_when: $ => seq(
-      $.kw_when, $.sql_expression, $.kw_then,
+      $.kw_when, $._sql_then_expr, $.kw_then,
       optional($.proc_sect)
     ),
 
@@ -239,7 +254,7 @@ module.exports = grammar({
     // ── WHILE ─────────────────────────────────────────────────────────────────
     stmt_while: $ => seq(
       optional($.loop_label),
-      $.kw_while, $.sql_expression, $.kw_loop,
+      $.kw_while, $._sql_loop_expr, $.kw_loop,
       $.loop_body
     ),
 
@@ -263,25 +278,25 @@ module.exports = grammar({
 
     for_integer_range: $ => seq(
       optional($.kw_reverse),
-      $.sql_expression, '..', $.sql_expression,
-      optional(seq($.kw_by, $.sql_expression)),
+      $._sql_range_expr, '..', $._sql_by_or_loop_expr,
+      optional(seq($.kw_by, $._sql_loop_expr)),
       $.kw_loop
     ),
 
     for_query: $ => seq(
-      $.sql_expression,
+      $._sql_loop_expr,
       $.kw_loop
     ),
 
     for_cursor: $ => seq(
       $.any_identifier,
-      optional(seq('(', $.sql_expression, repeat(seq(',', $.sql_expression)), ')')),
+      optional(seq('(', $._sql_comma_rparen_expr, repeat(seq(',', $._sql_comma_rparen_expr)), ')')),
       $.kw_loop
     ),
 
     for_dynamic: $ => seq(
-      $.kw_execute, $.sql_expression,
-      optional(seq($.kw_using, $.sql_expression, repeat(seq(',', $.sql_expression)))),
+      $.kw_execute, $._sql_using_or_loop_expr,
+      optional(seq($.kw_using, $._sql_comma_or_loop_expr, repeat(seq(',', $._sql_comma_or_loop_expr)))),
       $.kw_loop
     ),
 
@@ -291,7 +306,7 @@ module.exports = grammar({
       $.kw_foreach, $.for_variable,
       optional(seq($.kw_slice, $.integer_literal)),
       $.kw_in, $.kw_array,
-      $.sql_expression, $.kw_loop,
+      $._sql_loop_expr, $.kw_loop,
       $.loop_body
     ),
 
@@ -307,21 +322,21 @@ module.exports = grammar({
     stmt_exit: $ => seq(
       choice($.kw_exit, $.kw_continue),
       optional($.any_identifier),
-      optional(seq($.kw_when, $.sql_expression)),
+      optional(seq($.kw_when, $._sql_semicolon_expr)),
       ';'
     ),
 
     // ── RETURN ────────────────────────────────────────────────────────────────
     stmt_return: $ => choice(
       // RETURN expression ;
-      seq($.kw_return, optional($.sql_expression), ';'),
+      seq($.kw_return, optional($._sql_semicolon_expr), ';'),
       // RETURN NEXT expression ;
-      seq($.kw_return, $.kw_next, $.sql_expression, ';'),
+      seq($.kw_return, $.kw_next, $._sql_semicolon_expr, ';'),
       // RETURN QUERY sql ;
-      seq($.kw_return, $.kw_query, $.sql_expression, ';'),
+      seq($.kw_return, $.kw_query, $._sql_semicolon_expr, ';'),
       // RETURN QUERY EXECUTE expression [USING ...] ;
-      seq($.kw_return, $.kw_query, $.kw_execute, $.sql_expression,
-          optional(seq($.kw_using, $.sql_expression, repeat(seq(',', $.sql_expression)))),
+      seq($.kw_return, $.kw_query, $.kw_execute, $._sql_using_or_semicolon_expr,
+          optional(seq($.kw_using, $._sql_comma_or_semicolon_expr, repeat(seq(',', $._sql_comma_or_semicolon_expr)))),
           ';')
     ),
 
@@ -331,7 +346,7 @@ module.exports = grammar({
       optional($.raise_level),
       optional(choice(
         // Format string with parameters
-        seq($.string_literal, repeat(seq(',', $.sql_expression))),
+        seq($.string_literal, repeat(seq(',', $._sql_comma_using_or_semicolon_expr))),
         // Condition name
         $.any_identifier,
         // SQLSTATE 'xxxxx'
@@ -363,33 +378,33 @@ module.exports = grammar({
         $.kw_schema
       ),
       '=',
-      $.sql_expression
+      $._sql_comma_or_semicolon_expr
     ),
 
     // ── ASSERT ────────────────────────────────────────────────────────────────
     stmt_assert: $ => seq(
       $.kw_assert,
-      $.sql_expression,
-      optional(seq(',', $.sql_expression)),
+      $._sql_comma_or_semicolon_expr,
+      optional(seq(',', $._sql_semicolon_expr)),
       ';'
     ),
 
     // ── EXECUTE (dynamic SQL) ─────────────────────────────────────────────────
     stmt_dynexecute: $ => seq(
-      $.kw_execute, $.sql_expression,
+      $.kw_execute, $._sql_into_using_or_semicolon_expr,
       optional(seq($.kw_into, optional($.kw_strict), $.into_target)),
-      optional(seq($.kw_using, $.sql_expression, repeat(seq(',', $.sql_expression)))),
+      optional(seq($.kw_using, $._sql_comma_or_semicolon_expr, repeat(seq(',', $._sql_comma_or_semicolon_expr)))),
       ';'
     ),
 
     // ── PERFORM ───────────────────────────────────────────────────────────────
     stmt_perform: $ => seq(
-      $.kw_perform, $.sql_expression, ';'
+      $.kw_perform, $._sql_semicolon_expr, ';'
     ),
 
     // ── CALL / DO ─────────────────────────────────────────────────────────────
     stmt_call: $ => seq(
-      choice($.kw_call, $.kw_do), $.sql_expression, ';'
+      choice($.kw_call, $.kw_do), $._sql_semicolon_expr, ';'
     ),
 
     // ── GET DIAGNOSTICS ───────────────────────────────────────────────────────
@@ -434,13 +449,13 @@ module.exports = grammar({
           optional($.opt_scrollable),
           $.kw_for,
           choice(
-            seq($.kw_execute, $.sql_expression,
-                optional(seq($.kw_using, $.sql_expression, repeat(seq(',', $.sql_expression))))),
-            $.sql_expression
+            seq($.kw_execute, $._sql_using_or_semicolon_expr,
+                optional(seq($.kw_using, $._sql_comma_or_semicolon_expr, repeat(seq(',', $._sql_comma_or_semicolon_expr))))),
+            $._sql_semicolon_expr
           )
         ),
         // Bound cursor: OPEN cur (args)
-        seq('(', $.sql_expression, repeat(seq(',', $.sql_expression)), ')')
+        seq('(', $._sql_comma_rparen_expr, repeat(seq(',', $._sql_comma_rparen_expr)), ')')
       )),
       ';'
     ),
@@ -470,8 +485,8 @@ module.exports = grammar({
       $.kw_prior,
       $.kw_first,
       $.kw_last,
-      seq($.kw_absolute, $.sql_expression),
-      seq($.kw_relative, $.sql_expression),
+      seq($.kw_absolute, $._sql_from_or_into_expr),
+      seq($.kw_relative, $._sql_from_or_into_expr),
       $.kw_forward,
       $.kw_backward,
       seq($.kw_forward, choice($.integer_literal, $.kw_all)),
@@ -504,8 +519,7 @@ module.exports = grammar({
 
     // ── Exec SQL (pass-through SQL statement) ─────────────────────────────────
     stmt_execsql: $ => seq(
-      $.sql_expression,
-      optional(seq($.kw_into, optional($.kw_strict), $.into_target)),
+      $._sql_statement_expr,
       ';'
     ),
 
@@ -537,13 +551,33 @@ module.exports = grammar({
       seq($.kw_sqlstate, $.string_literal)
     ),
 
-    // ── SQL expression ────────────────────────────────────────────────────────
-    // Opaque node that captures a SQL expression fragment. The external
-    // scanner (src/scanner.c) consumes tokens until a PL/pgSQL structural
-    // delimiter is found (THEN, LOOP, END, ;, etc.), balancing parentheses
-    // and string literals. The actual SQL parsing is delegated to the
-    // postgres grammar via tree-sitter language injection.
-    sql_expression: $ => $._sql_body,
+    // ── SQL fragments ────────────────────────────────────────────────────────
+    // Opaque nodes that capture SQL fragments. PostgreSQL's real PL/pgSQL
+    // parser reads embedded SQL with context-specific terminators: IF reads
+    // until THEN, WHILE/FOR reads until LOOP, dynamic EXECUTE reads until
+    // INTO/USING/;, and plain SQL statements read until ;. Mirroring that
+    // split here keeps words like NULL and INTO valid inside SQL when the
+    // current PL/pgSQL context does not use them as delimiters.
+    //
+    // The hidden wrapper rules alias every external token to the same visible
+    // node name, `sql_expression`, so existing injections and editor queries
+    // can continue to target one node type.
+    _sql_statement_expr: $ => alias($._sql_statement, $.sql_expression),
+    _sql_semicolon_expr: $ => alias($._sql_until_semicolon, $.sql_expression),
+    _sql_then_expr: $ => alias($._sql_until_then, $.sql_expression),
+    _sql_when_expr: $ => alias($._sql_until_when, $.sql_expression),
+    _sql_loop_expr: $ => alias($._sql_until_loop, $.sql_expression),
+    _sql_assignment_expr: $ => alias($._sql_until_assignment, $.sql_expression),
+    _sql_range_expr: $ => alias($._sql_until_range, $.sql_expression),
+    _sql_by_or_loop_expr: $ => alias($._sql_until_by_or_loop, $.sql_expression),
+    _sql_into_using_or_semicolon_expr: $ => alias($._sql_until_into_using_or_semicolon, $.sql_expression),
+    _sql_using_or_semicolon_expr: $ => alias($._sql_until_using_or_semicolon, $.sql_expression),
+    _sql_using_or_loop_expr: $ => alias($._sql_until_using_or_loop, $.sql_expression),
+    _sql_comma_or_semicolon_expr: $ => alias($._sql_until_comma_or_semicolon, $.sql_expression),
+    _sql_comma_using_or_semicolon_expr: $ => alias($._sql_until_comma_using_or_semicolon, $.sql_expression),
+    _sql_comma_or_loop_expr: $ => alias($._sql_until_comma_or_loop, $.sql_expression),
+    _sql_comma_rparen_expr: $ => alias($._sql_until_comma_or_rparen, $.sql_expression),
+    _sql_from_or_into_expr: $ => alias($._sql_until_from_or_into, $.sql_expression),
 
     // ── Common helpers ────────────────────────────────────────────────────────
     any_identifier: $ => choice(

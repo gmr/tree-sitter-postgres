@@ -66,7 +66,6 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
-          (kw_next)
           (sql_expression))))
     (kw_end)))
 
@@ -87,7 +86,6 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
-          (kw_query)
           (sql_expression))))
     (kw_end)))
 
@@ -108,8 +106,6 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
-          (kw_query)
-          (kw_execute)
           (sql_expression))))
     (kw_end)))
 
@@ -130,5 +126,72 @@ END
       (proc_stmt
         (stmt_call
           (kw_call)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Execute with multiple using arguments
+==================
+
+BEGIN
+  EXECUTE 'SELECT $1, $2' INTO result USING x, y;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
+          (sql_expression)
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier)))
+          (kw_using)
+          (sql_expression)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Return query execute with using
+==================
+
+BEGIN
+  RETURN QUERY EXECUTE 'SELECT $1' USING x;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (sql_expression))))
+    (kw_end)))
+
+==================
+Execute dollar quoted string with semicolon
+==================
+
+BEGIN
+  EXECUTE $$SELECT 1; SELECT 2$$;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
           (sql_expression))))
     (kw_end)))
