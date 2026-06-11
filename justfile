@@ -15,7 +15,7 @@ test:
 # Generate the postgres grammar from PostgreSQL source
 generate-postgres pg_dir=env("PG_SOURCE_DIR"):
     node script/generate-grammar.js {{pg_dir}}
-    {{ts}} generate postgres/grammar.js
+    cd postgres && ../node_modules/.bin/tree-sitter generate
 
 # Generate postgres language injection queries
 generate-injections:
