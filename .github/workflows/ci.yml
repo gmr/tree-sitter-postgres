@@ -8,7 +8,9 @@ on:
       - bindings/**
       - script/**
       - Cargo.toml
+      - Cargo.lock
       - package.json
+      - package-lock.json
       - pyproject.toml
       - Package.swift
       - binding.gyp
@@ -20,7 +22,9 @@ on:
       - bindings/**
       - script/**
       - Cargo.toml
+      - Cargo.lock
       - package.json
+      - package-lock.json
       - pyproject.toml
       - Package.swift
       - binding.gyp
@@ -38,5 +42,8 @@ jobs:
         with:
           lfs: true
       - uses: tree-sitter/setup-action/cli@v2
-      - name: Run corpus tests
+      - name: Run postgres corpus tests
         run: tree-sitter test
+      - name: Run plpgsql corpus tests
+        run: tree-sitter test
+        working-directory: plpgsql

@@ -7,9 +7,10 @@ ts := "./node_modules/.bin/tree-sitter"
 # Default: run tests
 default: test
 
-# Run corpus tests
+# Run corpus tests for both grammars
 test:
     {{ts}} test
+    cd plpgsql && ../node_modules/.bin/tree-sitter test
 
 # Generate the postgres grammar from PostgreSQL source
 generate-postgres pg_dir=env("PG_SOURCE_DIR"):
@@ -22,7 +23,7 @@ generate-injections:
 
 # Generate the plpgsql parser
 generate-plpgsql:
-    cd plpgsql && {{ts}} generate
+    cd plpgsql && ../node_modules/.bin/tree-sitter generate
 
 # Generate both grammars
 generate pg_dir=env("PG_SOURCE_DIR"): (generate-postgres pg_dir) generate-injections generate-plpgsql

@@ -28668,7 +28668,7 @@ TS_PUBLIC const TSLanguage *tree_sitter_plpgsql(void) {
     .metadata = {
       .major_version = 1,
       .minor_version = 1,
-      .patch_version = 4,
+      .patch_version = 6,
     },
   };
   return &language;
