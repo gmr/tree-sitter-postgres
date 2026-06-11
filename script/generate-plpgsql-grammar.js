@@ -558,6 +558,7 @@ module.exports = grammar({
     ),
 
     // ── FETCH ─────────────────────────────────────────────────────────────────
+    // FETCH [direction] [FROM] cursor INTO target ;
     stmt_fetch: $ => seq(
       $.kw_fetch,
       optional($.fetch_direction),
