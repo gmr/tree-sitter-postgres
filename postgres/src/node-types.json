@@ -1065,6 +1065,10 @@
           "named": true
         },
         {
+          "type": "quoted_identifier",
+          "named": true
+        },
+        {
           "type": "role_list",
           "named": true
         }
@@ -1973,6 +1977,10 @@
         {
           "type": "identifier",
           "named": true
+        },
+        {
+          "type": "quoted_identifier",
+          "named": true
         }
       ]
     }
@@ -2346,6 +2354,10 @@
           "named": true
         },
         {
+          "type": "quoted_identifier",
+          "named": true
+        },
+        {
           "type": "unreserved_keyword",
           "named": true
         }
@@ -2366,6 +2378,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "quoted_identifier",
           "named": true
         },
         {
@@ -6204,6 +6220,10 @@
           "named": true
         },
         {
+          "type": "quoted_identifier",
+          "named": true
+        },
+        {
           "type": "type_func_name_keyword",
           "named": true
         },
@@ -7626,6 +7646,10 @@
         },
         {
           "type": "kw_as",
+          "named": true
+        },
+        {
+          "type": "quoted_identifier",
           "named": true
         }
       ]
@@ -13722,6 +13746,10 @@
         {
           "type": "kw_template",
           "named": true
+        },
+        {
+          "type": "quoted_identifier",
+          "named": true
         }
       ]
     }
@@ -14445,6 +14473,10 @@
         },
         {
           "type": "kw_year",
+          "named": true
+        },
+        {
+          "type": "quoted_identifier",
           "named": true
         }
       ]
@@ -18039,6 +18071,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "quoted_identifier",
           "named": true
         }
       ]
@@ -23573,6 +23609,10 @@
           "named": true
         },
         {
+          "type": "quoted_identifier",
+          "named": true
+        },
+        {
           "type": "type_func_name_keyword",
           "named": true
         },
@@ -25787,6 +25827,10 @@
         {
           "type": "kw_path",
           "named": true
+        },
+        {
+          "type": "quoted_identifier",
+          "named": true
         }
       ]
     }
@@ -25848,6 +25892,10 @@
         },
         {
           "type": "opt_interval",
+          "named": true
+        },
+        {
+          "type": "quoted_identifier",
           "named": true
         }
       ]
@@ -27956,6 +28004,10 @@
   },
   {
     "type": "param",
+    "named": true
+  },
+  {
+    "type": "quoted_identifier",
     "named": true
   },
   {

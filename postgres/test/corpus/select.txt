@@ -257,3 +257,79 @@ VALUES (1), (2);
                       (AexprConst
                         (Iconst
                           (integer_literal))))))))))))))
+
+================================================================================
+SELECT quoted identifiers and qualified names
+================================================================================
+
+SELECT "a""b" FROM "Sch ema"."T";
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (columnref
+                          (ColId
+                            (quoted_identifier)))))))))
+            (from_clause
+              (kw_from)
+              (from_list
+                (table_ref
+                  (relation_expr
+                    (qualified_name
+                      (ColId
+                        (quoted_identifier))
+                      (indirection
+                        (indirection_el
+                          (attr_name
+                            (ColLabel
+                              (quoted_identifier))))))))))))))))
+
+================================================================================
+SELECT quoted schema with unquoted table
+================================================================================
+
+SELECT x FROM "Quoted".unquoted;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (columnref
+                          (ColId
+                            (identifier)))))))))
+            (from_clause
+              (kw_from)
+              (from_list
+                (table_ref
+                  (relation_expr
+                    (qualified_name
+                      (ColId
+                        (quoted_identifier))
+                      (indirection
+                        (indirection_el
+                          (attr_name
+                            (ColLabel
+                              (identifier))))))))))))))))

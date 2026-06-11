@@ -397,3 +397,66 @@ CREATE INDEX idx_expr ON t USING btree ((lower(a)) DESC);
             (index_elem_options
               (opt_asc_desc
                 (kw_desc)))))))))
+
+================================================================================
+CREATE TABLE quoted identifiers
+================================================================================
+
+CREATE TABLE "My Table" ("Col""umn" int);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (CreateStmt
+        (kw_create)
+        (kw_table)
+        (qualified_name
+          (ColId
+            (quoted_identifier)))
+        (OptTableElementList
+          (TableElementList
+            (TableElement
+              (columnDef
+                (ColId
+                  (quoted_identifier))
+                (Typename
+                  (SimpleTypename
+                    (Numeric
+                      (kw_int))))))))))))
+
+================================================================================
+CREATE INDEX column COLLATE quoted DESC
+================================================================================
+
+CREATE INDEX i ON t (c COLLATE "fr_FR" DESC);
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (IndexStmt
+        (kw_create)
+        (kw_index)
+        (opt_single_name
+          (ColId
+            (identifier)))
+        (kw_on)
+        (relation_expr
+          (qualified_name
+            (ColId
+              (identifier))))
+        (index_params
+          (index_elem
+            (ColId
+              (identifier))
+            (index_elem_options
+              (opt_collate
+                (kw_collate)
+                (any_name
+                  (ColId
+                    (quoted_identifier))))
+              (opt_asc_desc
+                (kw_desc)))))))))

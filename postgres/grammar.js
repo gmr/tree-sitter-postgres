@@ -205,7 +205,7 @@ module.exports = grammar({
         seq($.kw_connection, $.kw_limit, $.SignedIconst),
         seq($.kw_valid, $.kw_until, $.Sconst),
         seq($.kw_user, $.role_list),
-        prec.left(11, prec.dynamic(11, $.identifier))
+        prec.left(11, prec.dynamic(11, $._ident))
       ),
     CreateOptRoleElem: $ => choice(
         $.AlterOptRoleElem,
@@ -311,7 +311,7 @@ module.exports = grammar({
       ),
     zone_value: $ => choice(
         $.Sconst,
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         seq($.ConstInterval, $.Sconst, optional($.opt_interval)),
         prec.left(20, prec.dynamic(20, seq($.ConstInterval, '(', $.Iconst, ')', $.Sconst))),
         $.NumericOnly,
@@ -991,7 +991,7 @@ module.exports = grammar({
     RowSecurityOptionalWithCheck: $ => prec.left(11, prec.dynamic(11, seq($.kw_with, $.kw_check, '(', $.a_expr, ')'))),
     RowSecurityDefaultToRole: $ => seq($.kw_to, $.role_list),
     RowSecurityOptionalToRole: $ => seq($.kw_to, $.role_list),
-    RowSecurityDefaultPermissive: $ => prec.left(11, prec.dynamic(11, seq($.kw_as, $.identifier))),
+    RowSecurityDefaultPermissive: $ => prec.left(11, prec.dynamic(11, seq($.kw_as, $._ident))),
     RowSecurityDefaultForCmd: $ => seq($.kw_for, $.row_security_cmd),
     row_security_cmd: $ => choice(
         $.kw_all,
@@ -1134,7 +1134,7 @@ module.exports = grammar({
         $.old_aggr_elem,
         seq($.old_aggr_list, ',', $.old_aggr_elem)
       ),
-    old_aggr_elem: $ => prec.left(11, prec.dynamic(11, seq($.identifier, '=', $.def_arg))),
+    old_aggr_elem: $ => prec.left(11, prec.dynamic(11, seq($._ident, '=', $.def_arg))),
     opt_enum_val_list: $ => $.enum_val_list,
     enum_val_list: $ => choice(
         $.Sconst,
@@ -1966,7 +1966,7 @@ module.exports = grammar({
         seq($.createdb_opt_name, optional($.opt_equal), $.kw_default)
       ),
     createdb_opt_name: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         seq($.kw_connection, $.kw_limit),
         $.kw_encoding,
         $.kw_location,
@@ -2505,7 +2505,7 @@ module.exports = grammar({
         seq($.xmltable_column_option_list, $.xmltable_column_option_el)
       ),
     xmltable_column_option_el: $ => choice(
-        prec.left(11, prec.dynamic(11, seq($.identifier, $.b_expr))),
+        prec.left(11, prec.dynamic(11, seq($._ident, $.b_expr))),
         seq($.kw_default, $.b_expr),
         prec.right(5, prec.dynamic(5, seq($.kw_not, $.kw_null))),
         $.kw_null,
@@ -2997,7 +2997,7 @@ module.exports = grammar({
       ),
     extract_list: $ => seq($.extract_arg, $.kw_from, $.a_expr),
     extract_arg: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.kw_year,
         $.kw_month,
         $.kw_day,
@@ -3226,30 +3226,30 @@ module.exports = grammar({
         prec.left(7, prec.dynamic(7, '='))
       ),
     ColId: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.unreserved_keyword,
         $.col_name_keyword
       ),
     type_function_name: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.unreserved_keyword,
         $.type_func_name_keyword
       ),
     NonReservedWord: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.unreserved_keyword,
         $.col_name_keyword,
         $.type_func_name_keyword
       ),
     ColLabel: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.unreserved_keyword,
         $.col_name_keyword,
         $.type_func_name_keyword,
         $.reserved_keyword
       ),
     BareColLabel: $ => choice(
-        prec.left(11, prec.dynamic(11, $.identifier)),
+        prec.left(11, prec.dynamic(11, $._ident)),
         $.bare_label_keyword
       ),
     bare_label_keyword: $ => choice(
@@ -4728,6 +4728,12 @@ module.exports = grammar({
     // prefix strings — the U is consumed as an identifier. An external
     // scanner would be needed to handle these correctly.
     quoted_identifier: _ => token(/"([^"]|"")*"/),
+
+    // gram.y's IDENT terminal matches either identifier form (scan.l lexes
+    // quoted identifiers into IDENT). Hidden so the CST surfaces the
+    // (identifier) / (quoted_identifier) leaf directly. 'word' below must
+    // stay on the bare identifier token, so this cannot replace it there.
+    _ident: $ => choice($.identifier, $.quoted_identifier),
 
     // Positional parameter: $1, $2, ...
     param: _ => /\$[0-9]+/,
