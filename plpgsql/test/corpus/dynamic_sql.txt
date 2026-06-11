@@ -66,6 +66,7 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
+          (kw_next)
           (sql_expression))))
     (kw_end)))
 
@@ -86,6 +87,7 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
+          (kw_query)
           (sql_expression))))
     (kw_end)))
 
@@ -106,6 +108,8 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
+          (kw_query)
+          (kw_execute)
           (sql_expression))))
     (kw_end)))
 
@@ -173,6 +177,10 @@ END
       (proc_stmt
         (stmt_return
           (kw_return)
+          (kw_query)
+          (kw_execute)
+          (sql_expression)
+          (kw_using)
           (sql_expression))))
     (kw_end)))
 

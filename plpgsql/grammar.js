@@ -38,6 +38,7 @@ module.exports = grammar({
     $._sql_until_comma_or_loop,
     $._sql_until_comma_or_rparen,
     $._sql_until_from_or_into,
+    $._sql_until_semicolon_guarded,
   ],
 
   conflicts: $ => [
@@ -328,12 +329,12 @@ module.exports = grammar({
 
     // ── RETURN ────────────────────────────────────────────────────────────────
     stmt_return: $ => choice(
-      // RETURN expression ;
-      seq($.kw_return, optional($._sql_semicolon_expr), ';'),
+      // RETURN expression ; — guarded so NEXT/QUERY lex as keywords below
+      seq($.kw_return, optional($._sql_semicolon_guarded_expr), ';'),
       // RETURN NEXT expression ;
       seq($.kw_return, $.kw_next, $._sql_semicolon_expr, ';'),
-      // RETURN QUERY sql ;
-      seq($.kw_return, $.kw_query, $._sql_semicolon_expr, ';'),
+      // RETURN QUERY sql ; — guarded so EXECUTE lexes as a keyword below
+      seq($.kw_return, $.kw_query, $._sql_semicolon_guarded_expr, ';'),
       // RETURN QUERY EXECUTE expression [USING ...] ;
       seq($.kw_return, $.kw_query, $.kw_execute, $._sql_using_or_semicolon_expr,
           optional(seq($.kw_using, $._sql_comma_or_semicolon_expr, repeat(seq(',', $._sql_comma_or_semicolon_expr)))),
@@ -451,7 +452,8 @@ module.exports = grammar({
           choice(
             seq($.kw_execute, $._sql_using_or_semicolon_expr,
                 optional(seq($.kw_using, $._sql_comma_or_semicolon_expr, repeat(seq(',', $._sql_comma_or_semicolon_expr))))),
-            $._sql_semicolon_expr
+            // guarded so EXECUTE lexes as the keyword above
+            $._sql_semicolon_guarded_expr
           )
         ),
         // Bound cursor: OPEN cur (args)
@@ -578,6 +580,7 @@ module.exports = grammar({
     _sql_comma_or_loop_expr: $ => alias($._sql_until_comma_or_loop, $.sql_expression),
     _sql_comma_rparen_expr: $ => alias($._sql_until_comma_or_rparen, $.sql_expression),
     _sql_from_or_into_expr: $ => alias($._sql_until_from_or_into, $.sql_expression),
+    _sql_semicolon_guarded_expr: $ => alias($._sql_until_semicolon_guarded, $.sql_expression),
 
     // ── Common helpers ────────────────────────────────────────────────────────
     any_identifier: $ => choice(

@@ -36,6 +36,7 @@ enum TokenType {
   SQL_UNTIL_COMMA_OR_LOOP,
   SQL_UNTIL_COMMA_OR_RPAREN,
   SQL_UNTIL_FROM_OR_INTO,
+  SQL_UNTIL_SEMICOLON_GUARDED,
 };
 
 void *tree_sitter_plpgsql_external_scanner_create(void) { return NULL; }
@@ -91,6 +92,12 @@ typedef struct {
   bool stop_from;
   bool refuse_plpgsql_statement_start;
   bool loop_yields_loop_token;
+  /* Refuse to start the fragment on words that must instead lex as PL/pgSQL
+   * keywords in the current context: NEXT/QUERY/EXECUTE after RETURN and
+   * EXECUTE after OPEN ... FOR (refuse_first_return_open_kw), or
+   * EXECUTE/REVERSE after FOR ... IN (refuse_first_for_in_kw). */
+  bool refuse_first_return_open_kw;
+  bool refuse_first_for_in_kw;
 } ScanMode;
 
 static ScanMode mode_for(enum TokenType symbol) {
@@ -166,6 +173,10 @@ static ScanMode mode_for(enum TokenType symbol) {
       mode.stop_semicolon = true;
       mode.stop_from = true;
       mode.stop_into = true;
+      break;
+    case SQL_UNTIL_SEMICOLON_GUARDED:
+      mode.stop_semicolon = true;
+      mode.refuse_first_return_open_kw = true;
       break;
   }
 
@@ -501,6 +512,17 @@ static bool scan_sql(TSLexer *lexer, ScanMode mode, const bool *valid_symbols) {
         if (mode.refuse_plpgsql_statement_start && is_plpgsql_statement_start(word)) {
           return false;
         }
+        if (mode.refuse_first_return_open_kw &&
+            (strcmp(word, "next") == 0 ||
+             strcmp(word, "query") == 0 ||
+             strcmp(word, "execute") == 0)) {
+          return false;
+        }
+        if (mode.refuse_first_for_in_kw &&
+            (strcmp(word, "execute") == 0 ||
+             strcmp(word, "reverse") == 0)) {
+          return false;
+        }
         if (mode.stop_assignment && is_sql_statement_start(word)) {
           disable_assignment_stop = true;
         }
@@ -713,15 +735,17 @@ bool tree_sitter_plpgsql_external_scanner_scan(
 
   /* FOR ... IN can begin either an integer range (expr .. expr) or a query
    * (query LOOP). Scan once and choose the token based on which delimiter is
-   * encountered first. */
+   * encountered first. EXECUTE and REVERSE introduce the dynamic and reverse
+   * forms, so they must lex as keywords rather than start the fragment. */
   if (valid_symbols[SQL_UNTIL_RANGE] && valid_symbols[SQL_UNTIL_LOOP]) {
     ScanMode mode = mode_for(SQL_UNTIL_RANGE);
     mode.stop_loop = true;
     mode.loop_yields_loop_token = true;
+    mode.refuse_first_for_in_kw = true;
     return scan_sql(lexer, mode, valid_symbols);
   }
 
-  for (int symbol = SQL_STATEMENT; symbol <= SQL_UNTIL_FROM_OR_INTO; symbol++) {
+  for (int symbol = SQL_STATEMENT; symbol <= SQL_UNTIL_SEMICOLON_GUARDED; symbol++) {
     if (valid_symbols[symbol]) {
       return scan_sql(lexer, mode_for((enum TokenType)symbol), valid_symbols);
     }

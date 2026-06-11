@@ -41,6 +41,7 @@ END
           (any_identifier
             (identifier))
           (kw_for)
+          (kw_execute)
           (sql_expression))))
     (kw_end)))
 
@@ -161,6 +162,10 @@ END
           (any_identifier
             (identifier))
           (kw_for)
+          (kw_execute)
+          (sql_expression)
+          (kw_using)
+          (sql_expression)
           (sql_expression))))
     (kw_end)))
 

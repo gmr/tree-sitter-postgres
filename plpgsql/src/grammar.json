@@ -1563,7 +1563,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "_sql_semicolon_expr"
+                  "name": "_sql_semicolon_guarded_expr"
                 },
                 {
                   "type": "BLANK"
@@ -1610,7 +1610,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "_sql_semicolon_expr"
+              "name": "_sql_semicolon_guarded_expr"
             },
             {
               "type": "STRING",
@@ -2282,7 +2282,7 @@
                         },
                         {
                           "type": "SYMBOL",
-                          "name": "_sql_semicolon_expr"
+                          "name": "_sql_semicolon_guarded_expr"
                         }
                       ]
                     }
@@ -2896,6 +2896,15 @@
       "content": {
         "type": "SYMBOL",
         "name": "_sql_until_from_or_into"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_semicolon_guarded_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_semicolon_guarded"
       },
       "named": true,
       "value": "sql_expression"
@@ -4649,6 +4658,10 @@
     {
       "type": "SYMBOL",
       "name": "_sql_until_from_or_into"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_semicolon_guarded"
     }
   ],
   "inline": [],
