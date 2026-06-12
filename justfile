@@ -12,9 +12,13 @@ test:
     {{ts}} test
     cd plpgsql && ../node_modules/.bin/tree-sitter test
 
-# Generate the postgres grammar from PostgreSQL source
-generate-postgres pg_dir=env("PG_SOURCE_DIR"):
+# Run only the Node codegen for the postgres grammar (writes postgres/grammar.js,
+# skips the parse-table build, which needs ~67 GB of RAM — see CONTRIBUTING.md)
+codegen-postgres pg_dir=env("PG_SOURCE_DIR"):
     node script/generate-grammar.js {{pg_dir}}
+
+# Generate the postgres grammar from PostgreSQL source
+generate-postgres pg_dir=env("PG_SOURCE_DIR"): (codegen-postgres pg_dir)
     cd postgres && ../node_modules/.bin/tree-sitter generate
 
 # Generate postgres language injection queries

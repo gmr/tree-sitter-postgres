@@ -61,6 +61,26 @@ npm install
 
 ## Running codegen
 
+> [!WARNING]
+> **Regenerating the postgres grammar needs a very large amount of RAM.** The
+> `tree-sitter generate` step for `postgres/grammar.js` builds GLR parse tables
+> for ~17,000 states and peaks at roughly **67 GB of memory** (measured with
+> tree-sitter CLI 0.26.7; takes ~8 minutes on a 128 GB machine). On a typical
+> 16–32 GB machine it will be OOM-killed. This is a [known tree-sitter
+> limitation](https://github.com/tree-sitter/tree-sitter/issues/1890), not
+> something we can fix in this repo.
+>
+> **You almost never need to run it.** The generated artifacts
+> (`postgres/src/parser.c` etc.) are committed (via Git LFS). If your change
+> touches `script/codegen.js`, run `just codegen-postgres` — it only runs the
+> Node codegen (well under 100 MB) and updates `postgres/grammar.js`, so you
+> can review the grammar diff. Open the PR with the `grammar.js` change and a
+> maintainer will run the full `just generate-postgres` and push the
+> regenerated artifacts to your branch.
+>
+> The plpgsql grammar is small — `just generate-plpgsql` runs anywhere in
+> under a second.
+
 End-to-end (postgres grammar + injections + plpgsql parser):
 
 ```bash
@@ -70,7 +90,8 @@ just generate
 Sub-recipes if you only need part of it:
 
 ```bash
-just generate-postgres        # postgres/grammar.js + tree-sitter generate
+just codegen-postgres         # postgres/grammar.js only (no parse-table build, low RAM)
+just generate-postgres        # postgres/grammar.js + tree-sitter generate (~67 GB RAM)
 just generate-injections      # postgres/queries/injections.scm
 just generate-plpgsql         # tree-sitter generate in plpgsql/
 
@@ -78,16 +99,15 @@ just generate-plpgsql         # tree-sitter generate in plpgsql/
 node script/generate-plpgsql-grammar.js "$PG_SOURCE_DIR"
 ```
 
-Run the corpus tests:
+Run the corpus tests (covers both grammars):
 
 ```bash
-just test                                 # postgres corpus
-( cd plpgsql && npx tree-sitter test )    # plpgsql corpus
+just test
 ```
 
 ## Where to make common changes
 
-- **SQL grammar** → edit `script/codegen.js` (or its helpers `parse-gram-y.js` / `parse-kwlist.js`), then `just generate-postgres`.
+- **SQL grammar** → edit `script/codegen.js` (or its helpers `parse-gram-y.js` / `parse-kwlist.js`), then `just codegen-postgres` (or `just generate-postgres` if you have the RAM for it — see the warning above).
 - **GLR conflicts** → edit `postgres/known-conflicts.json` directly. Use `postgres/harvest-conflicts.sh` to discover new conflicts iteratively.
 - **Language-injection queries** → edit `script/generate-injections.js`, then `just generate-injections`. Don't touch `postgres/queries/injections.scm`.
 - **Highlight queries** → edit `postgres/queries/highlights.scm` or `plpgsql/queries/highlights.scm` directly.
@@ -98,9 +118,8 @@ just test                                 # postgres corpus
 ## Validating before opening a PR
 
 ```bash
-just generate
+just generate     # or just codegen-postgres on a low-RAM machine
 just test
-( cd plpgsql && npx tree-sitter test )
 git diff --stat   # confirm only files you intended to change moved
 ```
 
