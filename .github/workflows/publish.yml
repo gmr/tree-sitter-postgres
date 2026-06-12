@@ -2,6 +2,11 @@ name: Publish
 on:
   push:
     tags: ["v*"]
+  # Manual dispatch republishes only the npm package (for recovering from a
+  # partial publish). The GitHub release, crates.io, and PyPI jobs are gated
+  # to tag pushes. npm trusted publishing is bound to this workflow file, so
+  # the recovery path must live here rather than in a separate workflow.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +21,7 @@ jobs:
 
   release:
     name: Build release artifacts
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       REPO_NAME: ${{ github.event.repository.name }}
@@ -80,6 +86,7 @@ jobs:
 
   crates:
     name: Publish Rust package
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -106,6 +113,7 @@ jobs:
 
   build_sdist:
     name: Build source dist
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -130,6 +138,7 @@ jobs:
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -160,6 +169,7 @@ jobs:
 
   pypi:
     name: Publish Python package
+    if: github.event_name == 'push'
     needs: [build_sdist, build_wheels]
     runs-on: ubuntu-latest
     permissions:
@@ -232,15 +242,10 @@ jobs:
         with:
           cache: npm
           node-version: "22"
-      - name: Use node-gyp with VS2026 support
-        # windows-2025 images now ship Visual Studio 2026 (v18), which the
-        # node-gyp bundled with npm (11.x) cannot detect; 12.1.0+ can.
-        # https://github.com/nodejs/node-gyp/issues/3282
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          npm install -g node-gyp@latest
-          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
+      # NOTE: node-gyp >= 12.1.0 is a devDependency so node-gyp-build and
+      # prebuildify resolve it from node_modules instead of npm's bundled
+      # 11.x, which cannot detect the Visual Studio 2026 (v18) that
+      # windows-2025 images now ship. https://github.com/nodejs/node-gyp/issues/3282
       - name: Install dependencies
         run: npm i --omit peer --omit optional
       - name: Build binary
