@@ -822,7 +822,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         }
@@ -2213,7 +2213,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -14215,7 +14215,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           ]
         }
@@ -16112,7 +16112,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             },
             {
               "type": "STRING",
@@ -31994,7 +31994,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -39799,7 +39799,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "identifier"
+                  "name": "_ident"
                 },
                 {
                   "type": "SYMBOL",
@@ -48339,7 +48339,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -51260,7 +51260,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -51285,7 +51285,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -51310,7 +51310,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -51339,7 +51339,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -51372,7 +51372,7 @@
             "value": 11,
             "content": {
               "type": "SYMBOL",
-              "name": "identifier"
+              "name": "_ident"
             }
           }
         },
@@ -60942,6 +60942,19 @@
         "type": "PATTERN",
         "value": "\"([^\"]|\"\")*\""
       }
+    },
+    "_ident": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "quoted_identifier"
+        }
+      ]
     },
     "param": {
       "type": "PATTERN",

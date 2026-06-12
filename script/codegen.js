@@ -47,8 +47,8 @@ const MODE_TOKENS = new Set([
  * Base (non-keyword) tokens from gram.y — map to tree-sitter rule references.
  */
 const BASE_TOKEN_MAP = {
-  IDENT:   '$.identifier',
-  UIDENT:  '$.identifier',   // reduced to IDENT in PG lexer
+  IDENT:   '$._ident',       // unquoted or double-quoted identifier
+  UIDENT:  '$._ident',       // reduced to IDENT in PG lexer
   FCONST:  '$.float_literal',
   SCONST:  'choice($.string_literal, $.dollar_quoted_string)',
   USCONST: 'choice($.string_literal, $.dollar_quoted_string)',  // reduced to SCONST in PG lexer
@@ -508,6 +508,12 @@ function generateLexerRules() {
     // prefix strings — the U is consumed as an identifier. An external
     // scanner would be needed to handle these correctly.
     quoted_identifier: _ => token(/"([^"]|"")*"/),
+
+    // gram.y's IDENT terminal matches either identifier form (scan.l lexes
+    // quoted identifiers into IDENT). Hidden so the CST surfaces the
+    // (identifier) / (quoted_identifier) leaf directly. 'word' below must
+    // stay on the bare identifier token, so this cannot replace it there.
+    _ident: $ => choice($.identifier, $.quoted_identifier),
 
     // Positional parameter: $1, $2, ...
     param: _ => /\\$[0-9]+/,
