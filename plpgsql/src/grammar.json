@@ -421,7 +421,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_semicolon_expr"
             },
             {
               "type": "STRING",
@@ -626,7 +626,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_semicolon_expr"
         }
       ]
     },
@@ -823,7 +823,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "sql_expression"
+            "name": "_sql_assignment_expr"
           },
           {
             "type": "CHOICE",
@@ -840,7 +840,7 @@
           },
           {
             "type": "SYMBOL",
-            "name": "sql_expression"
+            "name": "_sql_semicolon_expr"
           },
           {
             "type": "STRING",
@@ -858,7 +858,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_then_expr"
         },
         {
           "type": "SYMBOL",
@@ -918,7 +918,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_then_expr"
         },
         {
           "type": "SYMBOL",
@@ -971,7 +971,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_when_expr"
             },
             {
               "type": "BLANK"
@@ -1037,7 +1037,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_then_expr"
         },
         {
           "type": "SYMBOL",
@@ -1103,7 +1103,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_loop_expr"
         },
         {
           "type": "SYMBOL",
@@ -1211,7 +1211,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_range_expr"
         },
         {
           "type": "STRING",
@@ -1219,7 +1219,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_by_or_loop_expr"
         },
         {
           "type": "CHOICE",
@@ -1233,7 +1233,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_loop_expr"
                 }
               ]
             },
@@ -1253,7 +1253,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_loop_expr"
         },
         {
           "type": "SYMBOL",
@@ -1280,7 +1280,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_comma_rparen_expr"
                 },
                 {
                   "type": "REPEAT",
@@ -1293,7 +1293,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "sql_expression"
+                        "name": "_sql_comma_rparen_expr"
                       }
                     ]
                   }
@@ -1324,7 +1324,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_using_or_loop_expr"
         },
         {
           "type": "CHOICE",
@@ -1338,7 +1338,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_comma_or_loop_expr"
                 },
                 {
                   "type": "REPEAT",
@@ -1351,7 +1351,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "sql_expression"
+                        "name": "_sql_comma_or_loop_expr"
                       }
                     ]
                   }
@@ -1423,7 +1423,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_loop_expr"
         },
         {
           "type": "SYMBOL",
@@ -1533,7 +1533,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_semicolon_expr"
                 }
               ]
             },
@@ -1563,7 +1563,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_semicolon_guarded_expr"
                 },
                 {
                   "type": "BLANK"
@@ -1589,7 +1589,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_semicolon_expr"
             },
             {
               "type": "STRING",
@@ -1610,7 +1610,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_semicolon_guarded_expr"
             },
             {
               "type": "STRING",
@@ -1635,7 +1635,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_using_or_semicolon_expr"
             },
             {
               "type": "CHOICE",
@@ -1649,7 +1649,7 @@
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "sql_expression"
+                      "name": "_sql_comma_or_semicolon_expr"
                     },
                     {
                       "type": "REPEAT",
@@ -1662,7 +1662,7 @@
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "sql_expression"
+                            "name": "_sql_comma_or_semicolon_expr"
                           }
                         ]
                       }
@@ -1725,7 +1725,7 @@
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "sql_expression"
+                            "name": "_sql_comma_using_or_semicolon_expr"
                           }
                         ]
                       }
@@ -1878,7 +1878,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_comma_or_semicolon_expr"
         }
       ]
     },
@@ -1891,7 +1891,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_comma_or_semicolon_expr"
         },
         {
           "type": "CHOICE",
@@ -1905,7 +1905,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_semicolon_expr"
                 }
               ]
             },
@@ -1929,7 +1929,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_into_using_or_semicolon_expr"
         },
         {
           "type": "CHOICE",
@@ -1976,7 +1976,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "sql_expression"
+                  "name": "_sql_comma_or_semicolon_expr"
                 },
                 {
                   "type": "REPEAT",
@@ -1989,7 +1989,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "sql_expression"
+                        "name": "_sql_comma_or_semicolon_expr"
                       }
                     ]
                   }
@@ -2016,7 +2016,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_semicolon_expr"
         },
         {
           "type": "STRING",
@@ -2042,7 +2042,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
+          "name": "_sql_semicolon_expr"
         },
         {
           "type": "STRING",
@@ -2239,7 +2239,7 @@
                             },
                             {
                               "type": "SYMBOL",
-                              "name": "sql_expression"
+                              "name": "_sql_using_or_semicolon_expr"
                             },
                             {
                               "type": "CHOICE",
@@ -2253,7 +2253,7 @@
                                     },
                                     {
                                       "type": "SYMBOL",
-                                      "name": "sql_expression"
+                                      "name": "_sql_comma_or_semicolon_expr"
                                     },
                                     {
                                       "type": "REPEAT",
@@ -2266,7 +2266,7 @@
                                           },
                                           {
                                             "type": "SYMBOL",
-                                            "name": "sql_expression"
+                                            "name": "_sql_comma_or_semicolon_expr"
                                           }
                                         ]
                                       }
@@ -2282,7 +2282,7 @@
                         },
                         {
                           "type": "SYMBOL",
-                          "name": "sql_expression"
+                          "name": "_sql_semicolon_guarded_expr"
                         }
                       ]
                     }
@@ -2297,7 +2297,7 @@
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "sql_expression"
+                      "name": "_sql_comma_rparen_expr"
                     },
                     {
                       "type": "REPEAT",
@@ -2310,7 +2310,7 @@
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "sql_expression"
+                            "name": "_sql_comma_rparen_expr"
                           }
                         ]
                       }
@@ -2440,7 +2440,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_from_or_into_expr"
             }
           ]
         },
@@ -2453,7 +2453,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "sql_expression"
+              "name": "_sql_from_or_into_expr"
             }
           ]
         },
@@ -2631,40 +2631,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "sql_expression"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_into"
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "kw_strict"
-                    },
-                    {
-                      "type": "BLANK"
-                    }
-                  ]
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "into_target"
-                }
-              ]
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "name": "_sql_statement_expr"
         },
         {
           "type": "STRING",
@@ -2789,9 +2756,158 @@
         }
       ]
     },
-    "sql_expression": {
-      "type": "SYMBOL",
-      "name": "_sql_body"
+    "_sql_statement_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_statement"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_semicolon_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_semicolon"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_then_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_then"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_when_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_when"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_loop_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_loop"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_assignment_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_assignment"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_range_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_range"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_by_or_loop_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_by_or_loop"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_into_using_or_semicolon_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_into_using_or_semicolon"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_using_or_semicolon_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_using_or_semicolon"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_using_or_loop_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_using_or_loop"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_comma_or_semicolon_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_comma_or_semicolon"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_comma_using_or_semicolon_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_comma_using_or_semicolon"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_comma_or_loop_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_comma_or_loop"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_comma_rparen_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_comma_or_rparen"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_from_or_into_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_from_or_into"
+      },
+      "named": true,
+      "value": "sql_expression"
+    },
+    "_sql_semicolon_guarded_expr": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_sql_until_semicolon_guarded"
+      },
+      "named": true,
+      "value": "sql_expression"
     },
     "any_identifier": {
       "type": "CHOICE",
@@ -4481,7 +4597,71 @@
   "externals": [
     {
       "type": "SYMBOL",
-      "name": "_sql_body"
+      "name": "_sql_statement"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_then"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_when"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_loop"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_assignment"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_range"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_by_or_loop"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_into_using_or_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_using_or_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_using_or_loop"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_comma_or_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_comma_using_or_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_comma_or_loop"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_comma_or_rparen"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_from_or_into"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_sql_until_semicolon_guarded"
     }
   ],
   "inline": [],

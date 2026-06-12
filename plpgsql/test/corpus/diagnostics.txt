@@ -88,6 +88,7 @@ END
       (proc_stmt
         (stmt_assert
           (kw_assert)
+          (sql_expression)
           (sql_expression))))
     (kw_end)))
 

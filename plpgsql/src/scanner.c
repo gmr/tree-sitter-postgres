@@ -1,20 +1,42 @@
 /**
  * External scanner for PL/pgSQL tree-sitter grammar.
  *
- * Provides the _sql_expression token type that captures SQL expression
- * fragments. In PL/pgSQL, SQL expressions are consumed until a
- * context-specific delimiter is found (;, THEN, LOOP, etc.). Since
- * tree-sitter can't dynamically change the delimiter set, we use a simple
- * heuristic: consume everything that looks like SQL, respecting balanced
- * parentheses/brackets and string literals, stopping at tokens that are
- * unambiguously PL/pgSQL structure.
+ * PL/pgSQL embeds PostgreSQL SQL in many different grammar contexts. The
+ * important detail is that those contexts do not all use the same terminator:
+ * IF conditions end at THEN, WHILE/FOR expressions end at LOOP, dynamic
+ * EXECUTE expressions end at INTO/USING/;, and ordinary SQL statements end at
+ * semicolon. PostgreSQL's real PL/pgSQL parser models this with calls like
+ * read_sql_expression() and read_sql_construct() that receive context-specific
+ * terminators.
+ *
+ * This scanner mirrors that model with several external tokens. The grammar
+ * chooses the token for the current context, and the scanner consumes an opaque
+ * SQL fragment until that token's delimiter set is reached. The fragment is
+ * later parsed/highlighted by the PostgreSQL grammar through language
+ * injection.
  */
 #include "tree_sitter/parser.h"
 
 #include <string.h>
 
 enum TokenType {
-  SQL_BODY,
+  SQL_STATEMENT,
+  SQL_UNTIL_SEMICOLON,
+  SQL_UNTIL_THEN,
+  SQL_UNTIL_WHEN,
+  SQL_UNTIL_LOOP,
+  SQL_UNTIL_ASSIGNMENT,
+  SQL_UNTIL_RANGE,
+  SQL_UNTIL_BY_OR_LOOP,
+  SQL_UNTIL_INTO_USING_OR_SEMICOLON,
+  SQL_UNTIL_USING_OR_SEMICOLON,
+  SQL_UNTIL_USING_OR_LOOP,
+  SQL_UNTIL_COMMA_OR_SEMICOLON,
+  SQL_UNTIL_COMMA_USING_OR_SEMICOLON,
+  SQL_UNTIL_COMMA_OR_LOOP,
+  SQL_UNTIL_COMMA_OR_RPAREN,
+  SQL_UNTIL_FROM_OR_INTO,
+  SQL_UNTIL_SEMICOLON_GUARDED,
 };
 
 void *tree_sitter_plpgsql_external_scanner_create(void) { return NULL; }
@@ -29,19 +51,8 @@ static void skip_whitespace(TSLexer *lexer) {
   }
 }
 
-/*
- * Keep the scanner self-contained for WebAssembly builds.
- *
- * Zed loads tree-sitter grammars as Wasm modules. If this scanner calls
- * libc ctype helpers like isalpha/isalnum/tolower, the compiled Wasm can
- * contain imports named "isalpha", "isalnum", or "tolower". Zed's grammar
- * runtime does not provide those imports, causing errors like:
- *
- *   Failed to instantiate Wasm module: invalid import 'isalnum'
- *
- * For delimiter keyword detection we only need ASCII PL/pgSQL keywords, so
- * small local helpers are sufficient and avoid external libc imports.
- */
+/* Keep the scanner self-contained for WebAssembly builds. Zed and other
+ * editor runtimes may not provide libc ctype imports to grammar Wasm modules. */
 static bool is_ascii_alpha(int c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
@@ -58,152 +69,338 @@ static char ascii_tolower(int c) {
   return (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : (char)c;
 }
 
-bool tree_sitter_plpgsql_external_scanner_scan(
-  void *payload, TSLexer *lexer, const bool *valid_symbols
-) {
-  (void)payload;
-  if (!valid_symbols[SQL_BODY]) return false;
+static bool is_tag_start_char(int c) {
+  return is_ascii_alpha(c) || c == '_' || c >= 0x80;
+}
+
+static bool is_tag_char(int c) {
+  return is_tag_start_char(c) || is_ascii_digit(c);
+}
+
+typedef struct {
+  enum TokenType symbol;
+  bool stop_semicolon;
+  bool stop_then;
+  bool stop_when;
+  bool stop_loop;
+  bool stop_into;
+  bool stop_using;
+  bool stop_comma;
+  bool stop_assignment;
+  bool stop_range;
+  bool stop_by;
+  bool stop_from;
+  bool refuse_plpgsql_statement_start;
+  bool loop_yields_loop_token;
+  /* Refuse to start the fragment on words that must instead lex as PL/pgSQL
+   * keywords in the current context: NEXT/QUERY/EXECUTE after RETURN and
+   * EXECUTE after OPEN ... FOR (refuse_first_return_open_kw), or
+   * EXECUTE/REVERSE after FOR ... IN (refuse_first_for_in_kw). */
+  bool refuse_first_return_open_kw;
+  bool refuse_first_for_in_kw;
+} ScanMode;
+
+static ScanMode mode_for(enum TokenType symbol) {
+  ScanMode mode = {0};
+  mode.symbol = symbol;
+
+  switch (symbol) {
+    case SQL_STATEMENT:
+      mode.stop_semicolon = true;
+      mode.refuse_plpgsql_statement_start = true;
+      break;
+    case SQL_UNTIL_SEMICOLON:
+      mode.stop_semicolon = true;
+      break;
+    case SQL_UNTIL_THEN:
+      mode.stop_semicolon = true;
+      mode.stop_then = true;
+      break;
+    case SQL_UNTIL_WHEN:
+      mode.stop_semicolon = true;
+      mode.stop_when = true;
+      break;
+    case SQL_UNTIL_LOOP:
+      mode.stop_semicolon = true;
+      mode.stop_loop = true;
+      break;
+    case SQL_UNTIL_ASSIGNMENT:
+      mode.stop_semicolon = true;
+      mode.stop_assignment = true;
+      break;
+    case SQL_UNTIL_RANGE:
+      mode.stop_semicolon = true;
+      mode.stop_range = true;
+      break;
+    case SQL_UNTIL_BY_OR_LOOP:
+      mode.stop_semicolon = true;
+      mode.stop_by = true;
+      mode.stop_loop = true;
+      break;
+    case SQL_UNTIL_INTO_USING_OR_SEMICOLON:
+      mode.stop_semicolon = true;
+      mode.stop_into = true;
+      mode.stop_using = true;
+      break;
+    case SQL_UNTIL_USING_OR_SEMICOLON:
+      mode.stop_semicolon = true;
+      mode.stop_using = true;
+      break;
+    case SQL_UNTIL_USING_OR_LOOP:
+      mode.stop_semicolon = true;
+      mode.stop_using = true;
+      mode.stop_loop = true;
+      break;
+    case SQL_UNTIL_COMMA_OR_SEMICOLON:
+      mode.stop_semicolon = true;
+      mode.stop_comma = true;
+      break;
+    case SQL_UNTIL_COMMA_USING_OR_SEMICOLON:
+      mode.stop_semicolon = true;
+      mode.stop_comma = true;
+      mode.stop_using = true;
+      break;
+    case SQL_UNTIL_COMMA_OR_LOOP:
+      mode.stop_semicolon = true;
+      mode.stop_comma = true;
+      mode.stop_loop = true;
+      break;
+    case SQL_UNTIL_COMMA_OR_RPAREN:
+      mode.stop_semicolon = true;
+      mode.stop_comma = true;
+      break;
+    case SQL_UNTIL_FROM_OR_INTO:
+      mode.stop_semicolon = true;
+      mode.stop_from = true;
+      mode.stop_into = true;
+      break;
+    case SQL_UNTIL_SEMICOLON_GUARDED:
+      mode.stop_semicolon = true;
+      mode.refuse_first_return_open_kw = true;
+      break;
+  }
+
+  return mode;
+}
+
+static bool is_plpgsql_statement_start(const char *word) {
+  return strcmp(word, "begin") == 0 ||
+         strcmp(word, "declare") == 0 ||
+         strcmp(word, "end") == 0 ||
+         strcmp(word, "exception") == 0 ||
+         strcmp(word, "if") == 0 ||
+         strcmp(word, "case") == 0 ||
+         strcmp(word, "loop") == 0 ||
+         strcmp(word, "while") == 0 ||
+         strcmp(word, "for") == 0 ||
+         strcmp(word, "foreach") == 0 ||
+         strcmp(word, "return") == 0 ||
+         strcmp(word, "raise") == 0 ||
+         strcmp(word, "assert") == 0 ||
+         strcmp(word, "execute") == 0 ||
+         strcmp(word, "perform") == 0 ||
+         strcmp(word, "call") == 0 ||
+         strcmp(word, "do") == 0 ||
+         strcmp(word, "get") == 0 ||
+         strcmp(word, "open") == 0 ||
+         strcmp(word, "fetch") == 0 ||
+         strcmp(word, "move") == 0 ||
+         strcmp(word, "close") == 0 ||
+         strcmp(word, "null") == 0 ||
+         strcmp(word, "exit") == 0 ||
+         strcmp(word, "continue") == 0 ||
+         strcmp(word, "commit") == 0 ||
+         strcmp(word, "rollback") == 0 ||
+         strcmp(word, "elsif") == 0 ||
+         strcmp(word, "elseif") == 0 ||
+         strcmp(word, "else") == 0 ||
+         strcmp(word, "when") == 0;
+}
+
+static bool is_sql_statement_start(const char *word) {
+  return strcmp(word, "select") == 0 ||
+         strcmp(word, "insert") == 0 ||
+         strcmp(word, "update") == 0 ||
+         strcmp(word, "delete") == 0 ||
+         strcmp(word, "merge") == 0 ||
+         strcmp(word, "with") == 0 ||
+         strcmp(word, "values") == 0 ||
+         strcmp(word, "create") == 0 ||
+         strcmp(word, "alter") == 0 ||
+         strcmp(word, "drop") == 0 ||
+         strcmp(word, "truncate") == 0 ||
+         strcmp(word, "grant") == 0 ||
+         strcmp(word, "revoke") == 0 ||
+         strcmp(word, "analyze") == 0 ||
+         strcmp(word, "analyse") == 0 ||
+         strcmp(word, "explain") == 0 ||
+         strcmp(word, "vacuum") == 0 ||
+         strcmp(word, "lock") == 0 ||
+         strcmp(word, "notify") == 0 ||
+         strcmp(word, "listen") == 0 ||
+         strcmp(word, "unlisten") == 0 ||
+         strcmp(word, "refresh") == 0 ||
+         strcmp(word, "reindex") == 0 ||
+         strcmp(word, "copy") == 0 ||
+         strcmp(word, "set") == 0 ||
+         strcmp(word, "reset") == 0 ||
+         strcmp(word, "show") == 0 ||
+         strcmp(word, "discard") == 0 ||
+         strcmp(word, "prepare") == 0 ||
+         strcmp(word, "deallocate") == 0;
+}
+
+static bool is_keyword_terminator(const ScanMode *mode, const char *word, enum TokenType *result_symbol) {
+  *result_symbol = mode->symbol;
+  if (mode->stop_loop && strcmp(word, "loop") == 0) {
+    if (mode->loop_yields_loop_token) *result_symbol = SQL_UNTIL_LOOP;
+    return true;
+  }
+  return (mode->stop_then && strcmp(word, "then") == 0) ||
+         (mode->stop_when && strcmp(word, "when") == 0) ||
+         (mode->stop_into && strcmp(word, "into") == 0) ||
+         (mode->stop_using && strcmp(word, "using") == 0) ||
+         (mode->stop_by && strcmp(word, "by") == 0) ||
+         (mode->stop_from && strcmp(word, "from") == 0);
+}
+
+static bool finish_token(TSLexer *lexer, enum TokenType symbol, bool has_content) {
+  if (!has_content) return false;
+  lexer->result_symbol = symbol;
+  return true;
+}
+
+static bool consume_single_quoted_string(TSLexer *lexer) {
+  lexer->advance(lexer, false);
+  while (lexer->lookahead != 0) {
+    if (lexer->lookahead == '\'') {
+      lexer->advance(lexer, false);
+      if (lexer->lookahead != '\'') return true;
+      lexer->advance(lexer, false);
+    } else {
+      lexer->advance(lexer, false);
+    }
+  }
+  return true;
+}
+
+static bool consume_double_quoted_identifier(TSLexer *lexer) {
+  lexer->advance(lexer, false);
+  while (lexer->lookahead != 0) {
+    if (lexer->lookahead == '"') {
+      lexer->advance(lexer, false);
+      if (lexer->lookahead != '"') return true;
+      lexer->advance(lexer, false);
+    } else {
+      lexer->advance(lexer, false);
+    }
+  }
+  return true;
+}
+
+static bool consume_dollar_quoted_string(TSLexer *lexer) {
+  lexer->advance(lexer, false); /* opening $ */
+
+  char tag[64];
+  int tag_len = 0;
+  if (is_tag_start_char(lexer->lookahead)) {
+    do {
+      if (tag_len >= 63) return true;
+      tag[tag_len++] = (char)lexer->lookahead;
+      lexer->advance(lexer, false);
+    } while (is_tag_char(lexer->lookahead));
+  }
+
+  if (lexer->lookahead != '$') {
+    return true; /* Not actually a dollar quote; we consumed a SQL '$'. */
+  }
+  lexer->advance(lexer, false);
+
+  while (lexer->lookahead != 0) {
+    if (lexer->lookahead == '$') {
+      lexer->advance(lexer, false);
+      int i = 0;
+      while (i < tag_len && lexer->lookahead == (unsigned char)tag[i]) {
+        lexer->advance(lexer, false);
+        i++;
+      }
+      if (i == tag_len && lexer->lookahead == '$') {
+        lexer->advance(lexer, false);
+        return true;
+      }
+      continue;
+    }
+    lexer->advance(lexer, false);
+  }
+
+  return true;
+}
+
+static bool scan_sql(TSLexer *lexer, ScanMode mode, const bool *valid_symbols) {
+  (void)valid_symbols;
 
   skip_whitespace(lexer);
 
   if (lexer->lookahead == 0) return false;
 
-  /* Don't start on a semicolon — that's a delimiter, not SQL content */
-  if (lexer->lookahead == ';') return false;
-
   int depth = 0;
   bool has_content = false;
-
-  /*
-   * Track whether the next token at depth 0 is expected to be a value.
-   * `null` is a PL/pgSQL delimiter only as a fresh statement (`NULL;`), but
-   * inside an expression — after IS, IS NOT, =, <>, !=, IN, AND, OR, LIKE,
-   * BETWEEN, NOT, AS, or a binary operator — `NULL` is the SQL literal and
-   * must be consumed as part of `sql_expression`. We default to `false` so
-   * a bare leading `NULL` still falls through to the kw_null token (which
-   * `stmt_null` consumes); the flag flips to `true` only after the scanner
-   * has seen something that requires a value next.
-   */
-  bool expecting_value = false;
+  bool saw_first_word = false;
+  bool disable_assignment_stop = false;
 
   while (lexer->lookahead != 0) {
-    /* At depth 0, semicolon terminates */
-    if (depth == 0 && lexer->lookahead == ';') break;
-
-    /* At depth 0, << terminates (block/loop label) */
-    if (depth == 0 && lexer->lookahead == '<') {
-      lexer->mark_end(lexer);
-      lexer->advance(lexer, false);
-      if (lexer->lookahead == '<') {
-        /* << found — stop before it */
-        if (has_content) {
-          lexer->result_symbol = SQL_BODY;
-          return true;
-        }
-        return false;
+    if (depth == 0) {
+      if (mode.stop_semicolon && lexer->lookahead == ';') {
+        lexer->mark_end(lexer);
+        return finish_token(lexer, mode.symbol, has_content);
       }
-      /* Single < — part of a SQL comparison operator. The catch-all branch
-       * at the bottom of the loop would set expecting_value=true for '<',
-       * but this earlier branch consumes the char and `continue`s, so it
-       * must update the flag itself or `IF x < NULL THEN` would truncate
-       * at NULL (the next token wouldn't be recognized as a value). */
-      has_content = true;
-      expecting_value = true;
-      continue;
+
+      if (mode.stop_comma && lexer->lookahead == ',') {
+        lexer->mark_end(lexer);
+        return finish_token(lexer, mode.symbol, has_content);
+      }
     }
 
-    /* At depth 0, := terminates (assignment operator) */
-    if (depth == 0 && lexer->lookahead == ':') {
-      lexer->mark_end(lexer);
-      lexer->advance(lexer, false);
-      if (lexer->lookahead == '=') {
-        /* := found — stop before it */
-        if (has_content) {
-          lexer->result_symbol = SQL_BODY;
-          return true;
-        }
-        return false;
-      }
-      /* Just a colon, not :=  — continue (it's part of SQL like ::) */
-      if (lexer->lookahead == ':') {
-        /* :: typecast — consume both */
-        lexer->advance(lexer, false);
-        has_content = true;
-        continue;
-      }
-      has_content = true;
-      continue;
-    }
-
-    /* At depth 0, .. terminates (range operator in FOR loops) */
-    if (depth == 0 && lexer->lookahead == '.') {
-      lexer->mark_end(lexer);
-      lexer->advance(lexer, false);
-      if (lexer->lookahead == '.') {
-        /* .. found — stop before it */
-        if (has_content) {
-          lexer->result_symbol = SQL_BODY;
-          return true;
-        }
-        return false;
-      }
-      /* Just a single dot — part of dotted name, continue */
-      has_content = true;
-      continue;
-    }
-
-    /* Track balanced parens/brackets */
     if (lexer->lookahead == '(' || lexer->lookahead == '[') {
       depth++;
       lexer->advance(lexer, false);
       has_content = true;
-      expecting_value = true;
       continue;
     }
+
     if (lexer->lookahead == ')' || lexer->lookahead == ']') {
       if (depth > 0) {
         depth--;
         lexer->advance(lexer, false);
         has_content = true;
-        expecting_value = false;
         continue;
       }
-      /* Unbalanced close — stop */
-      break;
+      lexer->mark_end(lexer);
+      return finish_token(lexer, mode.symbol, has_content);
     }
 
-    /* String literals — consume whole */
     if (lexer->lookahead == '\'') {
-      lexer->advance(lexer, false);
-      while (lexer->lookahead != 0) {
-        if (lexer->lookahead == '\'') {
-          lexer->advance(lexer, false);
-          if (lexer->lookahead != '\'') break;  /* doubled quote */
-          lexer->advance(lexer, false);
-        } else {
-          lexer->advance(lexer, false);
-        }
-      }
+      consume_single_quoted_string(lexer);
       has_content = true;
-      expecting_value = false;
       continue;
     }
 
-    /* Dollar-quoted strings */
+    if (lexer->lookahead == '"') {
+      consume_double_quoted_identifier(lexer);
+      has_content = true;
+      continue;
+    }
+
     if (lexer->lookahead == '$') {
-      /* Just consume the $ and let it be part of the expression */
-      lexer->advance(lexer, false);
+      consume_dollar_quoted_string(lexer);
       has_content = true;
-      expecting_value = false;
       continue;
     }
 
-    /* Comments */
     if (lexer->lookahead == '-') {
       lexer->advance(lexer, false);
       if (lexer->lookahead == '-') {
         if (!has_content) return false;
-        /* Line comment — consume to end of line */
         while (lexer->lookahead != 0 && lexer->lookahead != '\n') {
           lexer->advance(lexer, false);
         }
@@ -213,11 +410,11 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       has_content = true;
       continue;
     }
+
     if (lexer->lookahead == '/') {
       lexer->advance(lexer, false);
       if (lexer->lookahead == '*') {
         if (!has_content) return false;
-        /* Block comment */
         lexer->advance(lexer, false);
         int comment_depth = 1;
         while (lexer->lookahead != 0 && comment_depth > 0) {
@@ -244,153 +441,314 @@ bool tree_sitter_plpgsql_external_scanner_scan(
       continue;
     }
 
-    /* At depth 0, check for PL/pgSQL delimiter keywords.
-     * We mark the position before checking, and if it's a delimiter, we stop. */
+    if (depth == 0 && !has_content && lexer->lookahead == '<') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '<') {
+        return finish_token(lexer, mode.symbol, has_content);
+      }
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && lexer->lookahead == ':') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '=') {
+        if (mode.stop_assignment && !disable_assignment_stop) {
+          return finish_token(lexer, mode.symbol, has_content);
+        }
+        lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      if (lexer->lookahead == ':') {
+        lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && lexer->lookahead == '=') {
+      lexer->mark_end(lexer);
+      if (mode.stop_assignment && !disable_assignment_stop) {
+        return finish_token(lexer, mode.symbol, has_content);
+      }
+      lexer->advance(lexer, false);
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && lexer->lookahead == '.') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '.') {
+        if (mode.stop_range) {
+          return finish_token(lexer, mode.symbol, has_content);
+        }
+        lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      has_content = true;
+      continue;
+    }
+
     if (depth == 0 && is_ascii_alpha(lexer->lookahead)) {
       lexer->mark_end(lexer);
-      /* Read the identifier */
+
       char word[32];
       int len = 0;
       while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_') {
-        if (len < 30) word[len++] = ascii_tolower(lexer->lookahead);
+        if (len < 31) word[len++] = ascii_tolower(lexer->lookahead);
         lexer->advance(lexer, false);
       }
       word[len] = '\0';
 
-      /* `null` is a PL/pgSQL delimiter only as a bare NULL statement.
-       * Inside an expression — after IS, IS NOT, =, <>, !=, IN, AND, OR,
-       * NOT, LIKE, etc., or any binary operator — NULL is the SQL literal
-       * and must be consumed as part of the expression. We approximate
-       * "inside an expression" with the `expecting_value` flag, which is
-       * set by operators, opening parens, comma, and value-expecting
-       * keywords like IS/NOT/AND/OR/IN/LIKE/BETWEEN. */
-      if (strcmp(word, "null") == 0 && expecting_value) {
-        has_content = true;
-        expecting_value = false;
-        continue;
-      }
-
-      /* Check if this word is a PL/pgSQL structural delimiter.
-       * These are keywords that, in context, indicate the end of a SQL
-       * expression in PL/pgSQL. We stop BEFORE consuming them.
-       *
-       * Note: This is a heuristic. The real parser knows the exact
-       * delimiter from context. We err on the side of stopping too
-       * early — the grammar rules will then match the keyword. */
-      if (/* Expression terminators */
-          strcmp(word, "then") == 0 ||
-          strcmp(word, "loop") == 0 ||
-          strcmp(word, "into") == 0 ||
-          strcmp(word, "using") == 0 ||
-          strcmp(word, "when") == 0 ||
-          strcmp(word, "elsif") == 0 ||
-          strcmp(word, "elseif") == 0 ||
-          strcmp(word, "else") == 0 ||
-          strcmp(word, "end") == 0 ||
-          strcmp(word, "declare") == 0 ||
-          strcmp(word, "begin") == 0 ||
-          strcmp(word, "exception") == 0 ||
-          /* Statement-starting keywords — must not be swallowed */
-          strcmp(word, "if") == 0 ||
-          strcmp(word, "case") == 0 ||
-          strcmp(word, "for") == 0 ||
-          strcmp(word, "foreach") == 0 ||
-          strcmp(word, "while") == 0 ||
-          strcmp(word, "return") == 0 ||
-          strcmp(word, "raise") == 0 ||
-          strcmp(word, "assert") == 0 ||
-          strcmp(word, "execute") == 0 ||
-          strcmp(word, "perform") == 0 ||
-          strcmp(word, "call") == 0 ||
-          strcmp(word, "open") == 0 ||
-          strcmp(word, "fetch") == 0 ||
-          strcmp(word, "move") == 0 ||
-          strcmp(word, "close") == 0 ||
-          strcmp(word, "null") == 0 ||
-          strcmp(word, "exit") == 0 ||
-          strcmp(word, "continue") == 0 ||
-          strcmp(word, "commit") == 0 ||
-          strcmp(word, "rollback") == 0 ||
-          strcmp(word, "get") == 0 ||
-          strcmp(word, "do") == 0 ||
-          /* Additional context-sensitive delimiters */
-          strcmp(word, "next") == 0 ||
-          strcmp(word, "query") == 0 ||
-          strcmp(word, "reverse") == 0 ||
-          strcmp(word, "by") == 0 ||
-          strcmp(word, "alias") == 0 ||
-          strcmp(word, "strict") == 0 ||
-          strcmp(word, "cursor") == 0 ||
-          strcmp(word, "slice") == 0 ||
-          strcmp(word, "array") == 0 ||
-          strcmp(word, "all") == 0) {
-        /* Stop before this keyword — it's a PL/pgSQL delimiter */
-        if (has_content) {
-          lexer->result_symbol = SQL_BODY;
-          return true;
+      if (!saw_first_word) {
+        saw_first_word = true;
+        if (mode.refuse_plpgsql_statement_start && is_plpgsql_statement_start(word)) {
+          return false;
         }
-        return false;
+        if (mode.refuse_first_return_open_kw &&
+            (strcmp(word, "next") == 0 ||
+             strcmp(word, "query") == 0 ||
+             strcmp(word, "execute") == 0)) {
+          return false;
+        }
+        if (mode.refuse_first_for_in_kw &&
+            (strcmp(word, "execute") == 0 ||
+             strcmp(word, "reverse") == 0)) {
+          return false;
+        }
+        if (mode.stop_assignment && is_sql_statement_start(word)) {
+          disable_assignment_stop = true;
+        }
       }
 
-      /* Non-delimiter word: update expecting_value based on whether the
-       * word naturally precedes a value (binary operators, IS, NOT, etc.) */
-      if (strcmp(word, "is") == 0 || strcmp(word, "not") == 0 ||
-          strcmp(word, "and") == 0 || strcmp(word, "or") == 0 ||
-          strcmp(word, "in") == 0 || strcmp(word, "like") == 0 ||
-          strcmp(word, "ilike") == 0 || strcmp(word, "between") == 0 ||
-          strcmp(word, "similar") == 0 || strcmp(word, "as") == 0) {
-        expecting_value = true;
-      } else {
-        expecting_value = false;
+      enum TokenType result_symbol = mode.symbol;
+      if (is_keyword_terminator(&mode, word, &result_symbol)) {
+        return finish_token(lexer, result_symbol, has_content);
       }
 
       has_content = true;
       continue;
     }
 
-    /* Identifiers starting with underscore or non-ASCII */
-    if (depth == 0 && (lexer->lookahead == '_' || (lexer->lookahead >= 0x80))) {
+    if (is_ascii_alpha(lexer->lookahead) || lexer->lookahead == '_' || lexer->lookahead >= 0x80) {
       while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_' ||
              lexer->lookahead == '$' || lexer->lookahead >= 0x80) {
         lexer->advance(lexer, false);
       }
-
-      has_content = true;
-      expecting_value = false;
-      continue;
-    }
-    /* Inside parens, consume identifiers without keyword checking */
-    if (depth > 0 && (is_ascii_alpha(lexer->lookahead) || lexer->lookahead == '_')) {
-      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_' ||
-             lexer->lookahead == '$') {
-        lexer->advance(lexer, false);
-      }
-
       has_content = true;
       continue;
     }
 
-    /* Everything else (operators, digits, etc.) — just consume */
-    int c = lexer->lookahead;
     lexer->advance(lexer, false);
     has_content = true;
-    if (depth == 0) {
-      if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' ||
-          c == '<' || c == '>' || c == '=' || c == '~' || c == '!' ||
-          c == '@' || c == '#' || c == '^' || c == '&' || c == '|' ||
-          c == '?' || c == ',') {
-        expecting_value = true;
-      } else if (c >= '0' && c <= '9') {
-        expecting_value = false;
-      }
-      /* '.' and other punctuation: leave expecting_value unchanged */
-    }
   }
 
-  if (has_content) {
-    lexer->mark_end(lexer);
-    lexer->result_symbol = SQL_BODY;
-    return true;
+  lexer->mark_end(lexer);
+  return finish_token(lexer, mode.symbol, has_content);
+}
+
+static bool scan_assignment_or_statement(TSLexer *lexer, const bool *valid_symbols) {
+  (void)valid_symbols;
+
+  /* If we reach ';' before an assignment operator, emit SQL_STATEMENT instead.
+   * If we reach ':=' or '=' first, emit SQL_UNTIL_ASSIGNMENT. */
+  skip_whitespace(lexer);
+  if (lexer->lookahead == 0) return false;
+
+  int depth = 0;
+  bool has_content = false;
+  bool saw_first_word = false;
+  bool disable_assignment_stop = false;
+
+  while (lexer->lookahead != 0) {
+    if (depth == 0 && lexer->lookahead == ';') {
+      lexer->mark_end(lexer);
+      if (!has_content) return false;
+      lexer->result_symbol = SQL_STATEMENT;
+      return true;
+    }
+
+    if (lexer->lookahead == '(' || lexer->lookahead == '[') {
+      depth++;
+      lexer->advance(lexer, false);
+      has_content = true;
+      continue;
+    }
+
+    if (lexer->lookahead == ')' || lexer->lookahead == ']') {
+      if (depth > 0) {
+        depth--;
+        lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      lexer->mark_end(lexer);
+      if (!has_content) return false;
+      lexer->result_symbol = SQL_STATEMENT;
+      return true;
+    }
+
+    if (lexer->lookahead == '\'') {
+      consume_single_quoted_string(lexer);
+      has_content = true;
+      continue;
+    }
+    if (lexer->lookahead == '"') {
+      consume_double_quoted_identifier(lexer);
+      has_content = true;
+      continue;
+    }
+    if (lexer->lookahead == '$') {
+      consume_dollar_quoted_string(lexer);
+      has_content = true;
+      continue;
+    }
+
+    if (lexer->lookahead == '-') {
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '-') {
+        if (!has_content) return false;
+        while (lexer->lookahead != 0 && lexer->lookahead != '\n') lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      has_content = true;
+      continue;
+    }
+
+    if (lexer->lookahead == '/') {
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '*') {
+        if (!has_content) return false;
+        lexer->advance(lexer, false);
+        int comment_depth = 1;
+        while (lexer->lookahead != 0 && comment_depth > 0) {
+          if (lexer->lookahead == '/') {
+            lexer->advance(lexer, false);
+            if (lexer->lookahead == '*') { comment_depth++; lexer->advance(lexer, false); }
+          } else if (lexer->lookahead == '*') {
+            lexer->advance(lexer, false);
+            if (lexer->lookahead == '/') { comment_depth--; lexer->advance(lexer, false); }
+          } else {
+            lexer->advance(lexer, false);
+          }
+        }
+        has_content = true;
+        continue;
+      }
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && !has_content && lexer->lookahead == '<') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '<') {
+        if (!has_content) return false;
+        lexer->result_symbol = SQL_STATEMENT;
+        return true;
+      }
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && lexer->lookahead == ':') {
+      lexer->mark_end(lexer);
+      lexer->advance(lexer, false);
+      if (lexer->lookahead == '=') {
+        if (!disable_assignment_stop) {
+          return finish_token(lexer, SQL_UNTIL_ASSIGNMENT, has_content);
+        }
+        lexer->advance(lexer, false);
+        has_content = true;
+        continue;
+      }
+      if (lexer->lookahead == ':') lexer->advance(lexer, false);
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && lexer->lookahead == '=') {
+      lexer->mark_end(lexer);
+      if (!disable_assignment_stop) {
+        return finish_token(lexer, SQL_UNTIL_ASSIGNMENT, has_content);
+      }
+      lexer->advance(lexer, false);
+      has_content = true;
+      continue;
+    }
+
+    if (depth == 0 && is_ascii_alpha(lexer->lookahead)) {
+      lexer->mark_end(lexer);
+      char word[32];
+      int len = 0;
+      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_') {
+        if (len < 31) word[len++] = ascii_tolower(lexer->lookahead);
+        lexer->advance(lexer, false);
+      }
+      word[len] = '\0';
+
+      if (!saw_first_word) {
+        saw_first_word = true;
+        if (is_plpgsql_statement_start(word)) return false;
+        if (is_sql_statement_start(word)) disable_assignment_stop = true;
+      }
+
+      has_content = true;
+      continue;
+    }
+
+    if (is_ascii_alpha(lexer->lookahead) || lexer->lookahead == '_' || lexer->lookahead >= 0x80) {
+      while (is_ascii_alnum(lexer->lookahead) || lexer->lookahead == '_' ||
+             lexer->lookahead == '$' || lexer->lookahead >= 0x80) {
+        lexer->advance(lexer, false);
+      }
+      has_content = true;
+      continue;
+    }
+
+    lexer->advance(lexer, false);
+    has_content = true;
+  }
+
+  lexer->mark_end(lexer);
+  if (!has_content) return false;
+  lexer->result_symbol = SQL_STATEMENT;
+  return true;
+}
+
+bool tree_sitter_plpgsql_external_scanner_scan(
+  void *payload, TSLexer *lexer, const bool *valid_symbols
+) {
+  (void)payload;
+
+  if (valid_symbols[SQL_UNTIL_ASSIGNMENT] && valid_symbols[SQL_STATEMENT]) {
+    return scan_assignment_or_statement(lexer, valid_symbols);
+  }
+
+  /* FOR ... IN can begin either an integer range (expr .. expr) or a query
+   * (query LOOP). Scan once and choose the token based on which delimiter is
+   * encountered first. EXECUTE and REVERSE introduce the dynamic and reverse
+   * forms, so they must lex as keywords rather than start the fragment. */
+  if (valid_symbols[SQL_UNTIL_RANGE] && valid_symbols[SQL_UNTIL_LOOP]) {
+    ScanMode mode = mode_for(SQL_UNTIL_RANGE);
+    mode.stop_loop = true;
+    mode.loop_yields_loop_token = true;
+    mode.refuse_first_for_in_kw = true;
+    return scan_sql(lexer, mode, valid_symbols);
+  }
+
+  for (int symbol = SQL_STATEMENT; symbol <= SQL_UNTIL_SEMICOLON_GUARDED; symbol++) {
+    if (valid_symbols[symbol]) {
+      return scan_sql(lexer, mode_for((enum TokenType)symbol), valid_symbols);
+    }
   }
 
   return false;

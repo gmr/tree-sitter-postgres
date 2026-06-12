@@ -230,3 +230,27 @@ END
             (kw_no)
             (kw_chain)))))
     (kw_end)))
+
+==================
+Raise with multiple format arguments
+==================
+
+BEGIN
+  RAISE NOTICE 'hello % %', x, y;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_raise
+          (kw_raise)
+          (raise_level
+            (kw_notice))
+          (string_literal)
+          (sql_expression)
+          (sql_expression))))
+    (kw_end)))
