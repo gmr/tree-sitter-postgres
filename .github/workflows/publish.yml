@@ -67,9 +67,12 @@ jobs:
             *.wasm
             ${{ env.REPO_NAME }}.tar.gz
       - name: Create GitHub release
+        # The release may already exist (created during the release process);
+        # in that case just attach the artifacts to it.
         run: |-
           gh release create "$GITHUB_REF_NAME" *.wasm "$REPO_NAME.tar.gz" \
-            -n "**NOTE:** Download \`$REPO_NAME.tar.gz\` for the *complete* source code."
+            -n "**NOTE:** Download \`$REPO_NAME.tar.gz\` for the *complete* source code." ||
+          gh release upload "$GITHUB_REF_NAME" *.wasm "$REPO_NAME.tar.gz" --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -229,6 +232,15 @@ jobs:
         with:
           cache: npm
           node-version: "22"
+      - name: Use node-gyp with VS2026 support
+        # windows-2025 images now ship Visual Studio 2026 (v18), which the
+        # node-gyp bundled with npm (11.x) cannot detect; 12.1.0+ can.
+        # https://github.com/nodejs/node-gyp/issues/3282
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          npm install -g node-gyp@latest
+          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: npm i --omit peer --omit optional
       - name: Build binary
