@@ -1,6 +1,6 @@
 # tree-sitter-postgres justfile
 
-version := "1.1.6"
+version := "1.2.0"
 language_name := "tree-sitter-postgres"
 ts := "./node_modules/.bin/tree-sitter"
 
