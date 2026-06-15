@@ -391,8 +391,13 @@ function generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, prec
       // These have unique operator tokens that don't create multi-way conflicts.
       // The operator must have declared precedence and not be a complex keyword
       // that starts multiple alternatives (like IS, IN, LIKE, AND, OR, etc.)
+      // AT is excluded so `a_expr AT LOCAL` stays in the main rule alongside
+      // `a_expr AT TIME ZONE a_expr` (5 tokens, never a clean op). Otherwise AT
+      // LOCAL goes into the self-referential _prec rule and AT TIME ZONE does
+      // not, creating a shift/reduce conflict on `expr AT ...` that the parser
+      // resolves toward AT LOCAL — so `x AT TIME ZONE y` fails to parse.
       const complexKw = new Set(['IS', 'ISNULL', 'NOTNULL', 'IN_P', 'LIKE', 'ILIKE',
-        'SIMILAR', 'BETWEEN', 'NOT', 'NOT_LA', 'AND', 'OR']);
+        'SIMILAR', 'BETWEEN', 'NOT', 'NOT_LA', 'AND', 'OR', 'AT']);
       if (syntaxTokens.length === 3
           && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
           && syntaxTokens[1].type === 'SYMBOL' && !complexKw.has(syntaxTokens[1].value)

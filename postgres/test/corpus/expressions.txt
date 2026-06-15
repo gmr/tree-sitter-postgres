@@ -301,3 +301,57 @@ SELECT 0.00, 0.0;
                       (c_expr
                         (AexprConst
                           (float_literal))))))))))))))
+
+================================================================================
+AT TIME ZONE and AT LOCAL
+================================================================================
+
+SELECT ts AT TIME ZONE 'UTC', ts AT LOCAL FROM t;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_list
+                  (target_el
+                    (a_expr
+                      (a_expr
+                        (a_expr
+                          (c_expr
+                            (columnref
+                              (ColId
+                                (identifier))))))
+                      (kw_at)
+                      (kw_time)
+                      (kw_zone)
+                      (a_expr
+                        (a_expr
+                          (c_expr
+                            (AexprConst
+                              (Sconst
+                                (string_literal)))))))))
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (a_expr
+                        (c_expr
+                          (columnref
+                            (ColId
+                              (identifier))))))
+                    (kw_at)
+                    (kw_local)))))
+            (from_clause
+              (kw_from)
+              (from_list
+                (table_ref
+                  (relation_expr
+                    (qualified_name
+                      (ColId
+                        (identifier)))))))))))))
