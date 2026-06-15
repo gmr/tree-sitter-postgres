@@ -252,8 +252,8 @@ module.exports = grammar({
       // variable%ROWTYPE / table%ROWTYPE
       seq($.dotted_name, '%', $.kw_rowtype),
       // Regular type: name or schema.name, with optional multi-word modifiers
-      // (e.g. `character varying`, `double precision`, `timestamp with time
-      // zone`), precision specifiers, and array modifiers. Trailing words are
+      // (e.g. \`character varying\`, \`double precision\`, \`timestamp with time
+      // zone\`), precision specifiers, and array modifiers. Trailing words are
       // plain identifiers, so this stops at keyword terminators such as
       // DEFAULT, NOT NULL, and COLLATE.
       seq(
