@@ -255,3 +255,126 @@ END
         (stmt_null
           (kw_null))))
     (kw_end)))
+
+==================
+Multi-word type names
+==================
+
+DECLARE
+  a character varying(50);
+  b double precision;
+  c timestamp with time zone;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))
+              (identifier)
+              (integer_literal)))))
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))
+              (identifier)))))
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))
+              (identifier)
+              (identifier)
+              (identifier))))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+DEFAULT initializer
+==================
+
+DECLARE
+  x integer DEFAULT 0;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier)))))
+          (decl_defval
+            (kw_default)
+            (sql_expression)))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))
+
+==================
+ALIAS for positional parameter
+==================
+
+DECLARE
+  username ALIAS FOR $1;
+BEGIN
+  NULL;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (kw_alias)
+          (kw_for)
+          (param))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_null
+          (kw_null))))
+    (kw_end)))

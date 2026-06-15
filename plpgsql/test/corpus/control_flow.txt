@@ -459,3 +459,23 @@ END
           (kw_end)
           (kw_if))))
     (kw_end)))
+
+==================
+RETURN NEXT without expression
+==================
+
+BEGIN
+  RETURN NEXT;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_return
+          (kw_return)
+          (kw_next))))
+    (kw_end)))

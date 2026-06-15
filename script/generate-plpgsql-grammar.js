@@ -214,7 +214,8 @@ module.exports = grammar({
     decl_statement: $ => choice(
       // Alias declaration: name ALIAS FOR target ;
       // Must precede variable declaration so ALIAS is not consumed as a type name.
-      seq($.decl_varname, $.kw_alias, $.kw_for, $.any_identifier, ';'),
+      // The target may be an identifier or a positional parameter ($1, $2, ...).
+      seq($.decl_varname, $.kw_alias, $.kw_for, choice($.any_identifier, $.param), ';'),
       // Variable declaration: name [CONSTANT] type [COLLATE collation] [NOT NULL] [DEFAULT|:=|= expr] ;
       seq(
         $.decl_varname,
@@ -250,10 +251,17 @@ module.exports = grammar({
       seq($.dotted_name, '%', $.kw_type),
       // variable%ROWTYPE / table%ROWTYPE
       seq($.dotted_name, '%', $.kw_rowtype),
-      // Regular type: name or schema.name, with optional array/precision modifiers
+      // Regular type: name or schema.name, with optional multi-word modifiers
+      // (e.g. `character varying`, `double precision`, `timestamp with time
+      // zone`), precision specifiers, and array modifiers. Trailing words are
+      // plain identifiers, so this stops at keyword terminators such as
+      // DEFAULT, NOT NULL, and COLLATE.
       seq(
         $.dotted_name,
-        optional(seq('(', $.integer_literal, optional(seq(',', $.integer_literal)), ')')),
+        repeat(choice(
+          $.identifier,
+          seq('(', $.integer_literal, optional(seq(',', $.integer_literal)), ')')
+        )),
         repeat(seq('[', optional($.integer_literal), ']'))
       )
     ),
@@ -266,7 +274,7 @@ module.exports = grammar({
     decl_collate: $ => seq($.kw_collate, $.dotted_name),
 
     decl_defval: $ => seq(
-      choice('=', ':='),
+      choice('=', ':=', $.kw_default),
       $._sql_semicolon_expr
     ),
 
@@ -443,8 +451,8 @@ module.exports = grammar({
     stmt_return: $ => choice(
       // RETURN expression ; — guarded so NEXT/QUERY lex as keywords below
       seq($.kw_return, optional($._sql_semicolon_guarded_expr), ';'),
-      // RETURN NEXT expression ;
-      seq($.kw_return, $.kw_next, $._sql_semicolon_expr, ';'),
+      // RETURN NEXT [expression] ; — expression omitted with OUT parameters
+      seq($.kw_return, $.kw_next, optional($._sql_semicolon_expr), ';'),
       // RETURN QUERY sql ; — guarded so EXECUTE lexes as a keyword below
       seq($.kw_return, $.kw_query, $._sql_semicolon_guarded_expr, ';'),
       // RETURN QUERY EXECUTE expression [USING ...] ;
@@ -716,6 +724,9 @@ ${generateKeywordRules(keywords)}
     // external scanner and parsed via injection into the postgres grammar.
 
     identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*/)),
+
+    // Positional parameter reference ($1, $2, ...) — used as an ALIAS target.
+    param: _ => token(/\\$[0-9]+/),
 
     integer_literal: _ => token(/[0-9](_?[0-9])*/),
 
