@@ -50,8 +50,8 @@ const BASE_TOKEN_MAP = {
   IDENT:   '$._ident',       // unquoted or double-quoted identifier
   UIDENT:  '$._ident',       // reduced to IDENT in PG lexer
   FCONST:  '$.float_literal',
-  SCONST:  'choice($.string_literal, $.dollar_quoted_string)',
-  USCONST: 'choice($.string_literal, $.dollar_quoted_string)',  // reduced to SCONST in PG lexer
+  SCONST:  'choice($.string_literal, $.escape_string_literal, $.dollar_quoted_string)',
+  USCONST: 'choice($.string_literal, $.escape_string_literal, $.dollar_quoted_string)',  // reduced to SCONST in PG lexer
   BCONST:  '$.bit_string_literal',
   XCONST:  '$.hex_string_literal',
   ICONST:  '$.integer_literal',
@@ -538,14 +538,16 @@ function generateLexerRules() {
     // Standard SQL string: 'hello' — doubled single-quote is the escape: 'it''s'
     string_literal: _ => token(/'([^']|'')*'/),
 
-    // NOTE: E'...', N'...', and U&'...' prefix strings are parsed as
-    // function-call-like forms (identifier + string_literal) rather than
-    // single tokens. This is a tree-sitter limitation: the lexer can't
-    // prefer a multi-char token over an identifier when both start with
-    // a letter, because the parser state commits to 'identifier' before
-    // considering string alternatives. An external scanner would fix this
-    // but adds significant complexity. The parse is still correct — PG
-    // treats E'...' the same as a function call to E() at parse time.
+    // Escape string: E'...' (or e'...') — backslash escapes apply, so \\' is an
+    // escaped quote and does not terminate the string (unlike a standard
+    // string). Matched as a single token; where a string constant is valid the
+    // lexer prefers this over the bare E identifier by longest match. Content
+    // is any non-quote/non-backslash char, a doubled quote, or a backslash
+    // escape. ruleutils emits E'...' for any string containing backslashes.
+    escape_string_literal: _ => token(/[eE]'([^'\\\\]|''|\\\\.)*'/),
+
+    // NOTE: N'...' and U&'...' prefix strings are still parsed as
+    // function-call-like forms (identifier + string_literal).
 
     // Dollar-quoted string: $$body$$ or $tag$body$tag$
     // Handled by the external scanner (postgres/src/scanner.c) so the

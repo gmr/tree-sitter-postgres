@@ -355,3 +355,36 @@ SELECT ts AT TIME ZONE 'UTC', ts AT LOCAL FROM t;
                     (qualified_name
                       (ColId
                         (identifier)))))))))))))
+
+================================================================================
+Escape string literal
+================================================================================
+
+SELECT E'a\'b', E'(\/|\<)';
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_list
+                  (target_el
+                    (a_expr
+                      (a_expr
+                        (c_expr
+                          (AexprConst
+                            (Sconst
+                              (escape_string_literal))))))))
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (escape_string_literal)))))))))))))))
