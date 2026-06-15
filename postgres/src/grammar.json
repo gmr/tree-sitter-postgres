@@ -41637,31 +41637,6 @@
           }
         },
         {
-          "type": "PREC_LEFT",
-          "value": 16,
-          "content": {
-            "type": "PREC_DYNAMIC",
-            "value": 16,
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "a_expr_prec"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_at"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "kw_local"
-                }
-              ]
-            }
-          }
-        },
-        {
           "type": "PREC_RIGHT",
           "value": 18,
           "content": {
@@ -41970,6 +41945,31 @@
                 {
                   "type": "SYMBOL",
                   "name": "a_expr"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 16,
+          "content": {
+            "type": "PREC_DYNAMIC",
+            "value": 16,
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "a_expr"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_at"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "kw_local"
                 }
               ]
             }

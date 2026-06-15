@@ -2647,7 +2647,6 @@ module.exports = grammar({
         $.c_expr,
         prec.left(21, prec.dynamic(21, seq($.a_expr_prec, '::', $.Typename))),
         prec.left(17, prec.dynamic(17, seq($.a_expr_prec, $.kw_collate, $.any_name))),
-        prec.left(16, prec.dynamic(16, seq($.a_expr_prec, $.kw_at, $.kw_local))),
         prec.right(18, prec.dynamic(18, seq('+', $.a_expr_prec))),
         prec.right(18, prec.dynamic(18, seq('-', $.a_expr_prec))),
         prec.left(13, prec.dynamic(13, seq($.a_expr_prec, '+', $.a_expr_prec))),
@@ -2663,6 +2662,7 @@ module.exports = grammar({
     a_expr: $ => choice(
         alias($.a_expr_prec, $.a_expr),
         prec.left(16, prec.dynamic(16, seq($.a_expr, $.kw_at, $.kw_time, $.kw_zone, $.a_expr))),
+        prec.left(16, prec.dynamic(16, seq($.a_expr, $.kw_at, $.kw_local))),
         prec.left(7, prec.dynamic(7, seq($.a_expr, '<=', $.a_expr))),
         prec.left(7, prec.dynamic(7, seq($.a_expr, '>=', $.a_expr))),
         prec.left(7, prec.dynamic(7, seq($.a_expr, '<>', $.a_expr))),

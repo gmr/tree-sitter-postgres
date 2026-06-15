@@ -9442,15 +9442,7 @@
           "named": true
         },
         {
-          "type": "kw_at",
-          "named": true
-        },
-        {
           "type": "kw_collate",
-          "named": true
-        },
-        {
-          "type": "kw_local",
           "named": true
         }
       ]
