@@ -191,9 +191,13 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "kw_default",
+          "named": true
+        },
         {
           "type": "sql_expression",
           "named": true
@@ -282,6 +286,10 @@
         },
         {
           "type": "opt_scrollable",
+          "named": true
+        },
+        {
+          "type": "param",
           "named": true
         },
         {
@@ -1800,6 +1808,10 @@
           "named": true
         },
         {
+          "type": "identifier",
+          "named": true
+        },
+        {
           "type": "integer_literal",
           "named": true
         },
@@ -2640,6 +2652,10 @@
   },
   {
     "type": "kw_while",
+    "named": true
+  },
+  {
+    "type": "param",
     "named": true
   },
   {

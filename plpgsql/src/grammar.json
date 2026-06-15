@@ -288,8 +288,17 @@
               "name": "kw_for"
             },
             {
-              "type": "SYMBOL",
-              "name": "any_identifier"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "any_identifier"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "param"
+                }
+              ]
             },
             {
               "type": "STRING",
@@ -493,50 +502,54 @@
               "name": "dotted_name"
             },
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": "("
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "integer_literal"
-                    },
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SEQ",
-                          "members": [
-                            {
-                              "type": "STRING",
-                              "value": ","
-                            },
-                            {
-                              "type": "SYMBOL",
-                              "name": "integer_literal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "BLANK"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "STRING",
-                      "value": ")"
-                    }
-                  ]
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
+              "type": "REPEAT",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "identifier"
+                  },
+                  {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "("
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "integer_literal"
+                      },
+                      {
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SEQ",
+                            "members": [
+                              {
+                                "type": "STRING",
+                                "value": ","
+                              },
+                              {
+                                "type": "SYMBOL",
+                                "name": "integer_literal"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "STRING",
+                        "value": ")"
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
               "type": "REPEAT",
@@ -621,6 +634,10 @@
             {
               "type": "STRING",
               "value": ":="
+            },
+            {
+              "type": "SYMBOL",
+              "name": "kw_default"
             }
           ]
         },
@@ -1588,8 +1605,16 @@
               "name": "kw_next"
             },
             {
-              "type": "SYMBOL",
-              "name": "_sql_semicolon_expr"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_sql_semicolon_expr"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "STRING",
@@ -4540,6 +4565,13 @@
           "type": "PATTERN",
           "value": "[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*"
         }
+      }
+    },
+    "param": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "\\$[0-9]+"
       }
     },
     "integer_literal": {
