@@ -7899,6 +7899,10 @@
           "named": true
         },
         {
+          "type": "escape_string_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         }
@@ -14296,6 +14300,10 @@
       "types": [
         {
           "type": "dollar_quoted_string",
+          "named": true
+        },
+        {
+          "type": "escape_string_literal",
           "named": true
         },
         {
@@ -25996,6 +26004,10 @@
   },
   {
     "type": "dollar_quoted_string",
+    "named": true
+  },
+  {
+    "type": "escape_string_literal",
     "named": true
   },
   {

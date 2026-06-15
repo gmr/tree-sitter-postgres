@@ -15258,6 +15258,10 @@
             },
             {
               "type": "SYMBOL",
+              "name": "escape_string_literal"
+            },
+            {
+              "type": "SYMBOL",
               "name": "dollar_quoted_string"
             }
           ]
@@ -15279,6 +15283,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "string_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "escape_string_literal"
                 },
                 {
                   "type": "SYMBOL",
@@ -50442,6 +50450,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "escape_string_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "dollar_quoted_string"
         }
       ]
@@ -60992,6 +61004,13 @@
       "content": {
         "type": "PATTERN",
         "value": "'([^']|'')*'"
+      }
+    },
+    "escape_string_literal": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "[eE]'([^'\\\\]|''|\\\\.)*'"
       }
     },
     "bit_string_literal": {
