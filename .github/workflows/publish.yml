@@ -27,7 +27,7 @@ jobs:
       REPO_NAME: ${{ github.event.repository.name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up tree-sitter CLI
@@ -96,7 +96,7 @@ jobs:
       url: https://crates.io/crates/tree-sitter-postgres
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up Rust
@@ -121,7 +121,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up Python
@@ -154,7 +154,7 @@ jobs:
           - macos-15-intel
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Build wheels
@@ -201,7 +201,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up NodeJS
@@ -237,7 +237,7 @@ jobs:
           - macos-15-intel
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up NodeJS
@@ -272,7 +272,7 @@ jobs:
       url: https://www.npmjs.com/package/tree-sitter-postgres
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
       - name: Set up NodeJS
