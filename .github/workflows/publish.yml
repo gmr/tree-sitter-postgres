@@ -105,7 +105,7 @@ jobs:
         # Pin to v1.0.4 explicitly: the moving `v1` tag still resolves to a
         # node20 build, while v1.0.4 declares node24 (required once GitHub
         # forces node24 on JS actions, June 2026).
-        uses: rust-lang/crates-io-auth-action@v1.0.4
+        uses: rust-lang/crates-io-auth-action@v1.0.5
         id: auth
       - name: Publish to crates.io
         run: cargo publish
