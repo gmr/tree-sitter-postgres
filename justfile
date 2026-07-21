@@ -56,13 +56,18 @@ bump new_version:
     #!/usr/bin/env bash
     set -euo pipefail
     new="{{new_version}}"
-    re='[0-9]+\.[0-9]+\.[0-9]+'
-    echo "Bumping version to: $new"
+    # Match x.y.z with an optional prerelease suffix (e.g. -beta.2)
+    re='[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?'
+    # pyproject.toml uses PEP 440 form, so match/emit the normalized version
+    # (e.g. 19.0.0-beta.2 -> 19.0.0b2) separately.
+    py_new=$(echo "$new" | sed -E 's/-alpha\.?/a/; s/-beta\.?/b/; s/-rc\.?/rc/')
+    py_re='[0-9]+\.[0-9]+\.[0-9]+([abrc]+[0-9]+)?'
+    echo "Bumping version to: $new (pyproject: $py_new)"
     sed -i '' -E "s/^version := \"${re}\"/version := \"${new}\"/" justfile
     sed -i '' -E "1,10s/\"version\": \"${re}\"/\"version\": \"${new}\"/" package.json
     sed -i '' -E "1,15s/\"version\": \"${re}\"/\"version\": \"${new}\"/g" package-lock.json
     sed -i '' -E "s/^version = \"${re}\"/version = \"${new}\"/" Cargo.toml
-    sed -i '' -E "s/^version = \"${re}\"/version = \"${new}\"/" pyproject.toml
+    sed -i '' -E "s/^version = \"${py_re}\"/version = \"${py_new}\"/" pyproject.toml
     sed -i '' -E "1,10s/\"version\": \"${re}\"/\"version\": \"${new}\"/" tree-sitter.json
     # Cargo.lock is updated by cargo
     cargo update --workspace
