@@ -1,6 +1,6 @@
 # tree-sitter-postgres justfile
 
-version := "1.2.4"
+version := "19.0.0-beta.2"
 language_name := "tree-sitter-postgres"
 ts := "./node_modules/.bin/tree-sitter"
 
@@ -56,13 +56,25 @@ bump new_version:
     #!/usr/bin/env bash
     set -euo pipefail
     new="{{new_version}}"
-    re='[0-9]+\.[0-9]+\.[0-9]+'
-    echo "Bumping version to: $new"
+    # Only stable and the prerelease suffixes py_new normalizes are supported.
+    # Reject anything else up front so we never emit an invalid PEP 440 version.
+    if ! echo "$new" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.?[0-9]+)?$'; then
+        echo "Error: unsupported version '$new'" >&2
+        echo "Supported: x.y.z or x.y.z-{alpha,beta,rc}.N (e.g. 19.0.0-beta.2)" >&2
+        exit 1
+    fi
+    # Match x.y.z with an optional prerelease suffix (e.g. -beta.2)
+    re='[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.?[0-9]+)?'
+    # pyproject.toml uses PEP 440 form, so match/emit the normalized version
+    # (e.g. 19.0.0-beta.2 -> 19.0.0b2) separately.
+    py_new=$(echo "$new" | sed -E 's/-alpha\.?/a/; s/-beta\.?/b/; s/-rc\.?/rc/')
+    py_re='[0-9]+\.[0-9]+\.[0-9]+([abrc]+[0-9]+)?'
+    echo "Bumping version to: $new (pyproject: $py_new)"
     sed -i '' -E "s/^version := \"${re}\"/version := \"${new}\"/" justfile
     sed -i '' -E "1,10s/\"version\": \"${re}\"/\"version\": \"${new}\"/" package.json
     sed -i '' -E "1,15s/\"version\": \"${re}\"/\"version\": \"${new}\"/g" package-lock.json
     sed -i '' -E "s/^version = \"${re}\"/version = \"${new}\"/" Cargo.toml
-    sed -i '' -E "s/^version = \"${re}\"/version = \"${new}\"/" pyproject.toml
+    sed -i '' -E "s/^version = \"${py_re}\"/version = \"${py_new}\"/" pyproject.toml
     sed -i '' -E "1,10s/\"version\": \"${re}\"/\"version\": \"${new}\"/" tree-sitter.json
     # Cargo.lock is updated by cargo
     cargo update --workspace

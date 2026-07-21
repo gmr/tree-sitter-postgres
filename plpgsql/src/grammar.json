@@ -2980,10 +2980,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "kw_execute"
-        },
-        {
-          "type": "SYMBOL",
           "name": "kw_for"
         },
         {
@@ -3021,10 +3017,6 @@
         {
           "type": "SYMBOL",
           "name": "kw_or"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "kw_strict"
         },
         {
           "type": "SYMBOL",
@@ -3170,6 +3162,10 @@
         {
           "type": "SYMBOL",
           "name": "kw_exception"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "kw_execute"
         },
         {
           "type": "SYMBOL",
@@ -3353,6 +3349,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "kw_strict"
+        },
+        {
+          "type": "SYMBOL",
           "name": "kw_table"
         },
         {
@@ -3455,17 +3455,6 @@
         "content": {
           "type": "PATTERN",
           "value": "[eE][nN][dD]"
-        }
-      }
-    },
-    "kw_execute": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PREC",
-        "value": 1,
-        "content": {
-          "type": "PATTERN",
-          "value": "[eE][xX][eE][cC][uU][tT][eE]"
         }
       }
     },
@@ -3576,17 +3565,6 @@
         "content": {
           "type": "PATTERN",
           "value": "[oO][rR]"
-        }
-      }
-    },
-    "kw_strict": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PREC",
-        "value": 1,
-        "content": {
-          "type": "PATTERN",
-          "value": "[sS][tT][rR][iI][cC][tT]"
         }
       }
     },
@@ -3981,6 +3959,17 @@
         "content": {
           "type": "PATTERN",
           "value": "[eE][xX][cC][eE][pP][tT][iI][oO][nN]"
+        }
+      }
+    },
+    "kw_execute": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[eE][xX][eE][cC][uU][tT][eE]"
         }
       }
     },
@@ -4476,6 +4465,17 @@
         "content": {
           "type": "PATTERN",
           "value": "[sS][tT][aA][cC][kK][eE][dD]"
+        }
+      }
+    },
+    "kw_strict": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[sS][tT][rR][iI][cC][tT]"
         }
       }
     },

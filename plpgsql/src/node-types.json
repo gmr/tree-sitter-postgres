@@ -1955,6 +1955,10 @@
           "named": true
         },
         {
+          "type": "kw_execute",
+          "named": true
+        },
+        {
           "type": "kw_exit",
           "named": true
         },
@@ -2132,6 +2136,10 @@
         },
         {
           "type": "kw_stacked",
+          "named": true
+        },
+        {
+          "type": "kw_strict",
           "named": true
         },
         {

@@ -91,6 +91,15 @@ function stripCActions(text) {
       continue;
     }
 
+    // Bison single-quoted char literal — pass through verbatim so literals
+    // like '{' and '}' (used by graph pattern quantifiers since PG 19) are
+    // not mistaken for C action braces.
+    if (text[i] === "'" && i + 2 < len && text[i + 2] === "'") {
+      result += text.slice(i, i + 3);
+      i += 3;
+      continue;
+    }
+
     // Opening brace — start of C action
     if (text[i] === '{') {
       depth = 1;

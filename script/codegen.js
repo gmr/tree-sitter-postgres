@@ -16,6 +16,7 @@ const OPERATOR_TOKEN_MAP = {
   LESS_EQUALS:     "'<='",
   GREATER_EQUALS:  "'>='",
   NOT_EQUALS:      "'<>'",
+  RIGHT_ARROW:     "'->'",  // dedicated token since PG 19 (scan.l right_arrow)
 };
 
 /**
@@ -380,11 +381,14 @@ function generateExprRule(name, rule, terminals, kwTokenMap, optionalRules, prec
     // that need GLR.
     let isCleanOp = false;
     if (precInfo && syntaxTokens.length >= 2 && syntaxTokens.length <= 3) {
-      // Binary: self OP self (where OP is a literal or operator token)
+      // Binary: self OP self (where OP is a literal or a compound operator
+      // token like RIGHT_ARROW/LESS_EQUALS — these resolve to unique string
+      // literals, so static precedence handles them without GLR)
       if (syntaxTokens.length === 3
           && syntaxTokens[0].type === 'SYMBOL' && syntaxTokens[0].value === name
           && syntaxTokens[2].type === 'SYMBOL' && syntaxTokens[2].value === name
-          && syntaxTokens[1].type === 'LITERAL') {
+          && (syntaxTokens[1].type === 'LITERAL'
+              || (syntaxTokens[1].type === 'SYMBOL' && OPERATOR_TOKEN_MAP[syntaxTokens[1].value]))) {
         isCleanOp = true;
       }
       // Binary postfix: self OP arg (like TYPECAST Typename, COLLATE any_name)
@@ -565,9 +569,17 @@ function generateLexerRules() {
     // ── Operators ────────────────────────────────────────────────────────────────
 
     // Custom and built-in multi-character operators.
-    // The specific compound operators (::, .., :=, =>, <=, >=, <>) are matched
-    // as string literals in the grammar rules and take priority.
-    operator: _ => token(/[~!@#^&|?+\\-*\/%<>=]+/),
+    // The specific compound operators (::, .., :=, =>, <=, >=, <>, ->) are
+    // matched as string literals in the grammar rules and take priority.
+    // Implements scan.l's trailing +/- rule: an operator may only end in
+    // + or - if it also contains one of ~ ! @ # ^ & | ? — otherwise the
+    // trailing +/- lexes as a separate token. Without this, SQL/PGQ edge
+    // patterns like <-[e]-> would lex "<-" as one operator. Bare + and -
+    // are intentionally not matched; the grammar uses them as literals.
+    operator: _ => token(choice(
+      /[~!@#^&|?+\\-*\/%<>=]*[~!@#^&|?][~!@#^&|?+\\-*\/%<>=]*/,
+      /[+\\-*\/%<>=]*[*\/%<>=]/
+    )),
 
     // ── Comments ─────────────────────────────────────────────────────────────────
 
