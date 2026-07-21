@@ -34,5 +34,17 @@
   [
     "func_table",
     "func_table"
+  ],
+  [
+    "copy_generic_opt_elem",
+    "unreserved_keyword"
+  ],
+  [
+    "set_quantifier",
+    "group_clause"
+  ],
+  [
+    "for_portion_of_clause",
+    "a_expr"
   ]
 ]

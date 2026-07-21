@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.2.4",
+    "version": "19.0.0-beta.2",
     "license": "BSD-3-Clause",
     "description": "PostgreSQL grammar for tree-sitter, generated from PostgreSQL source",
     "authors": [

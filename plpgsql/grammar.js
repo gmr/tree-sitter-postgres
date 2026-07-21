@@ -606,7 +606,6 @@ module.exports = grammar({
       $.kw_declare,
       $.kw_else,
       $.kw_end,
-      $.kw_execute,
       $.kw_for,
       $.kw_foreach,
       $.kw_from,
@@ -617,7 +616,6 @@ module.exports = grammar({
       $.kw_not,
       $.kw_null,
       $.kw_or,
-      $.kw_strict,
       $.kw_then,
       $.kw_to,
       $.kw_using,
@@ -656,6 +654,7 @@ module.exports = grammar({
       $.kw_errcode,
       $.kw_error,
       $.kw_exception,
+      $.kw_execute,
       $.kw_exit,
       $.kw_fetch,
       $.kw_first,
@@ -701,6 +700,7 @@ module.exports = grammar({
       $.kw_slice,
       $.kw_sqlstate,
       $.kw_stacked,
+      $.kw_strict,
       $.kw_table,
       $.kw_table_name,
       $.kw_type,
@@ -719,7 +719,6 @@ module.exports = grammar({
     kw_declare: _ => token(prec(1, /[dD][eE][cC][lL][aA][rR][eE]/)),
     kw_else: _ => token(prec(1, /[eE][lL][sS][eE]/)),
     kw_end: _ => token(prec(1, /[eE][nN][dD]/)),
-    kw_execute: _ => token(prec(1, /[eE][xX][eE][cC][uU][tT][eE]/)),
     kw_for: _ => token(prec(1, /[fF][oO][rR]/)),
     kw_foreach: _ => token(prec(1, /[fF][oO][rR][eE][aA][cC][hH]/)),
     kw_from: _ => token(prec(1, /[fF][rR][oO][mM]/)),
@@ -730,7 +729,6 @@ module.exports = grammar({
     kw_not: _ => token(prec(1, /[nN][oO][tT]/)),
     kw_null: _ => token(prec(1, /[nN][uU][lL][lL]/)),
     kw_or: _ => token(prec(1, /[oO][rR]/)),
-    kw_strict: _ => token(prec(1, /[sS][tT][rR][iI][cC][tT]/)),
     kw_then: _ => token(prec(1, /[tT][hH][eE][nN]/)),
     kw_to: _ => token(prec(1, /[tT][oO]/)),
     kw_using: _ => token(prec(1, /[uU][sS][iI][nN][gG]/)),
@@ -766,6 +764,7 @@ module.exports = grammar({
     kw_errcode: _ => token(prec(1, /[eE][rR][rR][cC][oO][dD][eE]/)),
     kw_error: _ => token(prec(1, /[eE][rR][rR][oO][rR]/)),
     kw_exception: _ => token(prec(1, /[eE][xX][cC][eE][pP][tT][iI][oO][nN]/)),
+    kw_execute: _ => token(prec(1, /[eE][xX][eE][cC][uU][tT][eE]/)),
     kw_exit: _ => token(prec(1, /[eE][xX][iI][tT]/)),
     kw_fetch: _ => token(prec(1, /[fF][eE][tT][cC][hH]/)),
     kw_first: _ => token(prec(1, /[fF][iI][rR][sS][tT]/)),
@@ -811,6 +810,7 @@ module.exports = grammar({
     kw_slice: _ => token(prec(1, /[sS][lL][iI][cC][eE]/)),
     kw_sqlstate: _ => token(prec(1, /[sS][qQ][lL][sS][tT][aA][tT][eE]/)),
     kw_stacked: _ => token(prec(1, /[sS][tT][aA][cC][kK][eE][dD]/)),
+    kw_strict: _ => token(prec(1, /[sS][tT][rR][iI][cC][tT]/)),
     kw_table: _ => token(prec(1, /[tT][aA][bB][lL][eE]/)),
     kw_table_name: _ => token(prec(1, /[tT][aA][bB][lL][eE]_[nN][aA][mM][eE]/)),
     kw_type: _ => token(prec(1, /[tT][yY][pP][eE]/)),
@@ -826,7 +826,7 @@ module.exports = grammar({
 
     identifier: _ => token(prec(0, /[a-zA-Z_\u0080-\u00ff][a-zA-Z0-9_$\u0080-\u00ff]*/)),
 
-    // Positional parameter reference ($1, $2, ...) \u2014 used as an ALIAS target.
+    // Positional parameter reference ($1, $2, ...) — used as an ALIAS target.
     param: _ => token(/\$[0-9]+/),
 
     integer_literal: _ => token(/[0-9](_?[0-9])*/),

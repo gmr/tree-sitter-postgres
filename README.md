@@ -4,7 +4,7 @@ A [tree-sitter](https://tree-sitter.github.io/) grammar for PostgreSQL, generate
 
 ## Features
 
-- **Current as of PostgreSQL 18** (generated from REL_18_3)
+- **Current as of PostgreSQL 19 beta 2** (generated from REL_19_BETA2)
 - **727 grammar rules** covering the full PostgreSQL SQL syntax
 - **494 case-insensitive keywords** across all four PG keyword categories
 - **Correct operator precedence** — `1 + 2 * 3` parses as `1 + (2 * 3)`

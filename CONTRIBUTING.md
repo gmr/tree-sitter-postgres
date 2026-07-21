@@ -38,11 +38,11 @@ You need:
 
 ### 1. Get a PostgreSQL source checkout
 
-We currently target PostgreSQL 18 (`REL_18_3`). Clone postgres anywhere on disk and check out the matching tag:
+We currently target PostgreSQL 19 beta 2 (`REL_19_BETA2`). Clone postgres anywhere on disk and check out the matching tag:
 
 ```bash
 git clone https://github.com/postgres/postgres.git ~/Source/postgres
-git -C ~/Source/postgres checkout REL_18_3
+git -C ~/Source/postgres checkout REL_19_BETA2
 ```
 
 Then point the codegen at it:
@@ -123,4 +123,4 @@ just test
 git diff --stat   # confirm only files you intended to change moved
 ```
 
-If `just generate` produces unexpected diffs in files you didn't touch, your PostgreSQL checkout is probably on a different revision than the project targets — confirm you're on `REL_18_3`.
+If `just generate` produces unexpected diffs in files you didn't touch, your PostgreSQL checkout is probably on a different revision than the project targets — confirm you're on `REL_19_BETA2`.
