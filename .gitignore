@@ -42,3 +42,8 @@ dist/
 /test
 /src/
 
+# Claude Code — share skills with the team, keep personal settings local
+!.claude/
+.claude/*
+!.claude/skills/
+
