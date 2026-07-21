@@ -56,8 +56,15 @@ bump new_version:
     #!/usr/bin/env bash
     set -euo pipefail
     new="{{new_version}}"
+    # Only stable and the prerelease suffixes py_new normalizes are supported.
+    # Reject anything else up front so we never emit an invalid PEP 440 version.
+    if ! echo "$new" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.?[0-9]+)?$'; then
+        echo "Error: unsupported version '$new'" >&2
+        echo "Supported: x.y.z or x.y.z-{alpha,beta,rc}.N (e.g. 19.0.0-beta.2)" >&2
+        exit 1
+    fi
     # Match x.y.z with an optional prerelease suffix (e.g. -beta.2)
-    re='[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?'
+    re='[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.?[0-9]+)?'
     # pyproject.toml uses PEP 440 form, so match/emit the normalized version
     # (e.g. 19.0.0-beta.2 -> 19.0.0b2) separately.
     py_new=$(echo "$new" | sed -E 's/-alpha\.?/a/; s/-beta\.?/b/; s/-rc\.?/rc/')
