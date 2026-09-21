@@ -1,0 +1,102 @@
+[
+  {
+    "hash": "422410f52da0",
+    "source": "citext.sgml:41",
+    "reason": "JDBC parameter placeholder (?), not PostgreSQL syntax"
+  },
+  {
+    "hash": "33e30012cea6",
+    "source": "ecpg.sgml:476",
+    "reason": "embedded SQL fragment; the UPDATE head is in the surrounding prose"
+  },
+  {
+    "hash": "e9e02043edd4",
+    "source": "extend.sgml:953",
+    "reason": "@extschema@ extension script placeholder, substituted before execution"
+  },
+  {
+    "hash": "51f346ef756c",
+    "source": "logical-replication.sgml:758",
+    "reason": "excerpt of a larger query; the opening parenthesis is in the prose above"
+  },
+  {
+    "hash": "eb4e9a6b98ee",
+    "source": "ref-create_aggregate.sgml:263",
+    "reason": "ORDER BY ... USING sortop, where sortop stands in for an operator"
+  },
+  {
+    "hash": "56e909f3f810",
+    "source": "ref-create_subscription.sgml:729",
+    "reason": "<pub-names> placeholder, written as an entity so it survives tag stripping"
+  },
+  {
+    "hash": "1e04ab099cc2",
+    "source": "ref-pgbench.sgml:2299",
+    "reason": "pgbench script; :delta and :aid are pgbench variables, not SQL"
+  },
+  {
+    "hash": "e9ec99d3a649",
+    "source": "ref-pgbench.sgml:2299",
+    "reason": "pgbench script; :aid is a pgbench variable, not SQL"
+  },
+  {
+    "hash": "2a503538fffb",
+    "source": "ref-pgbench.sgml:2299",
+    "reason": "pgbench script; :delta and :tid are pgbench variables, not SQL"
+  },
+  {
+    "hash": "85e94a1a2d0a",
+    "source": "ref-pgbench.sgml:2299",
+    "reason": "pgbench script; :delta and :bid are pgbench variables, not SQL"
+  },
+  {
+    "hash": "8ebbb6517f76",
+    "source": "ref-pgbench.sgml:2299",
+    "reason": "pgbench script; :tid, :bid, :aid and :delta are pgbench variables, not SQL"
+  },
+  {
+    "hash": "5faa88c5bb51",
+    "source": "ref-psql-ref.sgml:4043",
+    "reason": "psql backslash-escaped statement separators, not SQL"
+  },
+  {
+    "hash": "2531e764dc46",
+    "source": "ref-release_savepoint.sgml:100",
+    "reason": "deliberately invalid; the doc annotates it as generating an error"
+  },
+  {
+    "hash": "4ef84210439f",
+    "source": "rules.sgml:1379",
+    "reason": "rewriter output, not user SQL: INSERT with a FROM clause"
+  },
+  {
+    "hash": "d28c29f2f510",
+    "source": "rules.sgml:1478",
+    "reason": "rewriter output, not user SQL: INSERT with a FROM clause"
+  },
+  {
+    "hash": "49b3cf4887fe",
+    "source": "rules.sgml:1830",
+    "reason": "rewriter output, not user SQL: range table listing with a missing comma"
+  },
+  {
+    "hash": "5815b33d3398",
+    "source": "syntax.sgml:321",
+    "reason": "KNOWN GAP: string constants separated by whitespace including a newline are concatenated by the PostgreSQL lexer; the grammar does not implement this yet"
+  },
+  {
+    "hash": "80409e710244",
+    "source": "syntax.sgml:330",
+    "reason": "deliberately invalid; the doc gives it as the counter-example to newline string concatenation"
+  },
+  {
+    "hash": "d34d16ca898e",
+    "source": "xfunc.sgml:296",
+    "reason": "deliberately invalid; the doc uses it to show that $1 cannot name a table"
+  },
+  {
+    "hash": "60aba957c8fa",
+    "source": "xfunc.sgml:632",
+    "reason": "deliberately invalid; the doc shows the syntax error from omitting parentheses"
+  }
+]

@@ -17,6 +17,7 @@ If a generated file is wrong or missing something, fix the **generator**, not th
 | `postgres/queries/injections.scm` | `script/generate-injections.js` |
 | `plpgsql/grammar.js` | `script/generate-plpgsql-grammar.js` |
 | `plpgsql/src/grammar.json`, `plpgsql/src/parser.c` | `tree-sitter generate` (in `plpgsql/`) |
+| `postgres/test/docs/*.sql` | `script/extract-doc-sql.js` (from `doc/src/sgml`) |
 | `postgres/queries/highlights.scm` | hand-written |
 | `postgres/test/corpus/*.txt` | hand-written |
 | `postgres/known-conflicts.json` | hand-curated |
@@ -120,6 +121,34 @@ just test
 - **PL/pgSQL grammar** → edit `script/generate-plpgsql-grammar.js`, then run that script and `just generate-plpgsql`.
 - **PL/pgSQL external scanner** → edit `plpgsql/src/scanner.c` directly.
 - **Tests** → add corpus cases to `postgres/test/corpus/*.txt` or `plpgsql/test/corpus/*.txt`.
+- **Documentation SQL corpus** → see below; don't hand-edit `postgres/test/docs/*.sql`.
+
+## The documentation SQL corpus
+
+`postgres/test/docs/*.sql` holds every SQL example `script/extract-doc-sql.js`
+can lift out of PostgreSQL's own `doc/src/sgml` — about 2,200 statements. It is
+checked in so `just test-docs` runs without a PostgreSQL checkout and so
+documentation churn shows up as a reviewable diff.
+
+These are parse-success assertions only: `just test-docs` fails if the grammar
+produces an `ERROR` or `MISSING` node for any statement. Expected
+S-expressions for this many statements would be roughly forty times the size of
+the hand-written corpus and would be regenerated rather than reviewed, so tree
+shapes still belong in `postgres/test/corpus/`.
+
+Regenerate after a PostgreSQL version bump:
+
+```bash
+just extract-doc-sql   # needs a full checkout, not just gram.y + kwlist.h
+just test-docs
+```
+
+Statements the grammar is not expected to accept live in
+`script/doc-sql-skip.json`, keyed by a hash of the statement text, each with a
+reason. Most are examples the documentation itself marks as invalid, or
+placeholders that were never SQL (pgbench `:variables`, JDBC `?`, rewriter
+output). One is a real gap: PostgreSQL's lexer concatenates string constants
+separated by whitespace containing a newline, and the grammar does not.
 
 ## Validating before opening a PR
 

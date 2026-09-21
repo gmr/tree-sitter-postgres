@@ -47,3 +47,5 @@ jobs:
       - name: Run plpgsql corpus tests
         run: tree-sitter test
         working-directory: plpgsql
+      - name: Parse the documentation SQL corpus
+        run: node script/check-doc-sql.js
