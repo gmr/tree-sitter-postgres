@@ -297,4 +297,16 @@ jobs:
         continue-on-error: true
         run: mv -v prebuilds/*.wasm .
       - name: Publish to npm
-        run: npm publish
+        # npm refuses to publish a prerelease without --tag, since an untagged
+        # publish would become `latest`. Derive the dist-tag from the version so
+        # betas land under `beta` and stable releases still go to `latest`.
+        run: |-
+          v=$(jq -r .version package.json)
+          case "$v" in
+            *-alpha*) tag=alpha ;;
+            *-beta*)  tag=beta ;;
+            *-rc*)    tag=rc ;;
+            *)        tag=latest ;;
+          esac
+          echo "Publishing $v under dist-tag $tag"
+          npm publish --tag "$tag"
