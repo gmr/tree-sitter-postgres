@@ -22,7 +22,7 @@ PostgreSQL 19 broke that assumption. Five features that shipped in the betas wer
 | More object types in `CREATE SCHEMA` | 2026-09-11 |
 | `UPDATE`/`DELETE ... FOR PORTION OF` | 2026-09-15 |
 
-Only the first is in `REL_19_BETA3`, the newest tag. No release candidate is tagged yet. Generating from that tag would ship a grammar that accepts four syntaxes PostgreSQL 19.0 will reject, and the SQL/PGQ revert also removed the `RIGHT_ARROW` token and the standalone `|` self character from `scan.l`, so even the shape of ordinary `->` and `|` expressions differs between the tag and the branch.
+`REL_19_BETA3`, the newest tag, contains only the first revert; the other four features are still present in it. No release candidate is tagged yet. Generating from that tag would ship a grammar that accepts four syntaxes PostgreSQL 19.0 will reject, and the SQL/PGQ revert also removed the `RIGHT_ARROW` token and the standalone `|` self character from `scan.l`, so even the shape of ordinary `->` and `|` expressions differs between the tag and the branch.
 
 ## Decision
 
