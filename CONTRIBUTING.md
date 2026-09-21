@@ -38,11 +38,17 @@ You need:
 
 ### 1. Get a PostgreSQL source checkout
 
-We currently target PostgreSQL 19 beta 2 (`REL_19_BETA2`). Clone postgres anywhere on disk and check out the matching tag:
+We currently target PostgreSQL 19 as of the `REL_19_STABLE` branch at commit
+`b368bdd2301`. This is past the `REL_19_BETA3` tag: several features that
+shipped in the betas (SQL/PGQ property graphs, `ALTER TABLE MERGE/SPLIT
+PARTITION`, `UPDATE`/`DELETE ... FOR PORTION OF`, `GROUP BY ALL`, extra object
+types in `CREATE SCHEMA`) were reverted afterwards, so the tag no longer matches
+what PostgreSQL 19 will ship. Clone postgres anywhere on disk and check out that
+commit:
 
 ```bash
 git clone https://github.com/postgres/postgres.git ~/Source/postgres
-git -C ~/Source/postgres checkout REL_19_BETA2
+git -C ~/Source/postgres checkout b368bdd2301
 ```
 
 Then point the codegen at it:
@@ -123,4 +129,4 @@ just test
 git diff --stat   # confirm only files you intended to change moved
 ```
 
-If `just generate` produces unexpected diffs in files you didn't touch, your PostgreSQL checkout is probably on a different revision than the project targets — confirm you're on `REL_19_BETA2`.
+If `just generate` produces unexpected diffs in files you didn't touch, your PostgreSQL checkout is probably on a different revision than the project targets — confirm you're on `b368bdd2301` (`REL_19_STABLE`).

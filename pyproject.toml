@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tree-sitter-postgres"
 description = "Postgres grammar for tree-sitter"
-version = "19.0.0b2"
+version = "19.0.0b3"
 keywords = ["incremental", "parsing", "tree-sitter", "postgres"]
 classifiers = [
   "Intended Audience :: Developers",

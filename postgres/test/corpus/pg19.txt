@@ -18,20 +18,16 @@ REPACK (VERBOSE) t1 USING INDEX;
     (stmt
       (RepackStmt
         (kw_repack)
-        (vacuum_relation
-          (relation_expr
-            (qualified_name
-              (ColId
-                (identifier))))))))
+        (qualified_name
+          (ColId
+            (identifier))))))
   (toplevel_stmt
     (stmt
       (RepackStmt
         (kw_repack)
-        (vacuum_relation
-          (relation_expr
-            (qualified_name
-              (ColId
-                (identifier)))))
+        (qualified_name
+          (ColId
+            (identifier)))
         (kw_using)
         (kw_index)
         (name
@@ -48,11 +44,9 @@ REPACK (VERBOSE) t1 USING INDEX;
                 (NonReservedWord
                   (type_func_name_keyword
                     (kw_verbose)))))))
-        (vacuum_relation
-          (relation_expr
-            (qualified_name
-              (ColId
-                (identifier)))))
+        (qualified_name
+          (ColId
+            (identifier)))
         (opt_usingindex
           (kw_using)
           (kw_index))))))
@@ -95,218 +89,6 @@ WAIT FOR LSN '0/3F0000' WITH (timeout 1000);
                   (SignedIconst
                     (Iconst
                       (integer_literal))))))))))))
-
-================================================================================
-ALTER TABLE SPLIT PARTITION
-================================================================================
-
-ALTER TABLE t SPLIT PARTITION p1 INTO
-  (PARTITION p2 FOR VALUES FROM (1) TO (5),
-   PARTITION p3 FOR VALUES FROM (5) TO (10));
-
---------------------------------------------------------------------------------
-
-(source_file
-  (toplevel_stmt
-    (stmt
-      (AlterTableStmt
-        (kw_alter)
-        (kw_table)
-        (relation_expr
-          (qualified_name
-            (ColId
-              (identifier))))
-        (partition_cmd
-          (kw_split)
-          (kw_partition)
-          (qualified_name
-            (ColId
-              (identifier)))
-          (kw_into)
-          (partitions_list
-            (partitions_list
-              (SinglePartitionSpec
-                (kw_partition)
-                (qualified_name
-                  (ColId
-                    (identifier)))
-                (PartitionBoundSpec
-                  (kw_for)
-                  (kw_values)
-                  (kw_from)
-                  (expr_list
-                    (a_expr
-                      (a_expr
-                        (c_expr
-                          (AexprConst
-                            (Iconst
-                              (integer_literal)))))))
-                  (kw_to)
-                  (expr_list
-                    (a_expr
-                      (a_expr
-                        (c_expr
-                          (AexprConst
-                            (Iconst
-                              (integer_literal))))))))))
-            (SinglePartitionSpec
-              (kw_partition)
-              (qualified_name
-                (ColId
-                  (identifier)))
-              (PartitionBoundSpec
-                (kw_for)
-                (kw_values)
-                (kw_from)
-                (expr_list
-                  (a_expr
-                    (a_expr
-                      (c_expr
-                        (AexprConst
-                          (Iconst
-                            (integer_literal)))))))
-                (kw_to)
-                (expr_list
-                  (a_expr
-                    (a_expr
-                      (c_expr
-                        (AexprConst
-                          (Iconst
-                            (integer_literal)))))))))))))))
-
-================================================================================
-ALTER TABLE MERGE PARTITIONS
-================================================================================
-
-ALTER TABLE t MERGE PARTITIONS (p1, p2) INTO p3;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (toplevel_stmt
-    (stmt
-      (AlterTableStmt
-        (kw_alter)
-        (kw_table)
-        (relation_expr
-          (qualified_name
-            (ColId
-              (identifier))))
-        (partition_cmd
-          (kw_merge)
-          (kw_partitions)
-          (qualified_name_list
-            (qualified_name_list
-              (qualified_name
-                (ColId
-                  (identifier))))
-            (qualified_name
-              (ColId
-                (identifier))))
-          (kw_into)
-          (qualified_name
-            (ColId
-              (identifier))))))))
-
-================================================================================
-UPDATE FOR PORTION OF
-================================================================================
-
-UPDATE t FOR PORTION OF valid_at FROM '2020-01-01' TO '2021-01-01'
-  SET x = 1;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (toplevel_stmt
-    (stmt
-      (UpdateStmt
-        (kw_update)
-        (relation_expr
-          (qualified_name
-            (ColId
-              (identifier))))
-        (for_portion_of_clause
-          (kw_for)
-          (kw_portion)
-          (kw_of)
-          (ColId
-            (identifier))
-          (kw_from)
-          (a_expr
-            (a_expr
-              (c_expr
-                (AexprConst
-                  (Sconst
-                    (string_literal))))))
-          (kw_to)
-          (a_expr
-            (a_expr
-              (c_expr
-                (AexprConst
-                  (Sconst
-                    (string_literal)))))))
-        (kw_set)
-        (set_clause_list
-          (set_clause
-            (set_target
-              (ColId
-                (identifier)))
-            (a_expr
-              (a_expr
-                (c_expr
-                  (AexprConst
-                    (Iconst
-                      (integer_literal))))))))))))
-
-================================================================================
-DELETE FOR PORTION OF with target expression
-================================================================================
-
-DELETE FROM t FOR PORTION OF valid_at (tstzrange('2020-01-01', '2021-01-01'));
-
---------------------------------------------------------------------------------
-
-(source_file
-  (toplevel_stmt
-    (stmt
-      (DeleteStmt
-        (kw_delete)
-        (kw_from)
-        (relation_expr
-          (qualified_name
-            (ColId
-              (identifier))))
-        (for_portion_of_clause
-          (kw_for)
-          (kw_portion)
-          (kw_of)
-          (ColId
-            (identifier))
-          (a_expr
-            (a_expr
-              (c_expr
-                (func_expr
-                  (func_application
-                    (func_name
-                      (type_function_name
-                        (identifier)))
-                    (func_arg_list
-                      (func_arg_list
-                        (func_arg_expr
-                          (a_expr
-                            (a_expr
-                              (c_expr
-                                (AexprConst
-                                  (Sconst
-                                    (string_literal))))))))
-                      (func_arg_expr
-                        (a_expr
-                          (a_expr
-                            (c_expr
-                              (AexprConst
-                                (Sconst
-                                  (string_literal))))))))))))))))))
 
 ================================================================================
 Window function null treatment
@@ -429,61 +211,6 @@ SELECT first_value(x) RESPECT NULLS OVER w FROM t WINDOW w AS (ORDER BY y);
                                   (columnref
                                     (ColId
                                       (identifier))))))))))))))))))))
-
-================================================================================
-GROUP BY ALL
-================================================================================
-
-SELECT a, sum(b) FROM t GROUP BY ALL;
-
---------------------------------------------------------------------------------
-
-(source_file
-  (toplevel_stmt
-    (stmt
-      (SelectStmt
-        (select_no_parens
-          (simple_select
-            (kw_select)
-            (opt_target_list
-              (target_list
-                (target_list
-                  (target_el
-                    (a_expr
-                      (a_expr
-                        (c_expr
-                          (columnref
-                            (ColId
-                              (identifier))))))))
-                (target_el
-                  (a_expr
-                    (a_expr
-                      (c_expr
-                        (func_expr
-                          (func_application
-                            (func_name
-                              (type_function_name
-                                (identifier)))
-                            (func_arg_list
-                              (func_arg_expr
-                                (a_expr
-                                  (a_expr
-                                    (c_expr
-                                      (columnref
-                                        (ColId
-                                          (identifier))))))))))))))))
-            (from_clause
-              (kw_from)
-              (from_list
-                (table_ref
-                  (relation_expr
-                    (qualified_name
-                      (ColId
-                        (identifier)))))))
-            (group_clause
-              (kw_group)
-              (kw_by)
-              (kw_all))))))))
 
 ================================================================================
 ON CONFLICT DO SELECT
@@ -739,7 +466,7 @@ SET search_path TO NULL;
               (kw_null))))))))
 
 ================================================================================
-Arrow and pipe as expression operators
+Arrow and pipe as generic operators
 ================================================================================
 
 SELECT j -> 'key' FROM t;
@@ -759,12 +486,15 @@ SELECT a | b FROM t;
                 (target_el
                   (a_expr
                     (a_expr
-                      (a_expr_prec
+                      (a_expr
                         (c_expr
                           (columnref
                             (ColId
-                              (identifier)))))
-                      (a_expr_prec
+                              (identifier))))))
+                    (qual_Op
+                      (operator))
+                    (a_expr
+                      (a_expr
                         (c_expr
                           (AexprConst
                             (Sconst
@@ -788,12 +518,15 @@ SELECT a | b FROM t;
                 (target_el
                   (a_expr
                     (a_expr
-                      (a_expr_prec
+                      (a_expr
                         (c_expr
                           (columnref
                             (ColId
-                              (identifier)))))
-                      (a_expr_prec
+                              (identifier))))))
+                    (qual_Op
+                      (operator))
+                    (a_expr
+                      (a_expr
                         (c_expr
                           (columnref
                             (ColId
