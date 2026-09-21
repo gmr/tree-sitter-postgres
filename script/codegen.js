@@ -505,6 +505,27 @@ function generateKeywordRules(keywords) {
 function generateLexerRules() {
   // NOTE: backslashes in these template strings are for the OUTPUT file —
   // each \\ here becomes a single \ in grammar.js (which is a JS file).
+
+  // scan.l lets a quoted literal continue across a line break: a closing quote
+  // followed by whitespace containing at least one newline and then another
+  // quote resumes the same literal, and the two quotes contribute nothing to
+  // its contents. `SELECT 'foo'\n'bar';` is `SELECT 'foobar';`, while
+  // `SELECT 'foo' 'bar';` (no newline) is a syntax error. The rule applies to
+  // every quoted literal type — scan.l routes xb, xh, xq, xe and xus through
+  // one `xqs` lookahead state.
+  //
+  //   quotecontinue            {whitespace_with_newline}{quote}
+  //   whitespace_with_newline  {non_newline_whitespace}*{newline}{special_whitespace}*
+  //   non_newline_whitespace   [ \t\f\v] | --{non_newline}*
+  //   special_whitespace       [ \t\n\r\f\v]+ | --{non_newline}*{newline}
+  //
+  // Only `--` comments count as whitespace here; scan.l handles `/* */` in a
+  // separate start state, so a block comment ends the literal.
+  const contin = '([ \\t\\f\\v]|--[^\\n\\r]*)*[\\n\\r]([ \\t\\n\\r\\f\\v]+|--[^\\n\\r]*[\\n\\r])*';
+
+  // Emit `'body'` followed by any number of continued `'body'` segments.
+  const quoted = (body) => `'${body}'(${contin}'${body}')*`;
+
   return `
     // ── Identifiers ──────────────────────────────────────────────────────────────
 
@@ -539,7 +560,7 @@ function generateLexerRules() {
     // ── String literals ──────────────────────────────────────────────────────────
 
     // Standard SQL string: 'hello' — doubled single-quote is the escape: 'it''s'
-    string_literal: _ => token(/'([^']|'')*'/),
+    string_literal: _ => token(/${quoted("([^']|'')*")}/),
 
     // Escape string: E'...' (or e'...') — backslash escapes apply, so \\' is an
     // escaped quote and does not terminate the string (unlike a standard
@@ -547,7 +568,7 @@ function generateLexerRules() {
     // lexer prefers this over the bare E identifier by longest match. Content
     // is any non-quote/non-backslash char, a doubled quote, or a backslash
     // escape. ruleutils emits E'...' for any string containing backslashes.
-    escape_string_literal: _ => token(/[eE]'([^'\\\\]|''|\\\\.)*'/),
+    escape_string_literal: _ => token(/[eE]${quoted("([^'\\\\]|''|\\\\.)*")}/),
 
     // NOTE: N'...' and U&'...' prefix strings are still parsed as
     // function-call-like forms (identifier + string_literal).
@@ -560,10 +581,10 @@ function generateLexerRules() {
     // strings in a single file.
 
     // Bit string: B'0101'
-    bit_string_literal: _ => token(/[bB]'[01]*'/),
+    bit_string_literal: _ => token(/[bB]${quoted('[01]*')}/),
 
     // Hex string: X'deadbeef'
-    hex_string_literal: _ => token(/[xX]'[0-9a-fA-F]*'/),
+    hex_string_literal: _ => token(/[xX]${quoted('[0-9a-fA-F]*')}/),
 
     // ── Operators ────────────────────────────────────────────────────────────────
 

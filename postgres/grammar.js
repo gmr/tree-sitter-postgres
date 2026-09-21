@@ -4805,7 +4805,7 @@ module.exports = grammar({
     // ── String literals ──────────────────────────────────────────────────────────
 
     // Standard SQL string: 'hello' — doubled single-quote is the escape: 'it''s'
-    string_literal: _ => token(/'([^']|'')*'/),
+    string_literal: _ => token(/'([^']|'')*'(([ \t\f\v]|--[^\n\r]*)*[\n\r]([ \t\n\r\f\v]+|--[^\n\r]*[\n\r])*'([^']|'')*')*/),
 
     // Escape string: E'...' (or e'...') — backslash escapes apply, so \' is an
     // escaped quote and does not terminate the string (unlike a standard
@@ -4813,7 +4813,7 @@ module.exports = grammar({
     // lexer prefers this over the bare E identifier by longest match. Content
     // is any non-quote/non-backslash char, a doubled quote, or a backslash
     // escape. ruleutils emits E'...' for any string containing backslashes.
-    escape_string_literal: _ => token(/[eE]'([^'\\]|''|\\.)*'/),
+    escape_string_literal: _ => token(/[eE]'([^'\\]|''|\\.)*'(([ \t\f\v]|--[^\n\r]*)*[\n\r]([ \t\n\r\f\v]+|--[^\n\r]*[\n\r])*'([^'\\]|''|\\.)*')*/),
 
     // NOTE: N'...' and U&'...' prefix strings are still parsed as
     // function-call-like forms (identifier + string_literal).
@@ -4826,10 +4826,10 @@ module.exports = grammar({
     // strings in a single file.
 
     // Bit string: B'0101'
-    bit_string_literal: _ => token(/[bB]'[01]*'/),
+    bit_string_literal: _ => token(/[bB]'[01]*'(([ \t\f\v]|--[^\n\r]*)*[\n\r]([ \t\n\r\f\v]+|--[^\n\r]*[\n\r])*'[01]*')*/),
 
     // Hex string: X'deadbeef'
-    hex_string_literal: _ => token(/[xX]'[0-9a-fA-F]*'/),
+    hex_string_literal: _ => token(/[xX]'[0-9a-fA-F]*'(([ \t\f\v]|--[^\n\r]*)*[\n\r]([ \t\n\r\f\v]+|--[^\n\r]*[\n\r])*'[0-9a-fA-F]*')*/),
 
     // ── Operators ────────────────────────────────────────────────────────────────
 

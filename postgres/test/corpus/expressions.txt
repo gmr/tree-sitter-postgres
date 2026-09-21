@@ -388,3 +388,107 @@ SELECT E'a\'b', E'(\/|\<)';
                         (AexprConst
                           (Sconst
                             (escape_string_literal)))))))))))))))
+
+================================================================================
+String continuation across a line break
+================================================================================
+
+SELECT 'foo'
+'bar';
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (string_literal)))))))))))))))
+
+================================================================================
+String continuation past a line comment
+================================================================================
+
+SELECT 'foo' -- note
+'bar';
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (string_literal)))))))))))))))
+
+================================================================================
+Bit string continuation across a line break
+================================================================================
+
+SELECT B'0101'
+'1111';
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (bit_string_literal))))))))))))))
+
+================================================================================
+Adjacent strings on one line are not continued
+================================================================================
+
+SELECT 'foo'      'bar';
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (string_literal))))))))))))))
+  (ERROR
+    (string_literal)))
