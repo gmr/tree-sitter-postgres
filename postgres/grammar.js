@@ -2221,11 +2221,11 @@ module.exports = grammar({
         seq($.merge_when_list, $.merge_when_clause)
       ),
     merge_when_clause: $ => choice(
-        seq($.merge_when_tgt_matched, $.opt_merge_when_condition, $.kw_then, $.merge_update),
-        seq($.merge_when_tgt_matched, $.opt_merge_when_condition, $.kw_then, $.merge_delete),
-        seq($.merge_when_tgt_not_matched, $.opt_merge_when_condition, $.kw_then, $.merge_insert),
-        seq($.merge_when_tgt_matched, $.opt_merge_when_condition, $.kw_then, $.kw_do, $.kw_nothing),
-        seq($.merge_when_tgt_not_matched, $.opt_merge_when_condition, $.kw_then, $.kw_do, $.kw_nothing)
+        seq($.merge_when_tgt_matched, optional($.opt_merge_when_condition), $.kw_then, $.merge_update),
+        seq($.merge_when_tgt_matched, optional($.opt_merge_when_condition), $.kw_then, $.merge_delete),
+        seq($.merge_when_tgt_not_matched, optional($.opt_merge_when_condition), $.kw_then, $.merge_insert),
+        seq($.merge_when_tgt_matched, optional($.opt_merge_when_condition), $.kw_then, $.kw_do, $.kw_nothing),
+        seq($.merge_when_tgt_not_matched, optional($.opt_merge_when_condition), $.kw_then, $.kw_do, $.kw_nothing)
       ),
     merge_when_tgt_matched: $ => choice(
         seq($.kw_when, $.kw_matched),
