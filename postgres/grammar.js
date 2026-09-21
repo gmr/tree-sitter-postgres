@@ -36,7 +36,6 @@ module.exports = grammar({
     [$.utility_option_name, $.unreserved_keyword],
     [$.ConstDatetime, $.col_name_keyword],
     [$.simple_select, $.simple_select],
-    [$.a_expr, $.a_expr],
     [$.target_el, $.target_el],
     [$.ConstDatetime, $.ConstDatetime],
     [$.table_ref, $.table_ref],
