@@ -35912,8 +35912,16 @@
               "name": "merge_when_tgt_matched"
             },
             {
-              "type": "SYMBOL",
-              "name": "opt_merge_when_condition"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_merge_when_condition"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "SYMBOL",
@@ -35933,8 +35941,16 @@
               "name": "merge_when_tgt_matched"
             },
             {
-              "type": "SYMBOL",
-              "name": "opt_merge_when_condition"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_merge_when_condition"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "SYMBOL",
@@ -35954,8 +35970,16 @@
               "name": "merge_when_tgt_not_matched"
             },
             {
-              "type": "SYMBOL",
-              "name": "opt_merge_when_condition"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_merge_when_condition"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "SYMBOL",
@@ -35975,8 +35999,16 @@
               "name": "merge_when_tgt_matched"
             },
             {
-              "type": "SYMBOL",
-              "name": "opt_merge_when_condition"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_merge_when_condition"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "SYMBOL",
@@ -36000,8 +36032,16 @@
               "name": "merge_when_tgt_not_matched"
             },
             {
-              "type": "SYMBOL",
-              "name": "opt_merge_when_condition"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "opt_merge_when_condition"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
             },
             {
               "type": "SYMBOL",
@@ -61839,10 +61879,6 @@
     [
       "simple_select",
       "simple_select"
-    ],
-    [
-      "a_expr",
-      "a_expr"
     ],
     [
       "target_el",

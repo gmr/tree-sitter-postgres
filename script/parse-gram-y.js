@@ -359,8 +359,10 @@ function parseRuleTokens(tokens) {
         if (currentAlt.length > 0) {
           alternatives.push(currentAlt);
           currentAlt = []; // clear so the post-loop flush doesn't duplicate it
-        } else if (alternatives.length === 0) {
-          // Rule with no alternatives — shouldn't happen but be safe
+        } else {
+          // Nothing collected since the last separator — the final
+          // alternative is empty (e.g. `| { $$ = NULL; } ;` with no
+          // /* EMPTY */ comment), or the rule has no alternatives at all.
           hasEmpty = true;
         }
         i++;
