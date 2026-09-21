@@ -80,11 +80,6 @@
     "reason": "rewriter output, not user SQL: range table listing with a missing comma"
   },
   {
-    "hash": "5815b33d3398",
-    "source": "syntax.sgml:321",
-    "reason": "KNOWN GAP: string constants separated by whitespace including a newline are concatenated by the PostgreSQL lexer; the grammar does not implement this yet"
-  },
-  {
     "hash": "80409e710244",
     "source": "syntax.sgml:330",
     "reason": "deliberately invalid; the doc gives it as the counter-example to newline string concatenation"

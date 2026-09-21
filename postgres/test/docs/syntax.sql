@@ -19,6 +19,10 @@ UPDATE my_table SET a = 5;
 -- syntax.sgml:179
 UPDATE "my_table" SET "a" = 5;
 
+-- syntax.sgml:321
+SELECT 'foo'
+'bar';
+
 -- syntax.sgml:326
 SELECT 'foobar';
 

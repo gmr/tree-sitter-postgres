@@ -61800,28 +61800,28 @@
       "type": "TOKEN",
       "content": {
         "type": "PATTERN",
-        "value": "'([^']|'')*'"
+        "value": "'([^']|'')*'(([ \\t\\f\\v]|--[^\\n\\r]*)*[\\n\\r]([ \\t\\n\\r\\f\\v]+|--[^\\n\\r]*[\\n\\r])*'([^']|'')*')*"
       }
     },
     "escape_string_literal": {
       "type": "TOKEN",
       "content": {
         "type": "PATTERN",
-        "value": "[eE]'([^'\\\\]|''|\\\\.)*'"
+        "value": "[eE]'([^'\\\\]|''|\\\\.)*'(([ \\t\\f\\v]|--[^\\n\\r]*)*[\\n\\r]([ \\t\\n\\r\\f\\v]+|--[^\\n\\r]*[\\n\\r])*'([^'\\\\]|''|\\\\.)*')*"
       }
     },
     "bit_string_literal": {
       "type": "TOKEN",
       "content": {
         "type": "PATTERN",
-        "value": "[bB]'[01]*'"
+        "value": "[bB]'[01]*'(([ \\t\\f\\v]|--[^\\n\\r]*)*[\\n\\r]([ \\t\\n\\r\\f\\v]+|--[^\\n\\r]*[\\n\\r])*'[01]*')*"
       }
     },
     "hex_string_literal": {
       "type": "TOKEN",
       "content": {
         "type": "PATTERN",
-        "value": "[xX]'[0-9a-fA-F]*'"
+        "value": "[xX]'[0-9a-fA-F]*'(([ \\t\\f\\v]|--[^\\n\\r]*)*[\\n\\r]([ \\t\\n\\r\\f\\v]+|--[^\\n\\r]*[\\n\\r])*'[0-9a-fA-F]*')*"
       }
     },
     "operator": {
