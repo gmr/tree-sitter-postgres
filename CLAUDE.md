@@ -62,6 +62,13 @@ Tests use tree-sitter's corpus format (SQL input → expected S-expression tree)
 - `postgres/test/corpus/` — 11 files (select, dml, ddl, expressions, joins, etc.)
 - `plpgsql/test/corpus/` — 9 files (blocks, control_flow, loops, cursors, etc.)
 
+`postgres/test/docs/*.sql` is a separate, generated corpus: every SQL example
+extracted from PostgreSQL's `doc/src/sgml` by `script/extract-doc-sql.js`. It
+asserts parse success only (no ERROR/MISSING nodes), not tree shape. Run it with
+`just test-docs`; regenerate it with `just extract-doc-sql` (needs a full
+PostgreSQL source checkout). Do not hand-edit those files — record expected
+failures in `script/doc-sql-skip.json` instead.
+
 ## Language Bindings
 
 Bindings exist for C, Go, Node.js, Python, Rust, and Swift under `bindings/`. The Rust and Node bindings have their own test suites.

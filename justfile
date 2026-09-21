@@ -7,10 +7,19 @@ ts := "./node_modules/.bin/tree-sitter"
 # Default: run tests
 default: test
 
-# Run corpus tests for both grammars
+# Run corpus tests for both grammars plus the documentation parse check
 test:
     {{ts}} test
     cd plpgsql && ../node_modules/.bin/tree-sitter test
+    node script/check-doc-sql.js
+
+# Parse every SQL example extracted from the PostgreSQL documentation
+test-docs:
+    node script/check-doc-sql.js
+
+# Re-extract the documentation SQL corpus (needs a full PostgreSQL checkout)
+extract-doc-sql pg_dir=env("PG_SOURCE_DIR"):
+    node script/extract-doc-sql.js {{pg_dir}}
 
 # Run only the Node codegen for the postgres grammar (writes postgres/grammar.js,
 # skips the parse-table build, which needs ~67 GB of RAM — see CONTRIBUTING.md)
