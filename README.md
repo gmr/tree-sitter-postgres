@@ -4,9 +4,9 @@ A [tree-sitter](https://tree-sitter.github.io/) grammar for PostgreSQL, generate
 
 ## Features
 
-- **Current as of PostgreSQL 19 beta 2** (generated from REL_19_BETA2)
-- **784 grammar rules** covering the full PostgreSQL SQL syntax
-- **511 case-insensitive keywords** across all four PG keyword categories
+- **Current as of PostgreSQL 19** (generated from `REL_19_STABLE` @ `b368bdd2301`, post-beta 3, with the reverted beta features removed)
+- **743 grammar rules** covering the full PostgreSQL SQL syntax
+- **499 case-insensitive keywords** across all four PG keyword categories
 - **Correct operator precedence** — `1 + 2 * 3` parses as `1 + (2 * 3)`
 - **PL/pgSQL support** via a separate grammar with language injection
 - **Generated, not hand-written** — regenerate for any PostgreSQL version

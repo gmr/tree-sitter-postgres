@@ -16,7 +16,6 @@ const OPERATOR_TOKEN_MAP = {
   LESS_EQUALS:     "'<='",
   GREATER_EQUALS:  "'>='",
   NOT_EQUALS:      "'<>'",
-  RIGHT_ARROW:     "'->'",  // dedicated token since PG 19 (scan.l right_arrow)
 };
 
 /**
@@ -569,13 +568,13 @@ function generateLexerRules() {
     // ── Operators ────────────────────────────────────────────────────────────────
 
     // Custom and built-in multi-character operators.
-    // The specific compound operators (::, .., :=, =>, <=, >=, <>, ->) are
+    // The specific compound operators (::, .., :=, =>, <=, >=, <>) are
     // matched as string literals in the grammar rules and take priority.
     // Implements scan.l's trailing +/- rule: an operator may only end in
     // + or - if it also contains one of ~ ! @ # ^ & | ? — otherwise the
-    // trailing +/- lexes as a separate token. Without this, SQL/PGQ edge
-    // patterns like <-[e]-> would lex "<-" as one operator. Bare + and -
-    // are intentionally not matched; the grammar uses them as literals.
+    // trailing +/- lexes as a separate token, so "a<-1" is "a < -1". Bare
+    // + and - are intentionally not matched; the grammar uses them as
+    // literals.
     operator: _ => token(choice(
       /[~!@#^&|?+\\-*\/%<>=]*[~!@#^&|?][~!@#^&|?+\\-*\/%<>=]*/,
       /[+\\-*\/%<>=]*[*\/%<>=]/

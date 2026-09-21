@@ -836,10 +836,6 @@
           "named": true
         },
         {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
           "type": "kw_if",
           "named": true
         },
@@ -857,10 +853,6 @@
         },
         {
           "type": "kw_procedure",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -1187,10 +1179,6 @@
           "named": true
         },
         {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
           "type": "kw_language",
           "named": true
         },
@@ -1212,10 +1200,6 @@
         },
         {
           "type": "kw_procedure",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -1285,10 +1269,6 @@
         {
           "type": "opt_procedural",
           "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
         }
       ]
     }
@@ -1331,97 +1311,6 @@
         },
         {
           "type": "qualified_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "AlterPropGraphStmt",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "add_label_list",
-          "named": true
-        },
-        {
-          "type": "edge_synonym",
-          "named": true
-        },
-        {
-          "type": "edge_tables_clause",
-          "named": true
-        },
-        {
-          "type": "kw_add",
-          "named": true
-        },
-        {
-          "type": "kw_alter",
-          "named": true
-        },
-        {
-          "type": "kw_drop",
-          "named": true
-        },
-        {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
-          "type": "kw_label",
-          "named": true
-        },
-        {
-          "type": "kw_properties",
-          "named": true
-        },
-        {
-          "type": "kw_property",
-          "named": true
-        },
-        {
-          "type": "kw_table",
-          "named": true
-        },
-        {
-          "type": "kw_tables",
-          "named": true
-        },
-        {
-          "type": "labeled_expr_list",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        },
-        {
-          "type": "name_list",
-          "named": true
-        },
-        {
-          "type": "opt_drop_behavior",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
-        },
-        {
-          "type": "vertex_or_edge",
-          "named": true
-        },
-        {
-          "type": "vertex_synonym",
-          "named": true
-        },
-        {
-          "type": "vertex_tables_clause",
           "named": true
         }
       ]
@@ -3988,45 +3877,6 @@
     }
   },
   {
-    "type": "CreatePropGraphStmt",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "OptTemp",
-          "named": true
-        },
-        {
-          "type": "kw_create",
-          "named": true
-        },
-        {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
-          "type": "kw_property",
-          "named": true
-        },
-        {
-          "type": "opt_edge_tables_clause",
-          "named": true
-        },
-        {
-          "type": "opt_vertex_tables_clause",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "CreatePublicationStmt",
     "named": true,
     "fields": {},
@@ -4992,14 +4842,6 @@
       "required": true,
       "types": [
         {
-          "type": "for_portion_of_clause",
-          "named": true
-        },
-        {
-          "type": "for_portion_of_opt_alias",
-          "named": true
-        },
-        {
           "type": "kw_delete",
           "named": true
         },
@@ -5009,10 +4851,6 @@
         },
         {
           "type": "opt_with_clause",
-          "named": true
-        },
-        {
-          "type": "relation_expr",
           "named": true
         },
         {
@@ -7477,10 +7315,6 @@
           "named": true
         },
         {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
           "type": "kw_group",
           "named": true
         },
@@ -7518,10 +7352,6 @@
         },
         {
           "type": "kw_procedure",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -7680,6 +7510,10 @@
           "named": true
         },
         {
+          "type": "opt_name_list",
+          "named": true
+        },
+        {
           "type": "opt_usingindex",
           "named": true
         },
@@ -7697,10 +7531,6 @@
         },
         {
           "type": "utility_option_list",
-          "named": true
-        },
-        {
-          "type": "vacuum_relation",
           "named": true
         }
       ]
@@ -8483,29 +8313,6 @@
     }
   },
   {
-    "type": "SinglePartitionSpec",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "PartitionBoundSpec",
-          "named": true
-        },
-        {
-          "type": "kw_partition",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "TableConstraint",
     "named": true,
     "fields": {},
@@ -9268,14 +9075,6 @@
       "required": true,
       "types": [
         {
-          "type": "for_portion_of_clause",
-          "named": true
-        },
-        {
-          "type": "for_portion_of_opt_alias",
-          "named": true
-        },
-        {
           "type": "from_clause",
           "named": true
         },
@@ -9289,10 +9088,6 @@
         },
         {
           "type": "opt_with_clause",
-          "named": true
-        },
-        {
-          "type": "relation_expr",
           "named": true
         },
         {
@@ -9807,52 +9602,6 @@
         },
         {
           "type": "kw_drop",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "add_label",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "element_table_properties",
-          "named": true
-        },
-        {
-          "type": "kw_add",
-          "named": true
-        },
-        {
-          "type": "kw_label",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "add_label_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "add_label",
-          "named": true
-        },
-        {
-          "type": "add_label_list",
           "named": true
         }
       ]
@@ -11356,10 +11105,6 @@
           "named": true
         },
         {
-          "type": "kw_destination",
-          "named": true
-        },
-        {
           "type": "kw_detach",
           "named": true
         },
@@ -11401,10 +11146,6 @@
         },
         {
           "type": "kw_each",
-          "named": true
-        },
-        {
-          "type": "kw_edge",
           "named": true
         },
         {
@@ -11557,14 +11298,6 @@
         },
         {
           "type": "kw_granted",
-          "named": true
-        },
-        {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
-          "type": "kw_graph_table",
           "named": true
         },
         {
@@ -11952,10 +11685,6 @@
           "named": true
         },
         {
-          "type": "kw_node",
-          "named": true
-        },
-        {
           "type": "kw_none",
           "named": true
         },
@@ -12100,10 +11829,6 @@
           "named": true
         },
         {
-          "type": "kw_partitions",
-          "named": true
-        },
-        {
           "type": "kw_passing",
           "named": true
         },
@@ -12133,10 +11858,6 @@
         },
         {
           "type": "kw_policy",
-          "named": true
-        },
-        {
-          "type": "kw_portion",
           "named": true
         },
         {
@@ -12185,14 +11906,6 @@
         },
         {
           "type": "kw_program",
-          "named": true
-        },
-        {
-          "type": "kw_properties",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -12245,10 +11958,6 @@
         },
         {
           "type": "kw_reindex",
-          "named": true
-        },
-        {
-          "type": "kw_relationship",
           "named": true
         },
         {
@@ -12441,10 +12150,6 @@
         },
         {
           "type": "kw_source",
-          "named": true
-        },
-        {
-          "type": "kw_split",
           "named": true
         },
         {
@@ -12713,10 +12418,6 @@
         },
         {
           "type": "kw_version",
-          "named": true
-        },
-        {
-          "type": "kw_vertex",
           "named": true
         },
         {
@@ -13089,10 +12790,6 @@
         },
         {
           "type": "kw_float",
-          "named": true
-        },
-        {
-          "type": "kw_graph_table",
           "named": true
         },
         {
@@ -14472,37 +14169,6 @@
     }
   },
   {
-    "type": "destination_vertex_table",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "columnList",
-          "named": true
-        },
-        {
-          "type": "kw_destination",
-          "named": true
-        },
-        {
-          "type": "kw_key",
-          "named": true
-        },
-        {
-          "type": "kw_references",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "distinct_clause",
     "named": true,
     "fields": {},
@@ -14678,156 +14344,6 @@
         },
         {
           "type": "opt_procedural",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "edge_synonym",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_edge",
-          "named": true
-        },
-        {
-          "type": "kw_relationship",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "edge_table_definition",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "destination_vertex_table",
-          "named": true
-        },
-        {
-          "type": "opt_element_table_label_and_properties",
-          "named": true
-        },
-        {
-          "type": "opt_graph_table_key_clause",
-          "named": true
-        },
-        {
-          "type": "opt_propgraph_table_alias",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
-        },
-        {
-          "type": "source_vertex_table",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "edge_table_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "edge_table_definition",
-          "named": true
-        },
-        {
-          "type": "edge_table_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "edge_tables_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "edge_synonym",
-          "named": true
-        },
-        {
-          "type": "edge_table_list",
-          "named": true
-        },
-        {
-          "type": "kw_tables",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "element_table_label_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_default",
-          "named": true
-        },
-        {
-          "type": "kw_label",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "element_table_properties",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_all",
-          "named": true
-        },
-        {
-          "type": "kw_columns",
-          "named": true
-        },
-        {
-          "type": "kw_no",
-          "named": true
-        },
-        {
-          "type": "kw_properties",
-          "named": true
-        },
-        {
-          "type": "labeled_expr_list",
           "named": true
         }
       ]
@@ -15391,68 +14907,6 @@
         },
         {
           "type": "kw_update",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "for_portion_of_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "ColId",
-          "named": true
-        },
-        {
-          "type": "a_expr",
-          "named": true
-        },
-        {
-          "type": "kw_for",
-          "named": true
-        },
-        {
-          "type": "kw_from",
-          "named": true
-        },
-        {
-          "type": "kw_of",
-          "named": true
-        },
-        {
-          "type": "kw_portion",
-          "named": true
-        },
-        {
-          "type": "kw_to",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "for_portion_of_opt_alias",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "BareColLabel",
-          "named": true
-        },
-        {
-          "type": "ColId",
-          "named": true
-        },
-        {
-          "type": "kw_as",
           "named": true
         }
       ]
@@ -16648,25 +16102,6 @@
     }
   },
   {
-    "type": "graph_pattern",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "path_pattern_list",
-          "named": true
-        },
-        {
-          "type": "where_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "group_by_item",
     "named": true,
     "fields": {},
@@ -16726,10 +16161,6 @@
       "types": [
         {
           "type": "group_by_list",
-          "named": true
-        },
-        {
-          "type": "kw_all",
           "named": true
         },
         {
@@ -18231,97 +17662,6 @@
     }
   },
   {
-    "type": "label_and_properties",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "element_table_label_clause",
-          "named": true
-        },
-        {
-          "type": "element_table_properties",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "label_and_properties_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "label_and_properties",
-          "named": true
-        },
-        {
-          "type": "label_and_properties_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "label_disjunction",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "label_expression",
-          "named": true
-        },
-        {
-          "type": "label_term",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "label_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "label_disjunction",
-          "named": true
-        },
-        {
-          "type": "label_term",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "label_term",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "labeled_expr",
     "named": true,
     "fields": {},
@@ -18793,10 +18133,6 @@
           "named": true
         },
         {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
           "type": "kw_index",
           "named": true
         },
@@ -18806,10 +18142,6 @@
         },
         {
           "type": "kw_parser",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -19517,21 +18849,6 @@
     }
   },
   {
-    "type": "opt_colid",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "ColId",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "opt_collate",
     "named": true,
     "fields": {},
@@ -19806,40 +19123,6 @@
     }
   },
   {
-    "type": "opt_edge_tables_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "edge_tables_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "opt_element_table_label_and_properties",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "element_table_properties",
-          "named": true
-        },
-        {
-          "type": "label_and_properties_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "opt_encoding",
     "named": true,
     "fields": {},
@@ -20091,40 +19374,6 @@
     }
   },
   {
-    "type": "opt_graph_pattern_quantifier",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "Iconst",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "opt_graph_table_key_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "columnList",
-          "named": true
-        },
-        {
-          "type": "kw_key",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "opt_hold",
     "named": true,
     "fields": {},
@@ -20322,25 +19571,6 @@
         },
         {
           "type": "kw_year",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "opt_is_label_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_is",
-          "named": true
-        },
-        {
-          "type": "label_expression",
           "named": true
         }
       ]
@@ -20692,25 +19922,6 @@
       "types": [
         {
           "type": "kw_program",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "opt_propgraph_table_alias",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_as",
-          "named": true
-        },
-        {
-          "type": "name",
           "named": true
         }
       ]
@@ -21298,21 +20509,6 @@
     }
   },
   {
-    "type": "opt_vertex_tables_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "vertex_tables_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "opt_virtual_or_stored",
     "named": true,
     "fields": {},
@@ -21704,23 +20900,7 @@
           "named": true
         },
         {
-          "type": "kw_into",
-          "named": true
-        },
-        {
-          "type": "kw_merge",
-          "named": true
-        },
-        {
           "type": "kw_partition",
-          "named": true
-        },
-        {
-          "type": "kw_partitions",
-          "named": true
-        },
-        {
-          "type": "kw_split",
           "named": true
         },
         {
@@ -21728,53 +20908,7 @@
           "named": true
         },
         {
-          "type": "partitions_list",
-          "named": true
-        },
-        {
           "type": "qualified_name",
-          "named": true
-        },
-        {
-          "type": "qualified_name_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "partitions_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "SinglePartitionSpec",
-          "named": true
-        },
-        {
-          "type": "partitions_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_factor",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "opt_graph_pattern_quantifier",
-          "named": true
-        },
-        {
-          "type": "path_primary",
           "named": true
         }
       ]
@@ -21790,101 +20924,6 @@
       "types": [
         {
           "type": "kw_path",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_pattern",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "path_pattern_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_pattern_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "path_term",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_pattern_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "path_pattern",
-          "named": true
-        },
-        {
-          "type": "path_pattern_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_primary",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "opt_colid",
-          "named": true
-        },
-        {
-          "type": "opt_is_label_expression",
-          "named": true
-        },
-        {
-          "type": "path_pattern_expression",
-          "named": true
-        },
-        {
-          "type": "where_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "path_term",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "path_factor",
-          "named": true
-        },
-        {
-          "type": "path_term",
           "named": true
         }
       ]
@@ -22031,10 +21070,6 @@
           "named": true
         },
         {
-          "type": "kw_graph",
-          "named": true
-        },
-        {
           "type": "kw_in",
           "named": true
         },
@@ -22060,10 +21095,6 @@
         },
         {
           "type": "kw_procedures",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -23149,14 +22180,6 @@
       "required": true,
       "types": [
         {
-          "type": "CreateDomainStmt",
-          "named": true
-        },
-        {
-          "type": "CreateFunctionStmt",
-          "named": true
-        },
-        {
           "type": "CreateSeqStmt",
           "named": true
         },
@@ -23166,10 +22189,6 @@
         },
         {
           "type": "CreateTrigStmt",
-          "named": true
-        },
-        {
-          "type": "DefineStmt",
           "named": true
         },
         {
@@ -23811,37 +22830,6 @@
     }
   },
   {
-    "type": "source_vertex_table",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "columnList",
-          "named": true
-        },
-        {
-          "type": "kw_key",
-          "named": true
-        },
-        {
-          "type": "kw_references",
-          "named": true
-        },
-        {
-          "type": "kw_source",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "stats_param",
     "named": true,
     "fields": {},
@@ -23969,10 +22957,6 @@
         },
         {
           "type": "AlterPolicyStmt",
-          "named": true
-        },
-        {
-          "type": "AlterPropGraphStmt",
           "named": true
         },
         {
@@ -24125,10 +23109,6 @@
         },
         {
           "type": "CreatePolicyStmt",
-          "named": true
-        },
-        {
-          "type": "CreatePropGraphStmt",
           "named": true
         },
         {
@@ -24569,10 +23549,6 @@
           "named": true
         },
         {
-          "type": "graph_pattern",
-          "named": true
-        },
-        {
           "type": "joined_table",
           "named": true
         },
@@ -24581,31 +23557,11 @@
           "named": true
         },
         {
-          "type": "kw_columns",
-          "named": true
-        },
-        {
-          "type": "kw_graph_table",
-          "named": true
-        },
-        {
           "type": "kw_lateral",
           "named": true
         },
         {
-          "type": "kw_match",
-          "named": true
-        },
-        {
-          "type": "labeled_expr_list",
-          "named": true
-        },
-        {
           "type": "opt_alias_clause",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
           "named": true
         },
         {
@@ -25365,10 +24321,6 @@
           "named": true
         },
         {
-          "type": "kw_destination",
-          "named": true
-        },
-        {
           "type": "kw_detach",
           "named": true
         },
@@ -25402,10 +24354,6 @@
         },
         {
           "type": "kw_each",
-          "named": true
-        },
-        {
-          "type": "kw_edge",
           "named": true
         },
         {
@@ -25526,10 +24474,6 @@
         },
         {
           "type": "kw_granted",
-          "named": true
-        },
-        {
-          "type": "kw_graph",
           "named": true
         },
         {
@@ -25797,10 +24741,6 @@
           "named": true
         },
         {
-          "type": "kw_node",
-          "named": true
-        },
-        {
           "type": "kw_normalized",
           "named": true
         },
@@ -25905,10 +24845,6 @@
           "named": true
         },
         {
-          "type": "kw_partitions",
-          "named": true
-        },
-        {
           "type": "kw_passing",
           "named": true
         },
@@ -25934,10 +24870,6 @@
         },
         {
           "type": "kw_policy",
-          "named": true
-        },
-        {
-          "type": "kw_portion",
           "named": true
         },
         {
@@ -25978,14 +24910,6 @@
         },
         {
           "type": "kw_program",
-          "named": true
-        },
-        {
-          "type": "kw_properties",
-          "named": true
-        },
-        {
-          "type": "kw_property",
           "named": true
         },
         {
@@ -26030,10 +24954,6 @@
         },
         {
           "type": "kw_reindex",
-          "named": true
-        },
-        {
-          "type": "kw_relationship",
           "named": true
         },
         {
@@ -26202,10 +25122,6 @@
         },
         {
           "type": "kw_source",
-          "named": true
-        },
-        {
-          "type": "kw_split",
           "named": true
         },
         {
@@ -26402,10 +25318,6 @@
         },
         {
           "type": "kw_version",
-          "named": true
-        },
-        {
-          "type": "kw_vertex",
           "named": true
         },
         {
@@ -26706,113 +25618,6 @@
         },
         {
           "type": "opt_boolean_or_string",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "vertex_or_edge",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "edge_synonym",
-          "named": true
-        },
-        {
-          "type": "vertex_synonym",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "vertex_synonym",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_node",
-          "named": true
-        },
-        {
-          "type": "kw_vertex",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "vertex_table_definition",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "opt_element_table_label_and_properties",
-          "named": true
-        },
-        {
-          "type": "opt_graph_table_key_clause",
-          "named": true
-        },
-        {
-          "type": "opt_propgraph_table_alias",
-          "named": true
-        },
-        {
-          "type": "qualified_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "vertex_table_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "vertex_table_definition",
-          "named": true
-        },
-        {
-          "type": "vertex_table_list",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "vertex_tables_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "kw_tables",
-          "named": true
-        },
-        {
-          "type": "vertex_synonym",
-          "named": true
-        },
-        {
-          "type": "vertex_table_list",
           "named": true
         }
       ]
@@ -27447,10 +26252,6 @@
     "named": false
   },
   {
-    "type": "->",
-    "named": false
-  },
-  {
     "type": ".",
     "named": false
   },
@@ -27992,10 +26793,6 @@
     "named": true
   },
   {
-    "type": "kw_destination",
-    "named": true
-  },
-  {
     "type": "kw_detach",
     "named": true
   },
@@ -28037,10 +26834,6 @@
   },
   {
     "type": "kw_each",
-    "named": true
-  },
-  {
-    "type": "kw_edge",
     "named": true
   },
   {
@@ -28217,14 +27010,6 @@
   },
   {
     "type": "kw_granted",
-    "named": true
-  },
-  {
-    "type": "kw_graph",
-    "named": true
-  },
-  {
-    "type": "kw_graph_table",
     "named": true
   },
   {
@@ -28652,10 +27437,6 @@
     "named": true
   },
   {
-    "type": "kw_node",
-    "named": true
-  },
-  {
     "type": "kw_none",
     "named": true
   },
@@ -28824,10 +27605,6 @@
     "named": true
   },
   {
-    "type": "kw_partitions",
-    "named": true
-  },
-  {
     "type": "kw_passing",
     "named": true
   },
@@ -28857,10 +27634,6 @@
   },
   {
     "type": "kw_policy",
-    "named": true
-  },
-  {
-    "type": "kw_portion",
     "named": true
   },
   {
@@ -28916,14 +27689,6 @@
     "named": true
   },
   {
-    "type": "kw_properties",
-    "named": true
-  },
-  {
-    "type": "kw_property",
-    "named": true
-  },
-  {
     "type": "kw_publication",
     "named": true
   },
@@ -28973,10 +27738,6 @@
   },
   {
     "type": "kw_reindex",
-    "named": true
-  },
-  {
-    "type": "kw_relationship",
     "named": true
   },
   {
@@ -29181,10 +27942,6 @@
   },
   {
     "type": "kw_source",
-    "named": true
-  },
-  {
-    "type": "kw_split",
     "named": true
   },
   {
@@ -29468,10 +28225,6 @@
     "named": true
   },
   {
-    "type": "kw_vertex",
-    "named": true
-  },
-  {
     "type": "kw_view",
     "named": true
   },
@@ -29606,17 +28359,5 @@
   {
     "type": "string_literal",
     "named": true
-  },
-  {
-    "type": "{",
-    "named": false
-  },
-  {
-    "type": "|",
-    "named": false
-  },
-  {
-    "type": "}",
-    "named": false
   }
 ]
