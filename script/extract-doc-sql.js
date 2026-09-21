@@ -95,8 +95,10 @@ const STMT_START_RE = new RegExp(
   'i',
 );
 
-// psql prompts: "regression=>", "mydb=#", "mydb-#", "mydb(#".
-const PROMPT_RE = /^[A-Za-z0-9_]*[=\-(][>#]\s?/;
+// psql prompts: "regression=>", "mydb=#", "mydb-#", "mydb(#". The "-" and "("
+// continuation forms need a following space, or an operator at the start of a
+// line ("data->>'key'") looks like a prompt and loses its left side.
+const PROMPT_RE = /^[A-Za-z0-9_]+[=\-(][>#]\s|^[A-Za-z0-9_]*=[>#]\s?/;
 
 // psql prints a bare command tag after each statement ("SET", "INSERT 0 1",
 // "UPDATE 3"). Those lines start with a SQL keyword, so without this they get

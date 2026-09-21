@@ -74,6 +74,12 @@ function main() {
   }
 
   const statements = readStatements();
+  if (!statements.length) {
+    console.error(`No statements found in ${docsDir}.`);
+    console.error('Run: just extract-doc-sql');
+    process.exit(1);
+  }
+
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sql-'));
   try {
     const byName = new Map();
@@ -89,6 +95,18 @@ function main() {
       maxBuffer: 64 * 1024 * 1024,
     });
 
+    // Without these the script reads an empty stdout as "nothing failed" and
+    // reports a clean run when the CLI never parsed anything.
+    if (result.error) {
+      console.error(`Could not run ${cli}: ${result.error.message}`);
+      process.exit(1);
+    }
+    if (result.status === null) {
+      console.error(`${cli} was terminated by signal ${result.signal}.`);
+      if (result.stderr) console.error(result.stderr);
+      process.exit(1);
+    }
+
     const failures = [];
     for (const line of (result.stdout || '').split('\n')) {
       if (!/\((ERROR|MISSING)\b/.test(line)) continue;
@@ -102,6 +120,14 @@ function main() {
         console.log(`FAIL ${f.origin}`);
         console.log(`${f.text.split('\n').map((l) => `    ${l}`).join('\n')}\n`);
       }
+    }
+
+    // A non-zero status with nothing matched means the CLI reported a problem
+    // the stdout scan did not recognise, for example after a format change.
+    if (result.status !== 0 && !failures.length) {
+      console.error(`${cli} exited ${result.status} but reported no parse errors.`);
+      if (result.stderr) console.error(result.stderr);
+      process.exit(1);
     }
 
     const passed = statements.length - failures.length;
