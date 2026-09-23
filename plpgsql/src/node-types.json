@@ -1241,6 +1241,10 @@
         {
           "type": "kw_close",
           "named": true
+        },
+        {
+          "type": "param",
+          "named": true
         }
       ]
     }
@@ -1375,6 +1379,10 @@
         },
         {
           "type": "kw_into",
+          "named": true
+        },
+        {
+          "type": "param",
           "named": true
         }
       ]
@@ -1590,6 +1598,10 @@
         {
           "type": "kw_move",
           "named": true
+        },
+        {
+          "type": "param",
+          "named": true
         }
       ]
     }
@@ -1639,6 +1651,10 @@
         },
         {
           "type": "opt_scrollable",
+          "named": true
+        },
+        {
+          "type": "param",
           "named": true
         },
         {

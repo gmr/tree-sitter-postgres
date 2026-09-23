@@ -220,3 +220,44 @@ END
             (any_identifier
               (identifier))))))
     (kw_end)))
+
+==================
+Positional parameter as cursor
+==================
+
+BEGIN
+  OPEN $1 FOR SELECT * FROM table_1;
+  FETCH $1 INTO r;
+  MOVE $1;
+  CLOSE $1;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_open
+          (kw_open)
+          (param)
+          (kw_for)
+          (sql_expression)))
+      (proc_stmt
+        (stmt_fetch
+          (kw_fetch)
+          (param)
+          (kw_into)
+          (into_target
+            (any_identifier
+              (identifier)))))
+      (proc_stmt
+        (stmt_move
+          (kw_move)
+          (param)))
+      (proc_stmt
+        (stmt_close
+          (kw_close)
+          (param))))
+    (kw_end)))
