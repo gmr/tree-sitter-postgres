@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-postgres",
-  "version": "19.0.0-beta.4",
+  "version": "19.0.0-beta.4.1",
   "description": "PostgreSQL grammar for tree-sitter, generated from Postgres source",
   "repository": {
     "type": "git",
