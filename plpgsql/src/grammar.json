@@ -2225,7 +2225,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "any_identifier"
+          "name": "_cursor_variable"
         },
         {
           "type": "CHOICE",
@@ -2392,7 +2392,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "any_identifier"
+          "name": "_cursor_variable"
         },
         {
           "type": "SYMBOL",
@@ -2429,7 +2429,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "any_identifier"
+          "name": "_cursor_variable"
         },
         {
           "type": "STRING",
@@ -2545,11 +2545,24 @@
         },
         {
           "type": "SYMBOL",
-          "name": "any_identifier"
+          "name": "_cursor_variable"
         },
         {
           "type": "STRING",
           "value": ";"
+        }
+      ]
+    },
+    "_cursor_variable": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "any_identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "param"
         }
       ]
     },

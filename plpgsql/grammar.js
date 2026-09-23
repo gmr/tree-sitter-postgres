@@ -451,7 +451,7 @@ module.exports = grammar({
     // ── OPEN cursor ───────────────────────────────────────────────────────────
     stmt_open: $ => seq(
       $.kw_open,
-      $.any_identifier,
+      $._cursor_variable,
       optional(choice(
         // Unbound cursor: OPEN cur [NO SCROLL | SCROLL] FOR query|EXECUTE expr
         seq(
@@ -476,7 +476,7 @@ module.exports = grammar({
       $.kw_fetch,
       optional($.fetch_direction),
       optional($.kw_from),
-      $.any_identifier,
+      $._cursor_variable,
       $.kw_into,
       $.into_target,
       ';'
@@ -486,7 +486,7 @@ module.exports = grammar({
     stmt_move: $ => seq(
       $.kw_move,
       optional($.fetch_direction),
-      $.any_identifier,
+      $._cursor_variable,
       ';'
     ),
 
@@ -504,7 +504,11 @@ module.exports = grammar({
     ),
 
     // ── CLOSE ─────────────────────────────────────────────────────────────────
-    stmt_close: $ => seq($.kw_close, $.any_identifier, ';'),
+    stmt_close: $ => seq($.kw_close, $._cursor_variable, ';'),
+
+    // pl_gram.y cursor_variable is T_DATUM: any variable in scope, including a
+    // positional parameter such as $1. The refcursor type check is semantic.
+    _cursor_variable: $ => choice($.any_identifier, $.param),
 
     // ── NULL statement ────────────────────────────────────────────────────────
     stmt_null: $ => seq($.kw_null, ';'),
