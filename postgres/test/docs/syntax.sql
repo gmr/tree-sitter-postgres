@@ -31,122 +31,127 @@ CREATE FUNCTION dept(text) RETURNS dept
     AS $$ SELECT * FROM dept WHERE name = $1 $$
     LANGUAGE SQL;
 
--- syntax.sgml:1626
+-- syntax.sgml:1606
+WITH vals (f1) AS ( VALUES (1),(3),(4),(3),(2),(null) )
+SELECT count(*) AS total, count(f1) AS non_null, COUNT(DISTINCT f1) AS distinct
+FROM vals;
+
+-- syntax.sgml:1634
 WITH vals (v) AS ( VALUES (1),(3),(4),(3),(2) )
 SELECT array_agg(v ORDER BY v DESC) FROM vals;
 
--- syntax.sgml:1635
+-- syntax.sgml:1643
 WITH vals (k, v) AS ( VALUES ('key0','1'), ('key1','3'), ('key1','2') )
 SELECT jsonb_object_agg(k, v ORDER BY v) FROM vals;
 
--- syntax.sgml:1648
+-- syntax.sgml:1656
 SELECT string_agg(a, ',' ORDER BY a) FROM table;
 
--- syntax.sgml:1652
+-- syntax.sgml:1660
 SELECT string_agg(a ORDER BY a, ',') FROM table;  -- incorrect
 
--- syntax.sgml:1665
+-- syntax.sgml:1673
 WITH vals (v) AS ( VALUES (1),(3),(4),(3),(2) )
 SELECT array_agg(DISTINCT v ORDER BY v DESC) FROM vals;
 
--- syntax.sgml:1717
+-- syntax.sgml:1725
 SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY income) FROM households;
 
--- syntax.sgml:1735
+-- syntax.sgml:1743
 SELECT
     count(*) AS unfiltered,
     count(*) FILTER (WHERE i < 5) AS filtered
 FROM generate_series(1,10) AS s(i);
 
--- syntax.sgml:2165
+-- syntax.sgml:2173
 SELECT * FROM tbl WHERE a > 'foo' COLLATE "C";
 
--- syntax.sgml:2178
+-- syntax.sgml:2186
 SELECT * FROM tbl WHERE a COLLATE "C" > 'foo';
 
--- syntax.sgml:2182
+-- syntax.sgml:2190
 SELECT * FROM tbl WHERE (a > 'foo') COLLATE "C";
 
--- syntax.sgml:2216
+-- syntax.sgml:2224
 SELECT name, (SELECT max(pop) FROM cities WHERE cities.state = states.name)
     FROM states;
 
--- syntax.sgml:2243
+-- syntax.sgml:2251
 SELECT ARRAY[1,2,3+4];
 
--- syntax.sgml:2256
+-- syntax.sgml:2264
 SELECT ARRAY[1,2,22.7]::integer[];
 
--- syntax.sgml:2274
+-- syntax.sgml:2282
 SELECT ARRAY[ARRAY[1,2], ARRAY[3,4]];
 
--- syntax.sgml:2274
+-- syntax.sgml:2282
 SELECT ARRAY[[1,2],[3,4]];
 
--- syntax.sgml:2298
+-- syntax.sgml:2306
 CREATE TABLE arr(f1 int[], f2 int[]);
 
--- syntax.sgml:2298
+-- syntax.sgml:2306
 INSERT INTO arr VALUES (ARRAY[[1,2],[3,4]], ARRAY[[5,6],[7,8]]);
 
--- syntax.sgml:2298
+-- syntax.sgml:2306
 SELECT ARRAY[f1, f2, '{{9,10},{11,12}}'::int[]] FROM arr;
 
--- syntax.sgml:2315
+-- syntax.sgml:2323
 SELECT ARRAY[]::integer[];
 
--- syntax.sgml:2329
+-- syntax.sgml:2337
 SELECT ARRAY(SELECT oid FROM pg_proc WHERE proname LIKE 'bytea%');
 
--- syntax.sgml:2329
+-- syntax.sgml:2337
 SELECT ARRAY(SELECT ARRAY[i, i*2] FROM generate_series(1,5) AS a(i));
 
--- syntax.sgml:2385
+-- syntax.sgml:2393
 SELECT ROW(1,2.5,'this is a test');
 
--- syntax.sgml:2400
+-- syntax.sgml:2408
 SELECT ROW(t.*, 42) FROM t;
 
--- syntax.sgml:2400
+-- syntax.sgml:2408
 SELECT ROW(t.f1, t.f2, 42) FROM t;
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 CREATE TABLE mytable(f1 int, f2 float, f3 text);
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 CREATE FUNCTION getf1(mytable) RETURNS int AS 'SELECT $1.f1' LANGUAGE SQL;
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 SELECT getf1(ROW(1,2.5,'this is a test'));
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 CREATE TYPE myrowtype AS (f1 int, f2 text, f3 numeric);
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 CREATE FUNCTION getf1(myrowtype) RETURNS int AS 'SELECT $1.f1' LANGUAGE SQL;
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 SELECT getf1(ROW(1,2.5,'this is a test')::mytable);
 
--- syntax.sgml:2424
+-- syntax.sgml:2432
 SELECT getf1(CAST(ROW(11,'this is a test',2.5) AS myrowtype));
 
--- syntax.sgml:2489
+-- syntax.sgml:2497
 SELECT true OR somefunc();
 
--- syntax.sgml:2494
+-- syntax.sgml:2502
 SELECT somefunc() OR true;
 
--- syntax.sgml:2537
+-- syntax.sgml:2545
 SELECT CASE WHEN x > 0 THEN x ELSE 1/0 END FROM tab;
 
--- syntax.sgml:2564
+-- syntax.sgml:2572
 SELECT CASE WHEN min(employees) > 0
             THEN avg(expenses / employees)
        END
     FROM departments;
 
--- syntax.sgml:2622
+-- syntax.sgml:2630
 CREATE FUNCTION concat_lower_or_upper(a text, b text, uppercase boolean DEFAULT false)
 RETURNS text
 AS
@@ -158,23 +163,23 @@ $$
 $$
 LANGUAGE SQL IMMUTABLE STRICT;
 
--- syntax.sgml:2656
+-- syntax.sgml:2664
 SELECT concat_lower_or_upper('Hello', 'World', true);
 
--- syntax.sgml:2666
+-- syntax.sgml:2674
 SELECT concat_lower_or_upper('Hello', 'World');
 
--- syntax.sgml:2692
+-- syntax.sgml:2700
 SELECT concat_lower_or_upper(a => 'Hello', b => 'World');
 
--- syntax.sgml:2703
+-- syntax.sgml:2711
 SELECT concat_lower_or_upper(a => 'Hello', b => 'World', uppercase => true);
 
--- syntax.sgml:2703
+-- syntax.sgml:2711
 SELECT concat_lower_or_upper(a => 'Hello', uppercase => true, b => 'World');
 
--- syntax.sgml:2720
+-- syntax.sgml:2728
 SELECT concat_lower_or_upper(a := 'Hello', uppercase := true, b := 'World');
 
--- syntax.sgml:2742
+-- syntax.sgml:2750
 SELECT concat_lower_or_upper('Hello', 'World', uppercase => true);

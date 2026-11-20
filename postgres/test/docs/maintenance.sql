@@ -11,6 +11,6 @@ WHERE c.relkind IN ('r', 'm');
 -- maintenance.sgml:625
 SELECT datname, age(datfrozenxid) FROM pg_database;
 
--- maintenance.sgml:842
+-- maintenance.sgml:839
 SELECT *, pg_size_pretty(members_size) members_size_pretty
      FROM pg_catalog.pg_get_multixact_stats();

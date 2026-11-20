@@ -23,20 +23,20 @@ CREATE USER MAPPING FOR local_user SERVER subscription_server OPTIONS (user 'for
 -- postgres-fdw.sgml:1108
 CREATE SUBSCRIPTION my_subscription SERVER subscription_server PUBLICATION testpub;
 
--- postgres-fdw.sgml:1449
+-- postgres-fdw.sgml:1446
 CREATE EXTENSION postgres_fdw;
 
--- postgres-fdw.sgml:1460
+-- postgres-fdw.sgml:1457
 CREATE SERVER foreign_server
         FOREIGN DATA WRAPPER postgres_fdw
         OPTIONS (host '192.83.123.89', port '5432', dbname 'foreign_db');
 
--- postgres-fdw.sgml:1472
+-- postgres-fdw.sgml:1469
 CREATE USER MAPPING FOR local_user
         SERVER foreign_server
         OPTIONS (user 'foreign_user', password 'password');
 
--- postgres-fdw.sgml:1486
+-- postgres-fdw.sgml:1483
 CREATE FOREIGN TABLE foreign_table (
         id integer NOT NULL,
         data text

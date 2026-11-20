@@ -192,22 +192,22 @@ $$ LANGUAGE plpython3u;
 -- plpython.sgml:608
 SELECT * FROM multiout_simple_setof(3);
 
--- plpython.sgml:646
+-- plpython.sgml:653
 DO $$
     # PL/Python code
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:836
+-- plpython.sgml:843
 CREATE OR REPLACE FUNCTION pysnitch() RETURNS event_trigger
 LANGUAGE plpython3u
 AS $$
   plpy.notice("TD[event] => " + TD["event"] + " ; TD[tag] => " + TD["tag"]);
 $$;
 
--- plpython.sgml:836
+-- plpython.sgml:843
 CREATE EVENT TRIGGER pysnitch ON ddl_command_start EXECUTE FUNCTION pysnitch();
 
--- plpython.sgml:1021
+-- plpython.sgml:1028
 CREATE FUNCTION usesavedplan() RETURNS trigger AS $$
     if "plan" in SD:
         plan = SD["plan"]
@@ -217,7 +217,7 @@ CREATE FUNCTION usesavedplan() RETURNS trigger AS $$
     # rest of function
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1065
+-- plpython.sgml:1072
 CREATE FUNCTION count_odd_iterator() RETURNS integer AS $$
 odd = 0
 for row in plpy.cursor("SELECT num FROM largetable"):
@@ -226,7 +226,7 @@ for row in plpy.cursor("SELECT num FROM largetable"):
 return odd
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1065
+-- plpython.sgml:1072
 CREATE FUNCTION count_odd_fetch(batch_size integer) RETURNS integer AS $$
 odd = 0
 cursor = plpy.cursor("SELECT num FROM largetable")
@@ -240,7 +240,7 @@ while True:
 return odd
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1065
+-- plpython.sgml:1072
 CREATE FUNCTION count_odd_prepared() RETURNS integer AS $$
 odd = 0
 plan = plpy.prepare("SELECT num FROM largetable WHERE num % $1 <> 0", ["integer"])
@@ -249,7 +249,7 @@ rows = list(plpy.cursor(plan, [2]))  # or: = list(plan.cursor([2]))
 return len(rows)
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1130
+-- plpython.sgml:1137
 CREATE FUNCTION try_adding_joe() RETURNS text AS $$
     try:
         plpy.execute("INSERT INTO users(username) VALUES ('joe')")
@@ -259,7 +259,7 @@ CREATE FUNCTION try_adding_joe() RETURNS text AS $$
         return "Joe added"
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1157
+-- plpython.sgml:1164
 CREATE FUNCTION insert_fraction(numerator int, denominator int) RETURNS text AS $$
 from plpy import spiexceptions
 try:
@@ -275,7 +275,7 @@ else:
     return "fraction inserted"
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1209
+-- plpython.sgml:1216
 CREATE FUNCTION transfer_funds() RETURNS void AS $$
 try:
     plpy.execute("UPDATE accounts SET balance = balance - 100 WHERE account_name = 'joe'")
@@ -288,7 +288,7 @@ plan = plpy.prepare("INSERT INTO operations (result) VALUES ($1)", ["text"])
 plpy.execute(plan, [result])
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1240
+-- plpython.sgml:1247
 CREATE FUNCTION transfer_funds2() RETURNS void AS $$
 try:
     with plpy.subtransaction():
@@ -302,7 +302,7 @@ plan = plpy.prepare("INSERT INTO operations (result) VALUES ($1)", ["text"])
 plpy.execute(plan, [result])
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1289
+-- plpython.sgml:1296
 CREATE PROCEDURE transaction_test1()
 LANGUAGE plpython3u
 AS $$
@@ -314,12 +314,12 @@ for i in range(0, 10):
         plpy.rollback()
 $$;
 
--- plpython.sgml:1362
+-- plpython.sgml:1369
 CREATE FUNCTION raise_custom_exception() RETURNS void AS $$
 plpy.error("custom exception message",
            detail="some info about exception",
            hint="hint for users")
 $$ LANGUAGE plpython3u;
 
--- plpython.sgml:1362
+-- plpython.sgml:1369
 SELECT raise_custom_exception();

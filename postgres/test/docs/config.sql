@@ -7,24 +7,24 @@ SET configuration_parameter TO DEFAULT;
 -- config.sgml:314
 UPDATE pg_settings SET setting = reset_val WHERE name = 'configuration_parameter';
 
--- config.sgml:4898
+-- config.sgml:4900
 SELECT DISTINCT plugin FROM pg_replication_slots WHERE plugin IS NOT NULL;
 
--- config.sgml:6813
+-- config.sgml:6854
 CREATE TABLE child1000(CHECK (key BETWEEN 1000 AND 1999)) INHERITS(parent);
 
--- config.sgml:6813
+-- config.sgml:6854
 CREATE TABLE child2000(CHECK (key BETWEEN 2000 AND 2999)) INHERITS(parent);
 
--- config.sgml:6813
+-- config.sgml:6854
 SELECT * FROM parent WHERE key = 2400;
 
--- config.sgml:8383
+-- config.sgml:8425
 SELECT to_hex(trunc(EXTRACT(EPOCH FROM backend_start))::integer) || '.' ||
        to_hex(pid)
 FROM pg_stat_activity;
 
--- config.sgml:8700
+-- config.sgml:8742
 CREATE TABLE postgres_log
 (
   log_time timestamp(3) with time zone,
@@ -56,5 +56,5 @@ CREATE TABLE postgres_log
   PRIMARY KEY (session_id, session_line_num)
 );
 
--- config.sgml:8738
+-- config.sgml:8780
 COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
