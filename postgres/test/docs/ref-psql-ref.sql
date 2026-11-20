@@ -4,11 +4,11 @@
 -- ref-psql-ref.sgml:137
 SELECT * FROM foo;
 
--- ref-psql-ref.sgml:2768
+-- ref-psql-ref.sgml:2771
 SELECT * FROM employee WHERE employee_id = 456;
 
--- ref-psql-ref.sgml:3793
+-- ref-psql-ref.sgml:3796
 SELECT * FROM pg_class;
 
--- ref-psql-ref.sgml:4034
+-- ref-psql-ref.sgml:4037
 SELECT 1; SELECT 2; SELECT 3;

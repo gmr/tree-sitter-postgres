@@ -15,10 +15,10 @@ EXPLAIN (COSTS OFF)
 -- pgplanadvice.sgml:166
 SET pg_plan_advice.advice = 'JOIN_ORDER(x f d)';
 
--- pgplanadvice.sgml:557
+-- pgplanadvice.sgml:566
 SET pg_plan_advice.advice = 'hash_join(f g) join_order(f g) index_scan(f no_such_index)';
 
--- pgplanadvice.sgml:557
+-- pgplanadvice.sgml:566
 EXPLAIN (COSTS OFF)
     SELECT * FROM jo_fact f
     LEFT JOIN jo_dim1 d1 ON f.dim1_id = d1.id

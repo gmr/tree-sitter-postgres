@@ -7,27 +7,27 @@ CREATE VIEW vista AS SELECT 'Hello World';
 -- ref-create_view.sgml:278
 CREATE VIEW vista AS SELECT text 'Hello World' AS hello;
 
--- ref-create_view.sgml:488
+-- ref-create_view.sgml:493
 CREATE VIEW comedies AS
     SELECT *
     FROM films
     WHERE kind = 'Comedy';
 
--- ref-create_view.sgml:503
+-- ref-create_view.sgml:508
 CREATE VIEW universal_comedies AS
     SELECT *
     FROM comedies
     WHERE classification = 'U'
     WITH LOCAL CHECK OPTION;
 
--- ref-create_view.sgml:521
+-- ref-create_view.sgml:526
 CREATE VIEW pg_comedies AS
     SELECT *
     FROM comedies
     WHERE classification = 'PG'
     WITH CASCADED CHECK OPTION;
 
--- ref-create_view.sgml:535
+-- ref-create_view.sgml:540
 CREATE VIEW comedies AS
     SELECT f.*,
            country_code_to_name(f.country_code) AS country,
@@ -37,7 +37,7 @@ CREATE VIEW comedies AS
     FROM films f
     WHERE f.kind = 'Comedy';
 
--- ref-create_view.sgml:553
+-- ref-create_view.sgml:558
 CREATE RECURSIVE VIEW public.nums_1_100 (n) AS
     VALUES (1)
 UNION ALL

@@ -9,10 +9,10 @@ SELECT pg_stat_get_backend_pid(backendid) AS pid,
        pg_stat_get_backend_activity(backendid) AS query
 FROM pg_stat_get_backend_idset() AS backendid;
 
--- monitoring.sgml:8642
+-- monitoring.sgml:8659
 SELECT pg_relation_filepath(oid), relpages FROM pg_class WHERE relname = 'customer';
 
--- monitoring.sgml:8659
+-- monitoring.sgml:8676
 SELECT relname, relpages
 FROM pg_class,
      (SELECT reltoastrelid
@@ -24,7 +24,7 @@ WHERE oid = ss.reltoastrelid OR
              WHERE indrelid = ss.reltoastrelid)
 ORDER BY relname;
 
--- monitoring.sgml:8680
+-- monitoring.sgml:8697
 SELECT c2.relname, c2.relpages
 FROM pg_class c, pg_class c2, pg_index i
 WHERE c.relname = 'customer' AND
@@ -32,7 +32,7 @@ WHERE c.relname = 'customer' AND
       c2.oid = i.indexrelid
 ORDER BY c2.relname;
 
--- monitoring.sgml:8697
+-- monitoring.sgml:8714
 SELECT relname, relpages
 FROM pg_class
 ORDER BY relpages DESC;

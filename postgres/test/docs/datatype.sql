@@ -25,138 +25,138 @@ SET bytea_output = 'escape';
 -- datatype.sgml:1637
 SELECT 'abc \153\154\155 \052\251\124'::bytea;
 
--- datatype.sgml:2895
+-- datatype.sgml:2897
 SELECT '2 years 15 months 100 weeks 99 hours 123456789 milliseconds'::interval;
 
--- datatype.sgml:3153
+-- datatype.sgml:3155
 CREATE TABLE test1 (a boolean, b text);
 
--- datatype.sgml:3153
+-- datatype.sgml:3155
 INSERT INTO test1 VALUES (TRUE, 'sic est');
 
--- datatype.sgml:3153
+-- datatype.sgml:3155
 INSERT INTO test1 VALUES (FALSE, 'non est');
 
--- datatype.sgml:3153
+-- datatype.sgml:3155
 SELECT * FROM test1;
 
--- datatype.sgml:3153
+-- datatype.sgml:3155
 SELECT * FROM test1 WHERE a;
 
--- datatype.sgml:3221
+-- datatype.sgml:3223
 CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
 
--- datatype.sgml:3227
+-- datatype.sgml:3229
 CREATE TABLE person (
     name text,
     current_mood mood
 );
 
--- datatype.sgml:3227
+-- datatype.sgml:3229
 INSERT INTO person VALUES ('Moe', 'happy');
 
--- datatype.sgml:3227
+-- datatype.sgml:3229
 SELECT * FROM person WHERE current_mood = 'happy';
 
--- datatype.sgml:3252
+-- datatype.sgml:3254
 INSERT INTO person VALUES ('Larry', 'sad');
 
--- datatype.sgml:3252
+-- datatype.sgml:3254
 INSERT INTO person VALUES ('Curly', 'ok');
 
--- datatype.sgml:3252
+-- datatype.sgml:3254
 SELECT * FROM person WHERE current_mood > 'sad';
 
--- datatype.sgml:3252
+-- datatype.sgml:3254
 SELECT * FROM person WHERE current_mood > 'sad' ORDER BY current_mood;
 
--- datatype.sgml:3252
+-- datatype.sgml:3254
 SELECT name
 FROM person
 WHERE current_mood = (SELECT MIN(current_mood) FROM person);
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 CREATE TYPE happiness AS ENUM ('happy', 'very happy', 'ecstatic');
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 CREATE TABLE holidays (
     num_weeks integer,
     happiness happiness
 );
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 INSERT INTO holidays(num_weeks,happiness) VALUES (4, 'happy');
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 INSERT INTO holidays(num_weeks,happiness) VALUES (6, 'very happy');
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 INSERT INTO holidays(num_weeks,happiness) VALUES (8, 'ecstatic');
 
--- datatype.sgml:3287
+-- datatype.sgml:3289
 INSERT INTO holidays(num_weeks,happiness) VALUES (2, 'sad');
 
--- datatype.sgml:3308
+-- datatype.sgml:3310
 SELECT person.name, holidays.num_weeks FROM person, holidays
   WHERE person.current_mood::text = holidays.happiness::text;
 
--- datatype.sgml:4183
+-- datatype.sgml:4185
 SELECT 'a fat cat sat on a mat and ate a fat rat'::tsvector;
 
--- datatype.sgml:4193
+-- datatype.sgml:4195
 SELECT $$the lexeme '    ' contains spaces$$::tsvector;
 
--- datatype.sgml:4204
+-- datatype.sgml:4206
 SELECT $$the lexeme 'Joe''s' contains a quote$$::tsvector;
 
--- datatype.sgml:4234
+-- datatype.sgml:4236
 SELECT 'a:1A fat:2B,4C cat:5D'::tsvector;
 
--- datatype.sgml:4253
+-- datatype.sgml:4255
 SELECT 'The Fat Rats'::tsvector;
 
--- datatype.sgml:4266
+-- datatype.sgml:4268
 SELECT to_tsvector('english', 'The Fat Rats');
 
--- datatype.sgml:4308
+-- datatype.sgml:4310
 SELECT 'fat & rat'::tsquery;
 
--- datatype.sgml:4308
+-- datatype.sgml:4310
 SELECT 'fat & (rat | cat)'::tsquery;
 
--- datatype.sgml:4308
+-- datatype.sgml:4310
 SELECT 'fat & rat & ! cat'::tsquery;
 
--- datatype.sgml:4331
+-- datatype.sgml:4333
 SELECT 'fat:ab & cat'::tsquery;
 
--- datatype.sgml:4342
+-- datatype.sgml:4344
 SELECT 'super:*'::tsquery;
 
--- datatype.sgml:4359
+-- datatype.sgml:4361
 SELECT to_tsquery('Fat:ab & Cats');
 
--- datatype.sgml:4369
+-- datatype.sgml:4371
 SELECT to_tsvector( 'postgraduate' ) @@ to_tsquery( 'postgres:*' );
 
--- datatype.sgml:4376
+-- datatype.sgml:4378
 SELECT to_tsvector( 'postgraduate' ), to_tsquery( 'postgres:*' );
 
--- datatype.sgml:4700
+-- datatype.sgml:4702
 CREATE DOMAIN posint AS integer CHECK (VALUE > 0);
 
--- datatype.sgml:4700
+-- datatype.sgml:4702
 CREATE TABLE mytable (id posint);
 
--- datatype.sgml:4700
+-- datatype.sgml:4702
 INSERT INTO mytable VALUES(1);   -- works
 
--- datatype.sgml:4700
+-- datatype.sgml:4702
 INSERT INTO mytable VALUES(-1);  -- fails
 
--- datatype.sgml:4848
+-- datatype.sgml:4850
 SELECT * FROM pg_attribute WHERE attrelid = 'mytable'::regclass;
 
--- datatype.sgml:4852
+-- datatype.sgml:4854
 SELECT * FROM pg_attribute
   WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'mytable');
