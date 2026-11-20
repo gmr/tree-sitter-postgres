@@ -203,3 +203,23 @@ END
           (kw_execute)
           (sql_expression))))
     (kw_end)))
+
+==================
+Execute non-ASCII dollar-quote tag
+==================
+
+BEGIN
+  EXECUTE $걁$SELECT $A$x$A$$걁$;
+END
+
+---
+
+(source_file
+  (pl_block
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_dynexecute
+          (kw_execute)
+          (sql_expression))))
+    (kw_end)))

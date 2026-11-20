@@ -727,7 +727,7 @@ ${generateKeywordRules(keywords)}
     // SQL fragment tokens (float, escape strings, etc.) are handled by the
     // external scanner and parsed via injection into the postgres grammar.
 
-    identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*/)),
+    identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u{10ffff}][a-zA-Z0-9_$\\u0080-\\u{10ffff}]*/u)),
 
     // Positional parameter reference ($1, $2, ...) — used as an ALIAS target.
     param: _ => token(/\\$[0-9]+/),

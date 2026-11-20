@@ -378,3 +378,36 @@ END
         (stmt_null
           (kw_null))))
     (kw_end)))
+
+==================
+Non-ASCII variable name
+==================
+
+DECLARE
+  한글 integer;
+BEGIN
+  한글 := 1;
+END
+
+---
+
+(source_file
+  (pl_block
+    (decl_sect
+      (kw_declare)
+      (decl_stmt
+        (decl_statement
+          (decl_varname
+            (identifier))
+          (decl_datatype
+            (type_name
+              (dotted_name
+                (any_identifier
+                  (identifier))))))))
+    (kw_begin)
+    (proc_sect
+      (proc_stmt
+        (stmt_assign
+          (sql_expression)
+          (sql_expression))))
+    (kw_end)))

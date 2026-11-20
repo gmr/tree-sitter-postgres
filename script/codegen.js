@@ -530,7 +530,7 @@ function generateLexerRules() {
     // ── Identifiers ──────────────────────────────────────────────────────────────
 
     // Plain unquoted identifier; keywords (prec 1) take priority over this (prec 0).
-    identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*/)),
+    identifier: _ => token(prec(0, /[a-zA-Z_\\u0080-\\u{10ffff}][a-zA-Z0-9_$\\u0080-\\u{10ffff}]*/u)),
 
     // Double-quoted delimited identifier: "my table" or "My""Column"
     // NOTE: U&"..." unicode identifiers have the same lexer limitation as

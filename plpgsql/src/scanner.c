@@ -301,12 +301,12 @@ static bool consume_double_quoted_identifier(TSLexer *lexer) {
 static bool consume_dollar_quoted_string(TSLexer *lexer) {
   lexer->advance(lexer, false); /* opening $ */
 
-  char tag[64];
+  int32_t tag[64];
   int tag_len = 0;
   if (is_tag_start_char(lexer->lookahead)) {
     do {
       if (tag_len >= 63) return true;
-      tag[tag_len++] = (char)lexer->lookahead;
+      tag[tag_len++] = lexer->lookahead;
       lexer->advance(lexer, false);
     } while (is_tag_char(lexer->lookahead));
   }
@@ -320,7 +320,7 @@ static bool consume_dollar_quoted_string(TSLexer *lexer) {
     if (lexer->lookahead == '$') {
       lexer->advance(lexer, false);
       int i = 0;
-      while (i < tag_len && lexer->lookahead == (unsigned char)tag[i]) {
+      while (i < tag_len && lexer->lookahead == tag[i]) {
         lexer->advance(lexer, false);
         i++;
       }

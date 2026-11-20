@@ -272,6 +272,64 @@ SELECT $a$first$a$, $b$second$b$;
                             (dollar_quoted_string)))))))))))))))
 
 ================================================================================
+Non-ASCII dollar-quote tag is not closed by its low byte
+================================================================================
+
+SELECT $걁$a$A$b$걁$;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (AexprConst
+                          (Sconst
+                            (dollar_quoted_string)))))))))))))))
+
+================================================================================
+Non-ASCII unquoted identifier
+================================================================================
+
+SELECT 한글 FROM 테이블;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (toplevel_stmt
+    (stmt
+      (SelectStmt
+        (select_no_parens
+          (simple_select
+            (kw_select)
+            (opt_target_list
+              (target_list
+                (target_el
+                  (a_expr
+                    (a_expr
+                      (c_expr
+                        (columnref
+                          (ColId
+                            (identifier)))))))))
+            (from_clause
+              (kw_from)
+              (from_list
+                (table_ref
+                  (relation_expr
+                    (qualified_name
+                      (ColId
+                        (identifier)))))))))))))
+
+================================================================================
 Decimal float literals
 ================================================================================
 
