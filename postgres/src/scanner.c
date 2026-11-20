@@ -31,7 +31,7 @@ void tree_sitter_postgres_external_scanner_deserialize(void *payload, const char
  * functions like isalnum/tolower that Zed's grammar runtime cannot resolve.
  *
  * Dollar-quote tags follow PostgreSQL identifier rules: the first character
- * must be a letter (ASCII or non-ASCII via UTF-8 lead bytes >= 0x80) or an
+ * must be a letter (ASCII, or any non-ASCII code point >= 0x80) or an
  * underscore; subsequent characters may also be digits. Tags must not contain
  * a dollar sign. See sql-syntax-lexical.html in the PostgreSQL docs.
  */
@@ -66,12 +66,12 @@ bool tree_sitter_postgres_external_scanner_scan(
   /* PostgreSQL caps identifier length at NAMEDATALEN-1 = 63.
    * Empty tag ($$...$$) is valid; a non-empty tag must start with a letter
    * or underscore (not a digit). */
-  char tag[64];
+  int32_t tag[64];
   int tag_len = 0;
   if (is_tag_start_char(lexer->lookahead)) {
     do {
       if (tag_len >= 63) return false;
-      tag[tag_len++] = (char)lexer->lookahead;
+      tag[tag_len++] = lexer->lookahead;
       lexer->advance(lexer, false);
     } while (is_tag_char(lexer->lookahead));
   }
@@ -83,7 +83,7 @@ bool tree_sitter_postgres_external_scanner_scan(
     if (lexer->lookahead == '$') {
       lexer->advance(lexer, false);
       int i = 0;
-      while (i < tag_len && lexer->lookahead == (unsigned char)tag[i]) {
+      while (i < tag_len && lexer->lookahead == tag[i]) {
         lexer->advance(lexer, false);
         i++;
       }

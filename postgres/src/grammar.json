@@ -61741,7 +61741,8 @@
         "value": 0,
         "content": {
           "type": "PATTERN",
-          "value": "[a-zA-Z_\\u0080-\\u00ff][a-zA-Z0-9_$\\u0080-\\u00ff]*"
+          "value": "[a-zA-Z_\\u0080-\\u{10ffff}][a-zA-Z0-9_$\\u0080-\\u{10ffff}]*",
+          "flags": "u"
         }
       }
     },
